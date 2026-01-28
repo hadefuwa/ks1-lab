@@ -1,0 +1,63 @@
+{
+  "readingTasks": [
+    {
+      "id": "bw-reception-01",
+      "type": "buildWord",
+      "stage": "Reception",
+      "title": "Build the word",
+      "ttsText": "cat",
+      "tiles": ["c", "a", "t"],
+      "answers": ["cat"]
+    },
+    {
+      "id": "bw-reception-02",
+      "type": "buildWord",
+      "stage": "Reception",
+      "title": "Build the word",
+      "ttsText": "ship",
+      "tiles": ["sh", "i", "p"],
+      "answers": ["ship"]
+    },
+    {
+      "id": "bw-y1-01",
+      "type": "buildWord",
+      "stage": "Year 1",
+      "title": "Build the word",
+      "ttsText": "train",
+      "tiles": ["tr", "ai", "n"],
+      "answers": ["train"]
+    },
+    {
+      "id": "bw-y2-01",
+      "type": "buildWord",
+      "stage": "Year 2",
+      "title": "Build the word",
+      "ttsText": "bright",
+      "tiles": ["br", "igh", "t"],
+      "answers": ["bright"]
+    }
+  ],
+  "mathTasks": [
+    {
+      "id": "nb-reception-01",
+      "type": "numberBonds",
+      "stage": "Reception",
+      "title": "Make 10",
+      "total": 10
+    },
+    {
+      "id": "nb-y1-01",
+      "type": "numberBonds",
+      "stage": "Year 1",
+      "title": "Make 10",
+      "total": 10
+    },
+    {
+      "id": "nb-y2-01",
+      "type": "numberBonds",
+      "stage": "Year 2",
+      "title": "Make 20",
+      "total": 20
+    }
+  ]
+}
