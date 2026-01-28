@@ -1,20 +1,24 @@
 :root {
-  --bg: #f7f2e9;
-  --ink: #1f1a12;
-  --accent: #e07a2b;
-  --accent-2: #2b6cb0;
-  --panel: #fff7ec;
-  --muted: #6a5b4a;
-  --success: #2f855a;
-  --danger: #c05621;
-  --shadow: rgba(35, 25, 15, 0.15);
-  --radius: 16px;
-  --font: "Space Grotesk", "Segoe UI", sans-serif;
-  --glow: rgba(224, 122, 43, 0.25);
-  --panel-border: #efdcc4;
+  --bg: #f2efe7;
+  --ink: #17212b;
+  --accent: #ef5b5b;
+  --accent-2: #0f4c5c;
+  --panel: #fffdf8;
+  --muted: #506070;
+  --success: #1f8a70;
+  --danger: #d1495b;
+  --shadow: rgba(23, 33, 43, 0.18);
+  --radius: 18px;
+  --font: "Bricolage Grotesque", "Segoe UI", sans-serif;
+  --display: "Fraunces", serif;
+  --glow: rgba(239, 91, 91, 0.25);
+  --panel-border: #ead9c7;
+  --mesh-1: rgba(15, 76, 92, 0.18);
+  --mesh-2: rgba(239, 91, 91, 0.2);
+  --mesh-3: rgba(229, 159, 58, 0.2);
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Fraunces:wght@600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=Fraunces:wght@600;700&display=swap");
 
 * {
   box-sizing: border-box;
@@ -22,7 +26,11 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top left, #fff3db, #f7f2e9 50%, #f2e7d7);
+  background:
+    radial-gradient(circle at 10% 10%, var(--mesh-1), transparent 45%),
+    radial-gradient(circle at 85% 15%, var(--mesh-2), transparent 40%),
+    radial-gradient(circle at 20% 85%, var(--mesh-3), transparent 45%),
+    var(--bg);
   color: var(--ink);
   font-family: var(--font);
 }
@@ -34,7 +42,7 @@ body::after {
   width: 320px;
   height: 320px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(43, 108, 176, 0.18), transparent 70%);
+  background: radial-gradient(circle, rgba(15, 76, 92, 0.18), transparent 70%);
   z-index: -1;
   filter: blur(0.5px);
   animation: drift 16s ease-in-out infinite;
@@ -48,7 +56,7 @@ body::before {
 body::after {
   right: -80px;
   bottom: -60px;
-  background: radial-gradient(circle, rgba(224, 122, 43, 0.18), transparent 70%);
+  background: radial-gradient(circle, rgba(239, 91, 91, 0.18), transparent 70%);
   animation-delay: 4s;
 }
 
@@ -57,18 +65,26 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 18px 28px;
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(23, 33, 43, 0.08);
 }
 
 .logo {
-  font-family: "Fraunces", serif;
+  font-family: var(--display);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 24px;
   letter-spacing: 0.4px;
 }
 
 .nav {
   display: flex;
   gap: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(23, 33, 43, 0.08);
 }
 
 button,
@@ -78,7 +94,7 @@ input {
 }
 
 button {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), #f08a5d);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -90,7 +106,7 @@ button {
 }
 
 button.secondary {
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.8);
   color: var(--ink);
   border: 1px solid var(--panel-border);
   box-shadow: none;
@@ -98,7 +114,7 @@ button.secondary {
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px var(--shadow);
+  box-shadow: 0 10px 22px var(--shadow), 0 0 0 3px rgba(239, 91, 91, 0.12);
 }
 
 button:active {
@@ -114,11 +130,12 @@ button:active {
 }
 
 .panel {
-  background: var(--panel);
+  background: rgba(255, 253, 248, 0.9);
   border-radius: var(--radius);
   padding: 18px;
   box-shadow: 0 12px 28px var(--shadow);
   border: 1px solid var(--panel-border);
+  backdrop-filter: blur(6px);
 }
 
 .card {
@@ -126,7 +143,7 @@ button:active {
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: 0 8px 20px var(--shadow);
-  border: 1px solid #f0e3d1;
+  border: 1px solid rgba(23, 33, 43, 0.08);
 }
 
 .grid-2 {
@@ -141,8 +158,8 @@ button:active {
 }
 
 .task-title {
-  font-family: "Fraunces", serif;
-  font-size: 24px;
+  font-family: var(--display);
+  font-size: 26px;
   font-weight: 700;
   margin-bottom: 6px;
 }
@@ -176,7 +193,7 @@ button:active {
 }
 
 .tile {
-  background: #ffe4c0;
+  background: #ffe6c7;
   border-radius: 12px;
   padding: 10px 14px;
   font-weight: 600;
@@ -203,7 +220,7 @@ button:active {
   width: 100%;
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid #e7d9c6;
+  border: 1px solid #dfd4c4;
   font-size: 18px;
   background: #fffdf8;
 }
@@ -232,7 +249,7 @@ button:active {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #f5b26b;
+  background: #f3b06f;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -256,6 +273,28 @@ button:active {
   padding: 6px 10px;
   font-size: 13px;
   border: 1px solid #ead7c0;
+}
+
+.card,
+.panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after,
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(130deg, transparent 40%, rgba(239, 91, 91, 0.05) 60%, transparent 80%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.card:hover::after,
+.panel:hover::after {
+  opacity: 1;
 }
 
 .settings label {
