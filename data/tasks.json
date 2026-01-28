@@ -1,6 +1,16 @@
 {
   "readingTasks": [
     {
+      "id": "nursery-sound-01",
+      "type": "soundMatch",
+      "stage": "Nursery",
+      "title": "Find the first sound",
+      "ttsText": "sun",
+      "prompt": "Click the first sound.",
+      "options": ["s", "m", "t"],
+      "answer": "s"
+    },
+    {
       "id": "bw-reception-01",
       "type": "buildWord",
       "stage": "Reception",
@@ -35,6 +45,33 @@
       "ttsText": "bright",
       "tiles": ["br", "igh", "t"],
       "answers": ["bright"]
+    },
+    {
+      "id": "cloze-y1-01",
+      "type": "cloze",
+      "stage": "Year 1",
+      "title": "Fill the missing word",
+      "ttsText": "The cat sat on the mat.",
+      "sentence": "The cat sat on the ____.",
+      "answers": ["mat"]
+    },
+    {
+      "id": "cloze-y2-01",
+      "type": "cloze",
+      "stage": "Year 2",
+      "title": "Fill the missing word",
+      "ttsText": "Sam wore his bright coat to school.",
+      "sentence": "Sam wore his bright ____ to school.",
+      "answers": ["coat"]
+    },
+    {
+      "id": "sentence-y2-01",
+      "type": "sentenceBuilder",
+      "stage": "Year 2",
+      "title": "Build the sentence",
+      "ttsText": "We played in the park.",
+      "tiles": ["We", "played", "in", "the", "park."],
+      "answers": ["We played in the park."]
     }
   ],
   "mathTasks": [

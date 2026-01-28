@@ -92,6 +92,17 @@ function setMode(mode) {
   setView("practice");
 }
 
+function advanceTask() {
+  if (state.mode === "reading") {
+    state.readingIndex += 1;
+  } else {
+    state.mathIndex += 1;
+  }
+  state.feedback = "";
+  state.feedbackType = "";
+  render();
+}
+
 function updateProgress(skillKey, correct) {
   const entry = state.progress[skillKey] || { attempts: 0, correct: 0 };
   entry.attempts += 1;
@@ -265,6 +276,15 @@ function renderTask(task) {
   if (task.type === "buildWord") {
     return renderBuildWord(task);
   }
+  if (task.type === "soundMatch") {
+    return renderSoundMatch(task);
+  }
+  if (task.type === "cloze") {
+    return renderCloze(task);
+  }
+  if (task.type === "sentenceBuilder") {
+    return renderSentenceBuilder(task);
+  }
   if (task.type === "numberBonds") {
     return renderNumberBonds(task);
   }
@@ -301,6 +321,7 @@ function renderBuildWord(task) {
       state.feedbackType = ok ? "success" : "error";
       render();
     });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
 
   return `
@@ -321,6 +342,140 @@ function renderBuildWord(task) {
       <input id="typed-word" class="equation" placeholder="Type the word" />
       <div class="tts-row">
         <button id="check-word">Check</button>
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
+function renderSoundMatch(task) {
+  const tts = task.ttsText;
+
+  setTimeout(() => {
+    if (state.settings.autoplay) speak(tts);
+    document.getElementById("play-word")?.addEventListener("click", () => speak(tts));
+    document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
+    document.querySelectorAll(".sound-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const choice = btn.dataset.value;
+        const ok = choice.toLowerCase() === task.answer.toLowerCase();
+        updateProgress("reading/soundMatch", ok);
+        state.feedback = ok ? "Yes! That is the first sound." : "Not quite. Listen again.";
+        state.feedbackType = ok ? "success" : "error";
+        render();
+      });
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  return `
+    <div class="panel">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">${task.prompt}</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-word">Play word</button>
+        <button class="secondary" id="play-slow">Play slow</button>
+      </div>
+      <div class="tiles">
+        ${task.options
+          .map((opt) => `<button class="tile sound-option" data-value="${opt}">${opt}</button>`)
+          .join("")}
+      </div>
+      <div class="tts-row">
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
+function renderCloze(task) {
+  const tts = task.ttsText;
+
+  setTimeout(() => {
+    if (state.settings.autoplay) speak(tts);
+    document.getElementById("play-sentence")?.addEventListener("click", () => speak(tts));
+    document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
+    document.getElementById("check-cloze")?.addEventListener("click", () => {
+      const input = document.getElementById("cloze-input").value.trim().toLowerCase();
+      const answers = task.answers.map((a) => a.toLowerCase());
+      const ok = answers.includes(input);
+      updateProgress("reading/cloze", ok);
+      state.feedback = ok ? "Great! You found the missing word." : "Try again and listen to the sentence.";
+      state.feedbackType = ok ? "success" : "error";
+      render();
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  return `
+    <div class="panel">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">${task.sentence}</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-sentence">Play sentence</button>
+        <button class="secondary" id="play-slow">Play slow</button>
+      </div>
+      <input id="cloze-input" class="equation" placeholder="Type the missing word" />
+      <div class="tts-row">
+        <button id="check-cloze">Check</button>
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
+function renderSentenceBuilder(task) {
+  const tts = task.ttsText;
+
+  setTimeout(() => {
+    if (state.settings.autoplay) speak(tts);
+    document.getElementById("play-sentence")?.addEventListener("click", () => speak(tts));
+    document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
+    const buildEl = document.getElementById("built-sentence");
+    document.querySelectorAll(".sentence-tile").forEach((tile) => {
+      tile.addEventListener("click", () => {
+        const piece = tile.dataset.value;
+        buildEl.textContent = [buildEl.textContent.trim(), piece].filter(Boolean).join(" ");
+      });
+    });
+    document.getElementById("clear-sentence")?.addEventListener("click", () => {
+      buildEl.textContent = "";
+    });
+    document.getElementById("check-sentence")?.addEventListener("click", () => {
+      const built = buildEl.textContent.trim();
+      const typed = document.getElementById("typed-sentence").value.trim();
+      const answers = task.answers;
+      const ok = answers.includes(built) && answers.includes(typed);
+      updateProgress("reading/sentenceBuilder", ok);
+      state.feedback = ok ? "Nice sentence!" : "Try again. Listen and build it in order.";
+      state.feedbackType = ok ? "success" : "error";
+      render();
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  return `
+    <div class="panel">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">Listen, build, then type the sentence.</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-sentence">Play sentence</button>
+        <button class="secondary" id="play-slow">Play slow</button>
+      </div>
+      <div class="tiles">
+        ${task.tiles.map((tile) => `<div class="tile sentence-tile" data-value="${tile}">${tile}</div>`).join("")}
+      </div>
+      <div class="word-build" id="built-sentence"></div>
+      <div class="tts-row">
+        <button class="secondary" id="clear-sentence">Clear</button>
+      </div>
+      <input id="typed-sentence" class="equation" placeholder="Type the sentence" />
+      <div class="tts-row">
+        <button id="check-sentence">Check</button>
+        <button class="secondary" id="next-task">Next</button>
       </div>
       ${renderFeedback()}
     </div>
@@ -369,6 +524,7 @@ function renderNumberBonds(task) {
       state.feedbackType = ok ? "success" : "error";
       render();
     });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
 
   const counters = Array.from({ length: task.total }, (_, i) => `<div class="counter" draggable="true" data-id="${i + 1}">${i + 1}</div>`).join("");
@@ -394,6 +550,7 @@ function renderNumberBonds(task) {
       <input id="equation" class="equation" placeholder="e.g., 7 + 3 = ${task.total}" />
       <div class="tts-row">
         <button id="check-bonds">Check</button>
+        <button class="secondary" id="next-task">Next</button>
       </div>
       ${renderFeedback()}
     </div>
