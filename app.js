@@ -134,12 +134,53 @@ function render() {
 function renderHome() {
   return `
     <div class="layout">
-      <div class="card">
-        <div class="task-title">TTS-first reading and maths practice</div>
-        <p class="subtle">Desktop-only learning app for Nursery to Year 2. Start with audio, then build, then type.</p>
-        <div class="grid-2">
-          <button data-mode="reading">Reading practice</button>
-          <button data-mode="math">Maths practice</button>
+      <div class="hero card">
+        <div>
+          <div class="badge">Today’s mission</div>
+          <div class="task-title hero-title">Listen, build, read, and win</div>
+          <p class="subtle hero-sub">Friendly, TTS-first learning for Nursery to Year 2. Every question starts with audio.</p>
+          <div class="cta-row">
+            <button data-mode="reading">Start Reading Quest</button>
+            <button class="secondary" data-mode="math">Start Maths Quest</button>
+          </div>
+          <div class="stage-chips">
+            <span class="chip">Nursery</span>
+            <span class="chip">Reception</span>
+            <span class="chip">Year 1</span>
+            <span class="chip">Year 2</span>
+          </div>
+        </div>
+        <div class="mascot">
+          <div class="mascot-face">
+            <span class="eye"></span>
+            <span class="eye"></span>
+            <span class="smile"></span>
+          </div>
+          <div class="sparkle s1"></div>
+          <div class="sparkle s2"></div>
+          <div class="sparkle s3"></div>
+        </div>
+      </div>
+      <div class="card mission">
+        <div class="task-title">Quick start</div>
+        <div class="subtle">Pick a stage, then hit play on every task.</div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Focus</div>
+            <div class="stat-value">Reading</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mode</div>
+            <div class="stat-value">TTS-first</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Goal</div>
+            <div class="stat-value">Mastery</div>
+          </div>
+        </div>
+        <div class="mode-toggle">
+          <button class="secondary" data-mode="reading">Reading</button>
+          <button class="secondary" data-mode="math">Maths</button>
         </div>
       </div>
       ${renderSettingsPanel()}
@@ -170,16 +211,42 @@ function renderPractice() {
   return `
     <div class="layout">
       <div class="card">
-        <div class="task-title">${state.mode === "reading" ? "Reading practice" : "Maths practice"}</div>
-        <div class="subtle">Stage</div>
-        <select id="stage-select">
-          ${stageOptions
-            .map((stage) => `<option ${stage === state.stage ? "selected" : ""}>${stage}</option>`)
-            .join("")}
-        </select>
+        <div class="practice-header">
+          <div>
+            <div class="task-title">${state.mode === "reading" ? "Reading Quest" : "Maths Quest"}</div>
+            <div class="subtle">Pick a stage and press play to hear the task.</div>
+          </div>
+          <div class="mode-toggle">
+            <button class="${state.mode === "reading" ? "" : "secondary"}" data-mode="reading">Reading</button>
+            <button class="${state.mode === "math" ? "" : "secondary"}" data-mode="math">Maths</button>
+          </div>
+        </div>
+        <div class="stage-row">
+          <label class="subtle">Stage</label>
+          <select id="stage-select">
+            ${stageOptions
+              .map((stage) => `<option ${stage === state.stage ? "selected" : ""}>${stage}</option>`)
+              .join("")}
+          </select>
+        </div>
         ${panel}
       </div>
-      ${renderSettingsPanel()}
+      <div class="panel coach">
+        <div class="task-title">Coach</div>
+        <div class="subtle">Tips for this session</div>
+        <div class="coach-card">
+          <div class="coach-bubble">Press Play, listen, then build the answer.</div>
+          <div class="coach-bubble">Keep it short. Celebrate small wins.</div>
+          <div class="coach-bubble">Repeat tricky sounds after the slow button.</div>
+        </div>
+        <div class="coach-meter">
+          <div class="meter-ring" style="--pct: 0.72"></div>
+          <div>
+            <div class="subtle">Session energy</div>
+            <div class="stat-value">72%</div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -195,8 +262,24 @@ function renderProgress() {
   return `
     <div class="layout">
       <div class="card">
-        <div class="task-title">Progress</div>
+        <div class="task-title">Progress Map</div>
         <div class="subtle">Mastery grows with consistent success.</div>
+        <div class="progress-grid">
+          <div class="progress-badge">
+            <div class="meter-ring large" style="--pct: 0.58"></div>
+            <div>
+              <div class="stat-label">Reading</div>
+              <div class="stat-value">58%</div>
+            </div>
+          </div>
+          <div class="progress-badge">
+            <div class="meter-ring large" style="--pct: 0.42"></div>
+            <div>
+              <div class="stat-label">Maths</div>
+              <div class="stat-value">42%</div>
+            </div>
+          </div>
+        </div>
         <div class="tiles">${rows || "<span class='subtle'>No progress yet.</span>"}</div>
       </div>
       ${renderSettingsPanel()}
