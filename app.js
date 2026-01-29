@@ -1,4 +1,5 @@
-const app = document.getElementById("app");
+const main = document.getElementById("main");
+const sidebar = document.getElementById("sidebar");
 
 // Lessons data
 const lessons = [
@@ -19,12 +20,23 @@ let correctCount = 0;
 let phase = "practice"; // teach, practice, assess
 
 function init() {
+  renderSidebar();
   render();
+}
+
+function renderSidebar() {
+  sidebar.innerHTML = `
+    <h2>Lesson Progress</h2>
+    <ul>
+      <li>Lesson 1: ${phase === "teach" ? "Not Started" : phase === "practice" ? "In Practice" : "Assessing"}</li>
+      <!-- Add more lessons here -->
+    </ul>
+  `;
 }
 
 function render() {
   if (phase === "teach") {
-    app.innerHTML = `
+    main.innerHTML = `
       <div class="lesson">
         <h1>${currentLesson.title}</h1>
         <p>${currentLesson.teach}</p>
@@ -35,12 +47,13 @@ function render() {
       phase = "practice";
       currentIndex = 0;
       correctCount = 0;
+      renderSidebar();
       render();
     });
   } else if (phase === "practice" || phase === "assess") {
     const isAssess = phase === "assess";
     const word = currentLesson.words[currentIndex];
-    app.innerHTML = `
+    main.innerHTML = `
       <div class="game">
         <h1>${isAssess ? "Assessment" : "Practice"}: ${currentLesson.title}</h1>
         <p>${isAssess ? "Now, type the words correctly to pass!" : "Practice typing the words."}</p>
@@ -95,6 +108,7 @@ function checkWord(isAssess) {
           correctCount = 0;
         }
       }
+      renderSidebar();
       render();
     } else {
       document.getElementById("word-input").value = "";
