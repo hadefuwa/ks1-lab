@@ -1,103 +1,54 @@
 const app = document.getElementById("app");
 
-const STORAGE_KEYS = {
-  progress: "ks1-progress",
-  settings: "ks1-tts-settings",
-  readingIndex: "ks1-reading-index",
-  mathIndex: "ks1-math-index"
-};
+// Simple CVC words for reading practice
+const words = ["cat", "dog", "pig", "sun", "run", "fun", "big", "red", "bed", "hen"];
 
-const defaultSettings = {
-  voiceURI: "",
-  rate: 1,
-  pitch: 1,
-  autoplay: true
-};
+let currentIndex = 0;
+let currentWord = words[currentIndex];
 
-let tasks = { readingTasks: [], mathTasks: [] };
-let state = {
-  view: "home",
-  mode: "reading",
-  stage: "Reception",
-  readingIndex: loadIndex(STORAGE_KEYS.readingIndex),
-  mathIndex: loadIndex(STORAGE_KEYS.mathIndex),
-  progress: loadProgress(),
-  settings: loadSettings(),
-  feedback: "",
-  feedbackType: ""
-};
-
-let voices = [];
-
-init();
-
-async function init() {
-  await loadTasks();
-  initVoices();
+function init() {
   render();
 }
 
-async function loadTasks() {
-  const res = await fetch("data/tasks.json");
-  tasks = await res.json();
+function render() {
+  app.innerHTML = `
+    <div class="game">
+      <h1>Reading Game</h1>
+      <p>Listen to the word and type it!</p>
+      <button id="play-word">Play Word</button>
+      <input type="text" id="word-input" placeholder="Type the word here">
+      <button id="check">Check</button>
+      <p id="feedback"></p>
+      <p>Word ${currentIndex + 1} of ${words.length}</p>
+    </div>
+  `;
+
+  document.getElementById("play-word").addEventListener("click", () => speak(currentWord));
+  document.getElementById("check").addEventListener("click", checkWord);
 }
 
-function loadProgress() {
-  const saved = localStorage.getItem(STORAGE_KEYS.progress);
-  return saved ? JSON.parse(saved) : {};
-}
-
-function saveProgress() {
-  localStorage.setItem(STORAGE_KEYS.progress, JSON.stringify(state.progress));
-}
-
-function loadSettings() {
-  const saved = localStorage.getItem(STORAGE_KEYS.settings);
-  return saved ? JSON.parse(saved) : { ...defaultSettings };
-}
-
-function saveSettings() {
-  localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(state.settings));
-}
-
-function loadIndex(key) {
-  const raw = localStorage.getItem(key);
-  const value = Number(raw);
-  return Number.isFinite(value) && value >= 0 ? value : 0;
-}
-
-function saveIndex(key, value) {
-  localStorage.setItem(key, String(value));
-}
-
-function initVoices() {
-  const hydrate = () => {
-    voices = window.speechSynthesis.getVoices();
-    render();
-  };
-  hydrate();
-  window.speechSynthesis.addEventListener("voiceschanged", hydrate);
-}
-
-function speak(text, slow = false) {
-  if (!text) return;
-  window.speechSynthesis.cancel();
+function speak(text) {
   const utter = new SpeechSynthesisUtterance(text);
-  const chosen = voices.find((v) => v.voiceURI === state.settings.voiceURI);
-  if (chosen) utter.voice = chosen;
-  utter.rate = slow ? Math.max(0.6, state.settings.rate * 0.7) : state.settings.rate;
-  utter.pitch = state.settings.pitch;
   window.speechSynthesis.speak(utter);
 }
 
-function setView(view) {
-  state.view = view;
-  state.feedback = "";
-  state.feedbackType = "";
-  render();
+function checkWord() {
+  const input = document.getElementById("word-input").value.trim().toLowerCase();
+  const feedback = document.getElementById("feedback");
+  if (input === currentWord) {
+    feedback.textContent = "Correct! Well done!";
+    feedback.style.color = "green";
+    currentIndex = (currentIndex + 1) % words.length;
+    currentWord = words[currentIndex];
+    document.getElementById("word-input").value = "";
+    setTimeout(render, 2000);
+  } else {
+    feedback.textContent = "Try again!";
+    feedback.style.color = "red";
+  }
 }
 
-function setMode(mode) {
+init();
   state.mode = mode;
   state.feedback = "";
   state.feedbackType = "";

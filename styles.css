@@ -1,53 +1,33 @@
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=M+PLUS+Rounded+1c:wght@600;700&display=swap");
-
-:root {
-  --bg: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  --ink: #2d3748;
-  --accent: #ff6b6b;
-  --accent-2: #4ecdc4;
-  --panel: #ffffff;
-  --muted: #718096;
-  --success: #48bb78;
-  --danger: #f56565;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --radius: 20px;
-  --font: "Bricolage Grotesque", "Segoe UI", sans-serif;
-  --display: "M PLUS Rounded 1c", "Segoe UI", sans-serif;
-  --glow: rgba(255, 107, 107, 0.3);
-  --panel-border: #e2e8f0;
-  --mesh-1: rgba(255, 107, 107, 0.1);
-  --mesh-2: rgba(78, 205, 196, 0.1);
-  --mesh-3: rgba(255, 193, 7, 0.1);
-  --yellow: #ffd93d;
-  --blue: #6bcf7f;
-  --purple: #a78bfa;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   margin: 0;
-  background: var(--bg);
-  background-attachment: fixed;
-  color: var(--ink);
-  font-family: var(--font);
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
 }
 
-body::before {
-  content: "🌟";
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  font-size: 2rem;
-  animation: float 6s ease-in-out infinite;
+.game {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
-body::after {
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  margin: 10px;
+}
   content: "🎈";
   position: absolute;
   top: 80%;
