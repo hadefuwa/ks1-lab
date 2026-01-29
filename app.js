@@ -377,6 +377,9 @@ function renderTask(task) {
   if (task.type === "placeValue") {
     return renderPlaceValue(task);
   }
+  if (task.type === "barModel") {
+    return renderBarModel(task);
+  }
   return `<div class="card">Unknown task.</div>`;
 }
 
@@ -753,6 +756,72 @@ function renderPlaceValue(task) {
       <input id="pv-input" class="equation" placeholder="Type the number" />
       <div class="tts-row">
         <button id="check-pv">Check</button>
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
+function renderBarModel(task) {
+  setTimeout(() => {
+    const pool = document.getElementById("bar-pool");
+    const bar = document.getElementById("bar-area");
+    const segments = document.querySelectorAll(".bar-seg");
+
+    segments.forEach((seg) => {
+      seg.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", seg.dataset.id);
+      });
+    });
+
+    [pool, bar].forEach((zone) => {
+      zone.addEventListener("dragover", (e) => e.preventDefault());
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text/plain");
+        const el = document.querySelector(`.bar-seg[data-id="${id}"]`);
+        if (el) zone.appendChild(el);
+      });
+    });
+
+    document.getElementById("check-bar")?.addEventListener("click", () => {
+      const segs = Array.from(bar.querySelectorAll(".bar-seg"));
+      const values = segs.map((s) => Number(s.dataset.value)).sort((a, b) => a - b);
+      const target = [...task.parts].sort((a, b) => a - b);
+      const total = values.reduce((sum, v) => sum + v, 0);
+      const typed = Number(document.getElementById("bar-total").value.trim());
+      const partsOk = values.length === target.length && values.every((v, i) => v === target[i]);
+      const ok = partsOk && total === task.total && typed === task.total;
+      updateProgress("math/barModel", ok);
+      state.feedback = ok ? "Nice bar model!" : "Try again. Match the parts and the total.";
+      state.feedbackType = ok ? "success" : "error";
+      render();
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  const palette = task.parts
+    .map((value, i) => `<div class="bar-seg" draggable="true" data-id="p${i}" data-value="${value}">${value}</div>`)
+    .join("");
+
+  return `
+    <div class="panel bar-model">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">${task.story}</div>
+      <div class="bar-grid">
+        <div>
+          <div class="subtle">Parts</div>
+          <div id="bar-pool" class="bar-pool">${palette}</div>
+        </div>
+        <div>
+          <div class="subtle">Bar model</div>
+          <div id="bar-area" class="bar-area"></div>
+        </div>
+      </div>
+      <input id="bar-total" class="equation" placeholder="Type the total" />
+      <div class="tts-row">
+        <button id="check-bar">Check</button>
         <button class="secondary" id="next-task">Next</button>
       </div>
       ${renderFeedback()}

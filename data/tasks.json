@@ -119,6 +119,15 @@
       "stage": "Year 2",
       "title": "Build the number",
       "number": 48
+    },
+    {
+      "id": "bm-y1-01",
+      "type": "barModel",
+      "stage": "Year 1",
+      "title": "Bar Model Builder",
+      "story": "Ali has 7 stickers. He gets 5 more. How many now?",
+      "parts": [7, 5],
+      "total": 12
     }
   ]
 }
