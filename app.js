@@ -16,7 +16,7 @@ const lessons = [
 let currentLesson = lessons[0];
 let currentIndex = 0;
 let correctCount = 0;
-let phase = "teach"; // teach, practice, assess
+let phase = "practice"; // teach, practice, assess
 
 function init() {
   render();
