@@ -143,36 +143,51 @@ Implementation notes (GitHub Pages)
 MVP build checklist (desktop-first, TTS-first)
 
 Milestone 1: Core shell
-- App shell: Home -> Practice -> Progress
-- Local storage for progress (per skill, attempts, accuracy)
-- Settings panel: voice, rate, pitch, autoplay on/off
+- [x] App shell: Home -> Practice -> Progress
+- [x] Local storage for progress (per skill, attempts, accuracy)
+- [x] Settings panel: voice, rate, pitch, autoplay on/off
 
 Milestone 2: TTS foundation
-- Web Speech API wrapper (play, stop, rate, voice selection)
-- Per-task "Play" buttons (word/sentence/slow)
-- Auto-play on task load (toggleable)
+- [x] Web Speech API wrapper (play, stop, rate, voice selection)
+- [x] Per-task "Play" buttons (word/sentence/slow)
+- [x] Auto-play on task load (toggleable)
 
 Milestone 3: First reading activity
-- Build a Word (sound tiles + TTS)
-- Input validation (exact + small spelling variants)
-- Feedback panel (correct/incorrect + hint)
+- [x] Build a Word (sound tiles + TTS)
+- [x] Input validation (exact + small spelling variants)
+- [x] Feedback panel (correct/incorrect + hint)
 
 Milestone 4: First maths activity
-- Number Bonds Builder (drag counters + equation)
-- Model validation + equation equivalence (commutative)
-- Feedback panel reuse
+- [x] Number Bonds Builder (drag counters + equation)
+- [x] Model validation + equation equivalence (commutative)
+- [x] Feedback panel reuse
 
 Milestone 5: Content system
-- JSON task loader for at least 2 activities
-- Authoring folder structure + sample tasks
-- Simple task picker (by stage: Nursery/Reception/Y1/Y2)
+- [x] JSON task loader for at least 2 activities
+- [x] Authoring folder structure + sample tasks
+- [x] Simple task picker (by stage: Nursery/Reception/Y1/Y2)
 
 Milestone 6: Progress + mastery
-- Per-skill mastery rules (eg 5 correct in a row)
-- Error types tracking (eg missing sound, wrong bar partition)
-- Review queue (repeat weak skills)
+- [ ] Per-skill mastery rules (eg 5 correct in a row)
+- [ ] Error types tracking (eg missing sound, wrong bar partition)
+- [ ] Review queue (repeat weak skills)
 
 Milestone 7: Polish
-- Minimal animations (success/incorrect)
-- Consistent typography and spacing
-- Smoke test for GitHub Pages build/deploy
+- [x] Minimal animations (success/incorrect)
+- [x] Consistent typography and spacing
+- [x] Smoke test for GitHub Pages build/deploy
+
+Additional activities (plan coverage)
+- [x] Sound Match (Nursery)
+- [x] Cloze Passage
+- [x] Sentence Builder
+- [x] Word Hunt
+- [x] Place Value Blocks
+- [x] Bar Model Builder
+- [ ] Add/Sub with Regrouping Visual
+
+UX + motion
+- [x] Hero landing with mascot + quest CTA
+- [x] Coach panel on practice screen
+- [x] Motion polish (float-in, pulse, wobble)
+- [ ] Heavier game-like transitions between tasks (screen wipe, page flip, etc.)

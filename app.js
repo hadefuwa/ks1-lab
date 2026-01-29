@@ -2,7 +2,9 @@ const app = document.getElementById("app");
 
 const STORAGE_KEYS = {
   progress: "ks1-progress",
-  settings: "ks1-tts-settings"
+  settings: "ks1-tts-settings",
+  readingIndex: "ks1-reading-index",
+  mathIndex: "ks1-math-index"
 };
 
 const defaultSettings = {
@@ -17,8 +19,8 @@ let state = {
   view: "home",
   mode: "reading",
   stage: "Reception",
-  readingIndex: 0,
-  mathIndex: 0,
+  readingIndex: loadIndex(STORAGE_KEYS.readingIndex),
+  mathIndex: loadIndex(STORAGE_KEYS.mathIndex),
   progress: loadProgress(),
   settings: loadSettings(),
   feedback: "",
@@ -58,6 +60,16 @@ function saveSettings() {
   localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(state.settings));
 }
 
+function loadIndex(key) {
+  const raw = localStorage.getItem(key);
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+function saveIndex(key, value) {
+  localStorage.setItem(key, String(value));
+}
+
 function initVoices() {
   const hydrate = () => {
     voices = window.speechSynthesis.getVoices();
@@ -95,8 +107,10 @@ function setMode(mode) {
 function advanceTask() {
   if (state.mode === "reading") {
     state.readingIndex += 1;
+    saveIndex(STORAGE_KEYS.readingIndex, state.readingIndex);
   } else {
     state.mathIndex += 1;
+    saveIndex(STORAGE_KEYS.mathIndex, state.mathIndex);
   }
   state.feedback = "";
   state.feedbackType = "";
@@ -128,6 +142,10 @@ function render() {
 
   document.querySelectorAll("[data-view]").forEach((btn) => {
     btn.addEventListener("click", () => setView(btn.dataset.view));
+  });
+
+  document.querySelectorAll("[data-mode]").forEach((btn) => {
+    btn.addEventListener("click", () => setMode(btn.dataset.mode));
   });
 }
 
@@ -163,7 +181,7 @@ function renderHome() {
       </div>
       <div class="card mission">
         <div class="task-title">Quick start</div>
-        <div class="subtle">Pick a stage, then hit play on every task.</div>
+        <div class="subtle">Start the quest and weâ€™ll keep your place automatically.</div>
         <div class="stat-grid">
           <div class="stat">
             <div class="stat-label">Focus</div>
@@ -191,7 +209,7 @@ function renderHome() {
 function renderPractice() {
   const stageOptions = ["Nursery", "Reception", "Year 1", "Year 2"];
   const task = getCurrentTask();
-  const panel = task ? renderTask(task) : `<div class="card">No tasks for this stage yet.</div>`;
+  const panel = task ? renderTask(task) : `<div class="card">🎉 All tasks completed for this stage! Try a different stage or switch to Maths mode.</div>`;
 
   setTimeout(() => {
     document.querySelectorAll("[data-mode]").forEach((btn) => {
@@ -201,6 +219,8 @@ function renderPractice() {
     if (stageSelect) {
       stageSelect.addEventListener("change", (e) => {
         state.stage = e.target.value;
+        state.readingIndex = 0;
+        state.mathIndex = 0;
         state.feedback = "";
         state.feedbackType = "";
         render();
@@ -352,7 +372,7 @@ function getCurrentTask() {
   const filtered = list.filter((t) => t.stage === state.stage);
   if (!filtered.length) return null;
   const index = state.mode === "reading" ? state.readingIndex : state.mathIndex;
-  return filtered[index % filtered.length];
+  return filtered[index] || null;
 }
 
 function renderTask(task) {
@@ -374,6 +394,9 @@ function renderTask(task) {
   if (task.type === "numberBonds") {
     return renderNumberBonds(task);
   }
+  if (task.type === "equationInput") {
+    return renderEquationInput(task);
+  }
   if (task.type === "placeValue") {
     return renderPlaceValue(task);
   }
@@ -387,7 +410,7 @@ function renderBuildWord(task) {
   const tts = task.ttsText;
 
   setTimeout(() => {
-    if (state.settings.autoplay) speak(tts);
+    speak(tts);
 
     document.getElementById("play-word")?.addEventListener("click", () => speak(tts));
     document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
@@ -412,6 +435,7 @@ function renderBuildWord(task) {
       state.feedback = ok ? "Nice! You built the word." : "Try again. Listen carefully and blend the sounds.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -445,7 +469,7 @@ function renderSoundMatch(task) {
   const tts = task.ttsText;
 
   setTimeout(() => {
-    if (state.settings.autoplay) speak(tts);
+    speak(tts);
     document.getElementById("play-word")?.addEventListener("click", () => speak(tts));
     document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
     document.querySelectorAll(".sound-option").forEach((btn) => {
@@ -456,6 +480,7 @@ function renderSoundMatch(task) {
         state.feedback = ok ? "Yes! That is the first sound." : "Not quite. Listen again.";
         state.feedbackType = ok ? "success" : "error";
         render();
+        if (ok) setTimeout(() => advanceTask(), 2000);
       });
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
@@ -486,7 +511,7 @@ function renderCloze(task) {
   const tts = task.ttsText;
 
   setTimeout(() => {
-    if (state.settings.autoplay) speak(tts);
+    speak(tts);
     document.getElementById("play-sentence")?.addEventListener("click", () => speak(tts));
     document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
     document.getElementById("check-cloze")?.addEventListener("click", () => {
@@ -497,6 +522,7 @@ function renderCloze(task) {
       state.feedback = ok ? "Great! You found the missing word." : "Try again and listen to the sentence.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -523,7 +549,7 @@ function renderSentenceBuilder(task) {
   const tts = task.ttsText;
 
   setTimeout(() => {
-    if (state.settings.autoplay) speak(tts);
+    speak(tts);
     document.getElementById("play-sentence")?.addEventListener("click", () => speak(tts));
     document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
     const buildEl = document.getElementById("built-sentence");
@@ -545,6 +571,7 @@ function renderSentenceBuilder(task) {
       state.feedback = ok ? "Nice sentence!" : "Try again. Listen and build it in order.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -579,7 +606,7 @@ function renderWordHunt(task) {
   const tokens = task.paragraph.split(" ");
 
   setTimeout(() => {
-    if (state.settings.autoplay) speak(tts);
+    speak(tts);
     document.getElementById("play-paragraph")?.addEventListener("click", () => speak(tts));
     document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
     document.querySelectorAll(".hunt-word").forEach((word) => {
@@ -590,6 +617,7 @@ function renderWordHunt(task) {
         state.feedback = ok ? "Great spotting!" : "Try again. Look for the answer word.";
         state.feedbackType = ok ? "success" : "error";
         render();
+        if (ok) setTimeout(() => advanceTask(), 2000);
       });
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
@@ -621,6 +649,8 @@ function renderWordHunt(task) {
 
 function renderNumberBonds(task) {
   setTimeout(() => {
+    speak(task.ttsText);
+    document.getElementById("play-instructions")?.addEventListener("click", () => speak(task.ttsText));
     const pool = document.getElementById("counter-pool");
     const left = document.getElementById("basket-left");
     const right = document.getElementById("basket-right");
@@ -660,6 +690,7 @@ function renderNumberBonds(task) {
       state.feedback = ok ? "Great! That makes " + total + "." : "Check the counters and the equation.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -670,6 +701,9 @@ function renderNumberBonds(task) {
     <div class="panel">
       <div class="task-title">${task.title}</div>
       <div class="subtle">Drag counters into two groups, then write the equation.</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-instructions">Play instructions</button>
+      </div>
       <div class="counter-area">
         <div>
           <div class="subtle">Pool</div>
@@ -694,8 +728,45 @@ function renderNumberBonds(task) {
   `;
 }
 
+function renderEquationInput(task) {
+  setTimeout(() => {
+    speak(task.ttsText);
+    document.getElementById("play-instructions")?.addEventListener("click", () => speak(task.ttsText));
+    document.getElementById("check-equation")?.addEventListener("click", () => {
+      const typed = Number(document.getElementById("equation-answer").value.trim());
+      const ok = typed === Number(task.answer);
+      updateProgress("math/equationInput", ok);
+      state.feedback = ok ? "Nice work!" : "Try again. Solve the sum carefully.";
+      state.feedbackType = ok ? "success" : "error";
+      render();
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  return `
+    <div class="panel equation-panel">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">Solve and type the answer.</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-instructions">Play instructions</button>
+      </div>
+      <div class="equation-row">
+        <span class="equation-text">${task.equation}</span>
+        <input id="equation-answer" class="equation" placeholder="Answer" />
+      </div>
+      <div class="tts-row">
+        <button id="check-equation">Check</button>
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
 function renderPlaceValue(task) {
   setTimeout(() => {
+    speak(task.ttsText);
+    document.getElementById("play-instructions")?.addEventListener("click", () => speak(task.ttsText));
     const pool = document.getElementById("pv-pool");
     const build = document.getElementById("pv-build");
     const blocks = document.querySelectorAll(".pv-block");
@@ -728,6 +799,7 @@ function renderPlaceValue(task) {
       state.feedback = ok ? "Nice! You built " + task.number + "." : "Try again. Count tens and ones.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -743,6 +815,9 @@ function renderPlaceValue(task) {
     <div class="panel place-value">
       <div class="task-title">${task.title}</div>
       <div class="subtle">Drag tens and ones to build ${task.number}, then type it.</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-instructions">Play instructions</button>
+      </div>
       <div class="pv-area">
         <div>
           <div class="subtle">Blocks</div>
@@ -765,6 +840,8 @@ function renderPlaceValue(task) {
 
 function renderBarModel(task) {
   setTimeout(() => {
+    speak(task.ttsText);
+    document.getElementById("play-instructions")?.addEventListener("click", () => speak(task.ttsText));
     const pool = document.getElementById("bar-pool");
     const bar = document.getElementById("bar-area");
     const segments = document.querySelectorAll(".bar-seg");
@@ -797,6 +874,7 @@ function renderBarModel(task) {
       state.feedback = ok ? "Nice bar model!" : "Try again. Match the parts and the total.";
       state.feedbackType = ok ? "success" : "error";
       render();
+      if (ok) setTimeout(() => advanceTask(), 2000);
     });
     document.getElementById("next-task")?.addEventListener("click", advanceTask);
   }, 0);
@@ -809,6 +887,9 @@ function renderBarModel(task) {
     <div class="panel bar-model">
       <div class="task-title">${task.title}</div>
       <div class="subtle">${task.story}</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-instructions">Play instructions</button>
+      </div>
       <div class="bar-grid">
         <div>
           <div class="subtle">Parts</div>
