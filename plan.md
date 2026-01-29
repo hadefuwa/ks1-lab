@@ -101,6 +101,28 @@
 - **Assessment**: Immediate feedback, retry if fail
 - **Expansion**: Add more lessons as needed
 
+## Folder Structure for 1000 Lessons
+To support 1000 individual HTML lessons, each with its own JS and CSS:
+```
+lessons/
+  lesson1/
+    index.html
+    script.js
+    styles.css
+  lesson2/
+    index.html
+    script.js
+    styles.css
+  ...
+  lesson1000/
+    index.html
+    script.js
+    styles.css
+```
+- Main `index.html` in root loads the sidebar and navigates to lessons.
+- Each lesson is a self-contained HTML page with its own script and styles.
+- Progress tracked globally in localStorage.
+
 ## Next Steps
 - Implement lesson navigation in app.js
 - Add assessment logic
