@@ -72,6 +72,16 @@
       "ttsText": "We played in the park.",
       "tiles": ["We", "played", "in", "the", "park."],
       "answers": ["We played in the park."]
+    },
+    {
+      "id": "hunt-y2-01",
+      "type": "wordHunt",
+      "stage": "Year 2",
+      "title": "Word Hunt",
+      "ttsText": "Sam wore his bright coat to school.",
+      "paragraph": "Sam wore his bright coat to school.",
+      "question": "What did Sam wear?",
+      "answer": "coat"
     }
   ],
   "mathTasks": [
@@ -95,6 +105,20 @@
       "stage": "Year 2",
       "title": "Make 20",
       "total": 20
+    },
+    {
+      "id": "pv-y1-01",
+      "type": "placeValue",
+      "stage": "Year 1",
+      "title": "Build the number",
+      "number": 23
+    },
+    {
+      "id": "pv-y2-01",
+      "type": "placeValue",
+      "stage": "Year 2",
+      "title": "Build the number",
+      "number": 48
     }
   ]
 }

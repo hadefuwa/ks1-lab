@@ -368,8 +368,14 @@ function renderTask(task) {
   if (task.type === "sentenceBuilder") {
     return renderSentenceBuilder(task);
   }
+  if (task.type === "wordHunt") {
+    return renderWordHunt(task);
+  }
   if (task.type === "numberBonds") {
     return renderNumberBonds(task);
+  }
+  if (task.type === "placeValue") {
+    return renderPlaceValue(task);
   }
   return `<div class="card">Unknown task.</div>`;
 }
@@ -565,6 +571,51 @@ function renderSentenceBuilder(task) {
   `;
 }
 
+function renderWordHunt(task) {
+  const tts = task.ttsText;
+  const tokens = task.paragraph.split(" ");
+
+  setTimeout(() => {
+    if (state.settings.autoplay) speak(tts);
+    document.getElementById("play-paragraph")?.addEventListener("click", () => speak(tts));
+    document.getElementById("play-slow")?.addEventListener("click", () => speak(tts, true));
+    document.querySelectorAll(".hunt-word").forEach((word) => {
+      word.addEventListener("click", () => {
+        const picked = word.dataset.word.toLowerCase().replace(/[^\w]/g, "");
+        const ok = picked === task.answer.toLowerCase();
+        updateProgress("reading/wordHunt", ok);
+        state.feedback = ok ? "Great spotting!" : "Try again. Look for the answer word.";
+        state.feedbackType = ok ? "success" : "error";
+        render();
+      });
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  return `
+    <div class="panel hunt">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">${task.question}</div>
+      <div class="tts-row">
+        <button class="secondary" id="play-paragraph">Play paragraph</button>
+        <button class="secondary" id="play-slow">Play slow</button>
+      </div>
+      <div class="hunt-text">
+        ${tokens
+          .map((token) => {
+            const safe = token.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return `<button class="hunt-word" data-word="${safe}">${safe}</button>`;
+          })
+          .join(" ")}
+      </div>
+      <div class="tts-row">
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
 function renderNumberBonds(task) {
   setTimeout(() => {
     const pool = document.getElementById("counter-pool");
@@ -633,6 +684,75 @@ function renderNumberBonds(task) {
       <input id="equation" class="equation" placeholder="e.g., 7 + 3 = ${task.total}" />
       <div class="tts-row">
         <button id="check-bonds">Check</button>
+        <button class="secondary" id="next-task">Next</button>
+      </div>
+      ${renderFeedback()}
+    </div>
+  `;
+}
+
+function renderPlaceValue(task) {
+  setTimeout(() => {
+    const pool = document.getElementById("pv-pool");
+    const build = document.getElementById("pv-build");
+    const blocks = document.querySelectorAll(".pv-block");
+
+    blocks.forEach((block) => {
+      block.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", block.dataset.id);
+      });
+    });
+
+    [pool, build].forEach((zone) => {
+      zone.addEventListener("dragover", (e) => e.preventDefault());
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text/plain");
+        const el = document.querySelector(`.pv-block[data-id="${id}"]`);
+        if (el) zone.appendChild(el);
+      });
+    });
+
+    document.getElementById("check-pv")?.addEventListener("click", () => {
+      const blocksInBuild = build.querySelectorAll(".pv-block");
+      let total = 0;
+      blocksInBuild.forEach((b) => {
+        total += Number(b.dataset.value);
+      });
+      const typed = Number(document.getElementById("pv-input").value.trim());
+      const ok = total === task.number && typed === task.number;
+      updateProgress("math/placeValue", ok);
+      state.feedback = ok ? "Nice! You built " + task.number + "." : "Try again. Count tens and ones.";
+      state.feedbackType = ok ? "success" : "error";
+      render();
+    });
+    document.getElementById("next-task")?.addEventListener("click", advanceTask);
+  }, 0);
+
+  const tensBlocks = Array.from({ length: 6 }, (_, i) => {
+    return `<div class="pv-block tens" draggable="true" data-id="t${i}" data-value="10">10</div>`;
+  }).join("");
+  const onesBlocks = Array.from({ length: 9 }, (_, i) => {
+    return `<div class="pv-block ones" draggable="true" data-id="o${i}" data-value="1">1</div>`;
+  }).join("");
+
+  return `
+    <div class="panel place-value">
+      <div class="task-title">${task.title}</div>
+      <div class="subtle">Drag tens and ones to build ${task.number}, then type it.</div>
+      <div class="pv-area">
+        <div>
+          <div class="subtle">Blocks</div>
+          <div id="pv-pool" class="pv-pool">${tensBlocks}${onesBlocks}</div>
+        </div>
+        <div>
+          <div class="subtle">Build area</div>
+          <div id="pv-build" class="pv-build"></div>
+        </div>
+      </div>
+      <input id="pv-input" class="equation" placeholder="Type the number" />
+      <div class="tts-row">
+        <button id="check-pv">Check</button>
         <button class="secondary" id="next-task">Next</button>
       </div>
       ${renderFeedback()}
