@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lily's Math Meadow</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background: #2d5a27;
+            font-family: 'Fredoka One', cursive;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #game-world {
+            width: 800px;
+            height: 600px;
+            background: #7cfc00;
+            border: 10px solid #5d4037;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* UI Overlay */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .counter {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid white;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .counter span {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+
+        .red {
+            color: #ff4444;
+        }
+
+        .blue {
+            color: #33b5e5;
+        }
+
+        .yellow {
+            color: #ffbb33;
+        }
+
+        #lily {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            transition: transform 0.1s;
+            z-index: 10;
+        }
+
+        .item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            z-index: 5;
+        }
+
+        #start-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+            text-align: center;
+        }
+
+        .btn {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 8px 0 #ad1457;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-world">
+        <div id="start-overlay">
+            <h1>🌸 Lily's Math Meadow</h1>
+            <p>Use Arrows or WASD to walk around!<br>Collect the blocks to grow your score.</p>
+            <button class="btn" onclick="startGame()">START WALKING!</button>
+        </div>
+
+        <div id="ui">
+            <div class="counter"><span class="red">Hundreds</span>
+                <div id="h-val">0</div>
+            </div>
+            <div class="counter"><span class="blue">Tens</span>
+                <div id="t-val">0</div>
+            </div>
+            <div class="counter"><span class="yellow">Ones</span>
+                <div id="o-val">0</div>
+            </div>
+            <div class="counter" style="border-color: #4ade80;"><span style="color: #4ade80;">Total Number</span>
+                <div id="total-val">0</div>
+            </div>
+        </div>
+
+        <div id="lily" style="left: 375px; top: 275px;">
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="30" r="20" fill="#fdd835" />
+                <circle cx="50" cy="30" r="18" fill="#ffe0bd" />
+                <rect x="35" y="45" width="30" height="35" rx="10" fill="#ec407a" />
+                <rect x="40" y="80" width="8" height="15" fill="#ffe0bd" />
+                <rect x="52" y="80" width="8" height="15" fill="#ffe0bd" />
+                <circle cx="43" cy="28" r="2" fill="black" />
+                <circle cx="57" cy="28" r="2" fill="black" />
+            </svg>
+        </div>
+
+        <div id="items-container"></div>
+    </div>
+
+    <script>
+        let pos = { x: 375, y: 275 };
+        let scores = { h: 0, t: 0, o: 0 };
+        const keys = {};
+        let gameActive = false;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startGame() {
+            document.getElementById('start-overlay').style.display = 'none';
+            gameActive = true;
+            spawnItems();
+            gameLoop();
+        }
+
+        function spawnItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const type = ['h', 't', 'o'][Math.floor(Math.random() * 3)];
+                const item = document.createElement('div');
+                item.className = `item ${type}`;
+                item.dataset.type = type;
+
+                // Random position
+                const x = 50 + Math.random() * 700;
+                const y = 100 + Math.random() * 450;
+                item.style.left = x + 'px';
+                item.style.top = y + 'px';
+
+                // SVG Block Designs
+                if (type === 'h') {
+                    item.innerHTML = `<svg viewBox="0 0 100 100"><rect width="90" height="90" fill="#ff4444" stroke="white" stroke-width="4" rx="5"/></svg>`;
+                } else if (type === 't') {
+                    item.innerHTML = `<svg viewBox="0 0 100 100"><rect x="35" width="30" height="95" fill="#33b5e5" stroke="white" stroke-width="4" rx="5"/></svg>`;
+                } else {
+                    item.innerHTML = `<svg viewBox="0 0 100 100"><rect x="25" y="25" width="50" height="50" fill="#ffbb33" stroke="white" stroke-width="4" rx="5"/></svg>`;
+                }
+                container.appendChild(item);
+            }
+        }
+
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            const speed = 5;
+            if (keys['arrowup'] || keys['w']) pos.y -= speed;
+            if (keys['arrowdown'] || keys['s']) pos.y += speed;
+            if (keys['arrowleft'] || keys['a']) { pos.x -= speed; document.getElementById('lily').style.transform = 'scaleX(-1)'; }
+            if (keys['arrowright'] || keys['d']) { pos.x += speed; document.getElementById('lily').style.transform = 'scaleX(1)'; }
+
+            // Boundary checks
+            pos.x = Math.max(0, Math.min(750, pos.x));
+            pos.y = Math.max(80, Math.min(550, pos.y));
+
+            const lilyEl = document.getElementById('lily');
+            lilyEl.style.left = pos.x + 'px';
+            lilyEl.style.top = pos.y + 'px';
+
+            checkCollisions();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollisions() {
+            const lilyRect = document.getElementById('lily').getBoundingClientRect();
+            const items = document.querySelectorAll('.item');
+
+            items.forEach(item => {
+                const itemRect = item.getBoundingClientRect();
+                if (!(lilyRect.right < itemRect.left || lilyRect.left > itemRect.right || lilyRect.bottom < itemRect.top || lilyRect.top > itemRect.bottom)) {
+                    collect(item);
+                }
+            });
+        }
+
+        function collect(item) {
+            const type = item.dataset.type;
+            if (type === 'h') { scores.h++; speak("Found a hundred!"); }
+            if (type === 't') { scores.t++; speak("Got a ten!"); }
+            if (type === 'o') { scores.o++; speak("One!"); }
+
+            item.remove();
+            updateUI();
+
+            if (document.querySelectorAll('.item').length === 0) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                setTimeout(spawnItems, 1000);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('h-val').innerText = scores.h;
+            document.getElementById('t-val').innerText = scores.t;
+            document.getElementById('o-val').innerText = scores.o;
+            const total = (scores.h * 100) + (scores.t * 10) + scores.o;
+            document.getElementById('total-val').innerText = total;
+        }
+    </script>
+</body>
+
+</html>

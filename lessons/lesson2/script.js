@@ -4,13 +4,13 @@ const app = document.getElementById("app");
 const lessonData = {
   title: "KS1 Lab",
   mascot: "Bouncy",
-  introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some magic words!",
+  introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some 4-letter magic words!",
   teachWords: [
-    { word: "cat", context: "A fluffy pet." },
-    { word: "dog", context: "A loyal friend." },
-    { word: "sun", context: "Shines in the sky." }
+    { word: "frog", context: "Jumps in ponds." },
+    { word: "tree", context: "Grows tall." },
+    { word: "book", context: "Full of stories." }
   ],
-  challengeWords: ["cat", "dog", "pig", "sun", "run", "fun", "big", "red", "bed", "hen"],
+  challengeWords: ["frog", "tree", "book", "star", "moon", "rain", "wind", "snow", "leaf", "bird"],
   passScore: 80
 };
 
@@ -247,7 +247,7 @@ function nextWord() {
     playSound("win");
     burstConfetti(50);
     render();
-    window.parent.postMessage({type: 'lessonCompleted', lessonId: 1}, '*');
+    window.parent.postMessage({type: 'lessonCompleted', lessonId: 2}, '*');
   }
 }
 

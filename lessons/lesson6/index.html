@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Place Values</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --gold: #ffeb3b;
+            --neon-green: #4ade80;
+        }
+
+        body {
+            margin: 0;
+            background: #0b0118;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-box {
+            background: rgba(20, 0, 40, 0.9);
+            border: 5px solid var(--neon-blue);
+            border-radius: 40px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 0 30px var(--neon-blue);
+            width: 90%;
+            max-width: 600px;
+            display: none;
+            /* Hidden until start */
+        }
+
+        #start-screen {
+            text-align: center;
+        }
+
+        .big-start-btn {
+            background: linear-gradient(180deg, #ff00ff, #7b00ff);
+            border: none;
+            color: white;
+            padding: 50px 80px;
+            font-size: 3.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 15px 0 #4b0099, 0 0 50px rgba(255, 0, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        .big-start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .big-start-btn:active {
+            transform: translateY(10px);
+            box-shadow: 0 5px 0 #4b0099;
+        }
+
+        .level-badge {
+            background: var(--neon-pink);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+        }
+
+        .score-board {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+            margin: 15px 0;
+        }
+
+        .equation {
+            font-size: 3.5rem;
+            margin: 20px 0;
+            text-shadow: 3px 3px var(--neon-pink);
+            letter-spacing: 2px;
+        }
+
+        .place-value-highlight {
+            color: var(--gold);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            background: #4361ee;
+            border: none;
+            padding: 20px;
+            font-size: 2.5rem;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #2a087a;
+            font-family: inherit;
+        }
+
+        .answer-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #2a087a;
+        }
+
+        .teacher-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: var(--gold);
+            min-height: 60px;
+            border-left: 5px solid var(--gold);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="start-screen">
+        <button class="big-start-btn" onclick="startGame()">🚀 START<br>LESSON 6</button>
+    </div>
+
+    <div id="game-box">
+        <span class="level-badge" id="level-display">Level 1: Hundreds & Tens</span>
+        <div class="score-board">⭐ Stars: <span id="score">0</span></div>
+        <div class="equation" id="display">...</div>
+        <div class="grid" id="options"></div>
+        <div class="teacher-box" id="teacher-text">Loading...</div>
+    </div>
+
+    <script>
+        let score = 0;
+        let currentAns = 0;
+        let level = 1;
+        let isAnswering = false;
+        let lastAns = 0;
+
+        const levels = [
+            { name: "Hundreds Rookie", max: 4 }, // Small sums
+            { name: "Hundreds Explorer", max: 7 }, // Medium sums
+            { name: "Hundreds Master", max: 9 },  // Large sums
+            { name: "Galaxy Hero", max: 15 }      // Very large sums
+        ];
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 0.9;
+            msg.pitch = 1.1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-box').style.display = 'block';
+            generate();
+        }
+
+        function generate() {
+            isAnswering = false;
+            let config = levels[Math.min(level - 1, levels.length - 1)];
+            document.getElementById('level-display').innerText = `Level ${level}: ${config.name}`;
+
+            let h1, h2;
+            do {
+                h1 = Math.floor(Math.random() * config.max) + 1;
+                h2 = Math.floor(Math.random() * config.max) + 1;
+                currentAns = (h1 + h2) * 100;
+            } while (currentAns === lastAns);
+
+            lastAns = currentAns;
+            let n1 = h1 * 100;
+            let n2 = h2 * 100;
+
+            document.getElementById('display').innerHTML = `${n1} + ${n2} = <span class='place-value-highlight'>?</span>`;
+
+            // Helpful tip logic
+            let tipText = `Think: ${h1} + ${h2} is ${h1 + h2}. Then add the two zeros!`;
+            document.getElementById('teacher-text').innerText = tipText;
+            speak(`${n1} plus ${n2}. ${tipText}`);
+
+            // Generate Choices
+            let choices = [currentAns];
+            while (choices.length < 4) {
+                let wrongH = (h1 + h2) + (Math.floor(Math.random() * 5) - 2);
+                if (wrongH === (h1 + h2) || wrongH <= 0) wrongH = (h1 + h2) + 1;
+                let wrong = wrongH * 100;
+
+                if (!choices.includes(wrong)) {
+                    choices.push(wrong);
+                }
+            }
+            choices.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('options');
+            grid.innerHTML = '';
+            choices.forEach(val => {
+                const b = document.createElement('button');
+                b.className = 'answer-btn';
+                b.innerText = val;
+                b.onclick = () => check(val, b);
+                grid.appendChild(b);
+            });
+        }
+
+        function check(val, btn) {
+            if (isAnswering) return;
+            isAnswering = true;
+
+            if (val === currentAns) {
+                score++;
+                document.getElementById('score').innerText = score;
+                if (score % 5 === 0) {
+                    level++;
+                    speak("Level Up! You are a hundreds expert!");
+                } else {
+                    speak("Correct!");
+                }
+
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                btn.style.background = "#4ade80"; // Success Green
+                setTimeout(generate, 2000);
+            } else {
+                speak("Try again! Just add the first numbers and put two zeros at the end.");
+                btn.style.background = "#ff0055"; // Error Red
+                setTimeout(() => { isAnswering = false; }, 1000);
+            }
+        }
+    </script>
+</body>
+
+</html>
