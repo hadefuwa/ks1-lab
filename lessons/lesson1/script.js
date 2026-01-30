@@ -2,9 +2,9 @@ const app = document.getElementById("app");
 
 // Game Configuration & Data
 const lessonData = {
-  title: "CVC Words Lab",
+  title: "KS1 Lab",
   mascot: "Bouncy",
-  introText: "Welcome to CVC Words Lab! I'm Bouncy. Let's learn some magic words!",
+  introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some magic words!",
   teachWords: [
     { word: "cat", context: "A fluffy pet." },
     { word: "dog", context: "A loyal friend." },

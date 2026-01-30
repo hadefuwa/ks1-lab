@@ -8,7 +8,7 @@ function renderSidebar() {
   sidebar.innerHTML = `
     <h2>Lesson Progress</h2>
     <ul>
-      <li><button onclick="loadLesson('lessons/lesson1/index.html')">Lesson 1: CVC Words</button></li>
+      <li><button onclick="loadLesson('lessons/lesson1/index.html')">Lesson 1: Spelling</button></li>
       <!-- Add more lessons here -->
     </ul>
   `;
