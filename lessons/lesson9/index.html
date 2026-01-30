@@ -179,6 +179,7 @@
         let currentDigits = [0, 0, 0];
         let activeCol = 0;
         let isAnswering = false;
+        let correctCount = 0;
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -261,8 +262,15 @@
             const isCorrect = targetDigits.every((val, index) => val === currentDigits[index]);
 
             if (isCorrect) {
+                correctCount++;
                 speak("Keyboard master! You matched the blocks perfectly!");
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+
+                if (correctCount >= 5) {
+                    speak("Mission accomplished! You are a keyboard hero!");
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 9 }, '*');
+                }
+
                 setTimeout(generateLevel, 3000);
             } else {
                 speak("Not a match yet! Check the blocks one more time.");

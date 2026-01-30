@@ -154,6 +154,7 @@
         let scores = { h: 0, t: 0, o: 0 };
         const keys = {};
         let gameActive = false;
+        let totalCollected = 0;
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -239,9 +240,15 @@
             if (type === 'o') { scores.o++; speak("One!"); }
 
             item.remove();
+            totalCollected++;
             updateUI();
 
-            if (document.querySelectorAll('.item').length === 0) {
+            if (totalCollected >= 25) {
+                gameActive = false;
+                speak("Wonderful! You've collected so many blocks! Meadow mission complete!");
+                confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
+                window.parent.postMessage({ type: 'lessonCompleted', lessonId: 10 }, '*');
+            } else if (document.querySelectorAll('.item').length === 0) {
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 setTimeout(spawnItems, 1000);
             }

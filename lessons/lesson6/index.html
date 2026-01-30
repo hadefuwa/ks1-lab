@@ -147,6 +147,7 @@
         let level = 1;
         let isAnswering = false;
         let lastAns = 0;
+        let correctCount = 0;
 
         const levels = [
             { name: "Hundreds Rookie", max: 4 }, // Small sums
@@ -222,6 +223,7 @@
 
             if (val === currentAns) {
                 score++;
+                correctCount++;
                 document.getElementById('score').innerText = score;
                 if (score % 5 === 0) {
                     level++;
@@ -232,6 +234,12 @@
 
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
                 btn.style.background = "#4ade80"; // Success Green
+
+                if (correctCount >= 10) {
+                    speak("Amazing job! You've mastered the hundreds!");
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 6 }, '*');
+                }
+
                 setTimeout(generate, 2000);
             } else {
                 speak("Try again! Just add the first numbers and put two zeros at the end.");
