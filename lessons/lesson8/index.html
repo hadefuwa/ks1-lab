@@ -4,296 +4,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galactic Place Values</title>
+    <title>Lesson 4: Tens and Singles</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff00ff;
-            --gold: #ffeb3b;
-            --neon-green: #4ade80;
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
         }
 
         body {
-            margin: 0;
-            background: #0b0118;
-            color: white;
-            font-family: 'Fredoka One', cursive;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
             overflow: hidden;
         }
 
-        #game-box {
-            background: rgba(20, 0, 40, 0.9);
-            border: 5px solid var(--neon-blue);
-            border-radius: 40px;
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
             padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
-            box-shadow: 0 0 30px var(--neon-blue);
+            max-width: 800px;
             width: 90%;
-            max-width: 600px;
-            display: none;
-            /* Hidden until start */
+            transition: transform 0.3s ease;
         }
 
-        #start-screen {
-            text-align: center;
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .big-start-btn {
-            background: linear-gradient(180deg, #ff00ff, #7b00ff);
+        .columns-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .column {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            width: 120px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .col-label {
+            position: absolute;
+            top: -30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        .block-ten {
+            width: 30px;
+            height: 80px;
+            background: #3b82f6;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
+        }
+
+        .block-one {
+            width: 30px;
+            height: 30px;
+            background: #fbbf24;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            animation: popIn 0.3s ease;
+        }
+
+        .regroup-btn {
+            background: linear-gradient(135deg, #10b981, #3b82f6);
             border: none;
+            padding: 1rem 2rem;
             color: white;
-            padding: 50px 80px;
-            font-size: 3.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            font-family: 'Fredoka One', cursive;
-            box-shadow: 0 15px 0 #4b0099, 0 0 50px rgba(255, 0, 255, 0.5);
-            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            margin-top: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
         }
 
-        .big-start-btn:hover {
+        .regroup-btn:hover {
             transform: scale(1.05);
-        }
-
-        .big-start-btn:active {
-            transform: translateY(10px);
-            box-shadow: 0 5px 0 #4b0099;
-        }
-
-        .level-badge {
-            background: var(--neon-pink);
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-        }
-
-        .score-board {
-            font-size: 1.5rem;
-            color: var(--neon-green);
-            margin: 15px 0;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
         }
 
         .equation {
-            font-size: 3.5rem;
-            margin: 20px 0;
-            text-shadow: 3px 3px var(--neon-pink);
-            letter-spacing: 2px;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
         }
 
-        .place-value-highlight {
-            color: var(--gold);
+        .number {
+            color: #fff;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .operator {
+            color: #ec4899;
         }
 
-        .answer-btn {
-            background: #4361ee;
-            border: none;
-            padding: 20px;
-            font-size: 2.5rem;
-            color: white;
-            border-radius: 20px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #2a087a;
-            font-family: inherit;
+        #message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            margin-top: 1rem;
+            color: #a5b4fc;
         }
 
-        .answer-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #2a087a;
-        }
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
 
-        .teacher-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: var(--gold);
-            min-height: 60px;
-            border-left: 5px solid var(--gold);
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div id="start-screen">
-        <button class="big-start-btn" onclick="startGame()">🚀 START<br>LESSON 8</button>
-    </div>
+    <div class="glass-panel">
+        <h1>Tens and Singles</h1>
+        <div id="instruction">Add the ones. If there are too many, move a Ten over!</div>
 
-    <div id="game-box">
-        <span class="level-badge" id="level-display">Level 1: Hundreds & Tens</span>
-        <div class="score-board">⭐ Stars: <span id="score">0</span></div>
-        <div class="equation" id="display">...</div>
-        <div class="grid" id="options"></div>
-        <div class="teacher-box" id="teacher-text">Loading...</div>
+        <div class="equation">
+            <span id="num1" class="number">15</span>
+            <span class="operator">+</span>
+            <span id="num2" class="number">8</span>
+            <span class="operator">=</span>
+            <span id="result" class="number">?</span>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="col-tens">
+                <div class="col-label">Tens</div>
+            </div>
+            <div class="column" id="col-ones">
+                <div class="col-label">Ones</div>
+            </div>
+        </div>
+
+        <button id="regroupBtn" class="regroup-btn" onclick="regroup()">🚀 Carry the One! 🚀</button>
+
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;"></div>
+
+        <div id="message"></div>
     </div>
 
     <script>
-        let score = 0;
-        let currentAns = 0;
-        let level = 1;
-        let isAnswering = false;
-        let lastAns = 0;
+        let currentProblem = {};
+        let tensCount = 0;
+        let onesCount = 0;
+        let hasRegrouped = false;
         let correctCount = 0;
-
-        const levels = [
-            { name: "Simple Addition", type: "simple" }, // No carrying
-            { name: "Ones Carry", type: "carry_ones" }, // Carry over in ones place
-            { name: "Tens Carry", type: "carry_tens" }, // Carry over in tens place
-            { name: "Mastery", type: "mixed" } // Random tough ones
-        ];
+        const totalToWin = 5;
+        const LESSON_ID = 12;
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.9;
-            msg.pitch = 1.1;
+            msg.rate = 1.0;
             window.speechSynthesis.speak(msg);
         }
 
-        function startGame() {
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-box').style.display = 'block';
-            generate();
+        function init() {
+            generateProblem();
         }
 
-        function generate() {
-            isAnswering = false;
-            let config = levels[Math.min(level - 1, levels.length - 1)];
-            document.getElementById('level-display').innerText = `Level ${level}: ${config.name}`;
+        function generateProblem() {
+            hasRegrouped = false;
+            document.getElementById('regroupBtn').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('result').innerText = '?';
+            document.getElementById('message').innerText = '';
 
-            let n1, n2;
-            let isValid = false;
+            // Generate Double (Teen/Twenty) + Single > Next Ten
+            // 15 + 6 = 21
+            // 28 + 4 = 32
+            const startTens = Math.floor(Math.random() * 2) + 1; // 1 or 2 (Teens or Twenties)
+            const startOnes = Math.floor(Math.random() * 5) + 5; // 5-9
+            const n1 = (startTens * 10) + startOnes;
 
-            // Logic to generate 3-digit numbers based on level difficulty
-            do {
-                n1 = Math.floor(Math.random() * 800) + 100; // 100-899
-                n2 = Math.floor(Math.random() * 800) + 100; // 100-899
+            const maxOnesVal = 9;
+            const minOnesVal = (10 - startOnes) + 1; // Ensure carry
+            const n2 = Math.floor(Math.random() * (maxOnesVal - minOnesVal + 1)) + minOnesVal;
 
-                // Ensure result doesn't exceed 4 digits excessively (optional, but keeps it cleaner)
-                if (n1 + n2 > 9999) continue;
+            currentProblem = { n1, n2, sum: n1 + n2 };
 
-                let ones1 = n1 % 10;
-                let ones2 = n2 % 10;
-                let tens1 = Math.floor(n1 / 10) % 10;
-                let tens2 = Math.floor(n2 / 10) % 10;
+            document.getElementById('num1').innerText = n1;
+            document.getElementById('num2').innerText = n2;
 
-                if (config.type === "simple") {
-                    // No carrying: Ones sum < 10 AND Tens sum < 10
-                    if (ones1 + ones2 < 10 && tens1 + tens2 < 10) isValid = true;
-                } else if (config.type === "carry_ones") {
-                    // Carry in ones: Ones sum >= 10
-                    if (ones1 + ones2 >= 10 && tens1 + tens2 < 10) isValid = true;
-                } else if (config.type === "carry_tens") {
-                    // Carry in tens: Tens sum >= 10
-                    if (tens1 + tens2 >= 10) isValid = true;
-                } else {
-                    // Mixed
-                    isValid = true;
+            // Initial State: n1 (tens+ones) + n2 (ones)
+            tensCount = startTens;
+            onesCount = startOnes + n2;
+
+            renderBlocks();
+            speak(`Add ${n1} plus ${n2}. Look at the Ones column! It's too full!`);
+
+            setTimeout(() => {
+                if (onesCount >= 10) {
+                    document.getElementById('regroupBtn').style.display = 'block';
                 }
+            }, 1000);
+        }
 
-                // Prevent duplicates
-                if ((n1 + n2) === lastAns) isValid = false;
+        function renderBlocks() {
+            const tCol = document.getElementById('col-tens');
+            const oCol = document.getElementById('col-ones');
+            // Clear but keep labels? simpler to clear all and re-add labels or uses innerHTML
+            tCol.innerHTML = '<div class="col-label">Tens</div>';
+            oCol.innerHTML = '<div class="col-label">Ones</div>';
 
-            } while (!isValid);
-
-            lastAns = n1 + n2;
-            currentAns = n1 + n2;
-
-            document.getElementById('display').innerHTML = `${n1} + ${n2} = <span class='place-value-highlight'>?</span>`;
-
-            // Helpful tip logic
-            let tipText = "Add the ones, then the tens, then the hundreds.";
-            if (config.type === "simple") {
-                tipText = `Start with ${n1 % 10} + ${n2 % 10}, then move left!`;
-            } else if (config.type.includes("carry")) {
-                tipText = "Don't forget to carry over if a column adds to 10 or more!";
+            for (let i = 0; i < tensCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-ten';
+                tCol.appendChild(b);
             }
-
-            document.getElementById('teacher-text').innerText = tipText;
-            speak(`${n1} plus ${n2}.`);
-
-            // Generate Choices
-            let choices = [currentAns];
-            while (choices.length < 4) {
-                let wrong;
-                let offsetType = Math.floor(Math.random() * 4);
-
-                if (offsetType === 0) {
-                    // Close by 10 (common error)
-                    wrong = currentAns + (Math.random() > 0.5 ? 10 : -10);
-                } else if (offsetType === 1) {
-                    // Close by 100
-                    wrong = currentAns + (Math.random() > 0.5 ? 100 : -100);
-                } else if (offsetType === 2) {
-                    // Close by 1 (counting error)
-                    wrong = currentAns + (Math.random() > 0.5 ? 1 : -1);
-                } else {
-                    // Random digits swap or arithmetic error simulation
-                    wrong = currentAns + (Math.floor(Math.random() * 20) - 10);
-                }
-
-                if (wrong <= 0 || wrong === currentAns) wrong = currentAns + 5;
-                if (!choices.includes(wrong)) {
-                    choices.push(wrong);
-                }
+            for (let i = 0; i < onesCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-one';
+                oCol.appendChild(b);
             }
-            choices.sort(() => Math.random() - 0.5);
+        }
 
-            const grid = document.getElementById('options');
-            grid.innerHTML = '';
-            choices.forEach(val => {
-                const b = document.createElement('button');
-                b.className = 'answer-btn';
-                b.innerText = val;
-                b.onclick = () => check(val, b);
-                grid.appendChild(b);
+        function regroup() {
+            if (onesCount >= 10 && !hasRegrouped) {
+                onesCount -= 10;
+                tensCount += 1;
+                renderBlocks();
+                hasRegrouped = true;
+                document.getElementById('regroupBtn').style.display = 'none';
+                speak("We moved ten ones to make one new ten! Now count.");
+                showOptions();
+            }
+        }
+
+        function showOptions() {
+            const correct = currentProblem.sum;
+            let opts = [correct];
+            while (opts.length < 3) {
+                let w = correct + Math.floor(Math.random() * 10 - 5);
+                // simple collision check
+                if (w !== correct && w > 10 && !opts.includes(w)) opts.push(w);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'regroup-btn';
+                btn.innerText = opt;
+                btn.style.display = 'block';
+                btn.style.margin = '0';
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
             });
         }
 
-        function check(val, btn) {
-            if (isAnswering) return;
-            isAnswering = true;
-
-            if (val === currentAns) {
-                score++;
+        function checkAnswer(val, btn) {
+            if (val === currentProblem.sum) {
                 correctCount++;
-                document.getElementById('score').innerText = score;
-                if (score % 5 === 0) {
-                    level++;
-                    speak("Level Up! You are mastering addition!");
+                btn.style.background = '#22c55e';
+                document.getElementById('result').innerText = val;
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                speak("Correct! You are mastering the carry!");
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => {
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
                 } else {
-                    speak("Correct! Well done.");
+                    setTimeout(generateProblem, 2000);
                 }
-
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                btn.style.background = "#4ade80"; // Success Green
-
-                if (correctCount >= 10) {
-                    speak("You are a true addition master! Lesson complete!");
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 8 }, '*');
-                }
-
-                setTimeout(generate, 2000);
             } else {
-                speak("Try again. Take your time to add each column.");
-                btn.style.background = "#ff0055"; // Error Red
-                setTimeout(() => { isAnswering = false; }, 1000);
+                btn.style.background = '#ef4444';
+                speak("Try again.");
             }
         }
+
+        init();
     </script>
 </body>
 

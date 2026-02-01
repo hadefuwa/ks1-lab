@@ -6,9 +6,16 @@ const lessonData = {
   mascot: "Bouncy",
   introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some magic words!",
   teachWords: [
-    { word: "cat", context: "A fluffy pet." },
-    { word: "dog", context: "A loyal friend." },
-    { word: "sun", context: "Shines in the sky." }
+    { word: "cat", context: "A fluffy pet that says meow." },
+    { word: "dog", context: "A loyal friend that barks." },
+    { word: "pig", context: "A pink animal on the farm." },
+    { word: "sun", context: "Shines bright in the sky." },
+    { word: "run", context: "Moving very fast!" },
+    { word: "fun", context: "Playing games is fun." },
+    { word: "big", context: "The opposite of small." },
+    { word: "red", context: "The color of an apple." },
+    { word: "bed", context: "Where you sleep at night." },
+    { word: "hen", context: "A mother chicken." }
   ],
   challengeWords: ["cat", "dog", "pig", "sun", "run", "fun", "big", "red", "bed", "hen"],
   passScore: 80

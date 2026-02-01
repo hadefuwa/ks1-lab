@@ -10,58 +10,83 @@
         "id": 2
     },
     {
-        "title": "Lesson 3: Making Ten Magic",
-        "path": "lessons/lesson_carry1/index.html",
+        "title": "Lesson 3: First Letter Fun",
+        "path": "lessons/lesson3/index.html",
+        "id": 15
+    },
+    {
+        "title": "Lesson 4: Vowel Power",
+        "path": "lessons/lesson4/index.html",
+        "id": 16
+    },
+    {
+        "title": "Lesson 5: Perfect Endings",
+        "path": "lessons/lesson5/index.html",
+        "id": 17
+    },
+    {
+        "title": "Lesson 6: Fashion Spelling",
+        "path": "lessons/lesson6/index.html",
+        "id": 18
+    },
+    {
+        "title": "Lesson 7: Making Ten Magic",
+        "path": "lessons/lesson7/index.html",
         "id": 11
     },
     {
-        "title": "Lesson 4: Tens and Singles",
-        "path": "lessons/lesson_carry2/index.html",
+        "title": "Lesson 8: Tens and Singles",
+        "path": "lessons/lesson8/index.html",
         "id": 12
     },
     {
-        "title": "Lesson 5: Double Digit Dash",
-        "path": "lessons/lesson_carry3/index.html",
+        "title": "Lesson 9: Double Digit Dash",
+        "path": "lessons/lesson9/index.html",
         "id": 13
     },
     {
-        "title": "Lesson 6: Base-10 Block Party",
-        "path": "lessons/lesson3/index.html",
+        "title": "Lesson 10: Big Number Boost",
+        "path": "lessons/lesson10/index.html",
+        "id": 14
+    },
+    {
+        "title": "Lesson 11: Base-10 Block Party",
+        "path": "lessons/lesson11/index.html",
         "id": 3
     },
     {
-        "title": "Lesson 7: Space Block Adder",
-        "path": "lessons/lesson4/index.html",
+        "title": "Lesson 12: Space Block Adder",
+        "path": "lessons/lesson12/index.html",
         "id": 4
     },
     {
-        "title": "Lesson 8: Space Sums Academy",
-        "path": "lessons/lesson5/index.html",
+        "title": "Lesson 13: Space Sums Academy",
+        "path": "lessons/lesson13/index.html",
         "id": 5
     },
     {
-        "title": "Lesson 9: Whole Hundreds Addition",
-        "path": "lessons/lesson6/index.html",
+        "title": "Lesson 14: Whole Hundreds Addition",
+        "path": "lessons/lesson14/index.html",
         "id": 6
     },
     {
-        "title": "Lesson 10: The 50s Nebula",
-        "path": "lessons/lesson7/index.html",
+        "title": "Lesson 15: The 50s Nebula",
+        "path": "lessons/lesson15/index.html",
         "id": 7
     },
     {
-        "title": "Lesson 11: 3-Digit Addition Mastery",
-        "path": "lessons/lesson8/index.html",
+        "title": "Lesson 16: 3-Digit Addition Mastery",
+        "path": "lessons/lesson16/index.html",
         "id": 8
     },
     {
-        "title": "Lesson 12: Keyboard Block Mission",
-        "path": "lessons/lesson9/index.html",
+        "title": "Lesson 17: Keyboard Block Mission",
+        "path": "lessons/lesson17/index.html",
         "id": 9
     },
     {
-        "title": "Lesson 13: Lily's Math Meadow",
-        "path": "lessons/lesson10/index.html",
+        "title": "Lesson 18: Lily's Math Meadow",
+        "path": "lessons/lesson18/index.html",
         "id": 10
     }
 ]

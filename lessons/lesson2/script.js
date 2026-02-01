@@ -6,9 +6,16 @@ const lessonData = {
   mascot: "Bouncy",
   introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some 4-letter magic words!",
   teachWords: [
-    { word: "frog", context: "Jumps in ponds." },
-    { word: "tree", context: "Grows tall." },
-    { word: "book", context: "Full of stories." }
+    { word: "frog", context: "Green and jumps in ponds." },
+    { word: "tree", context: "Tall with green leaves." },
+    { word: "book", context: "Filled with stories to read." },
+    { word: "star", context: "Twinkles in the night sky." },
+    { word: "moon", context: "Shines at night." },
+    { word: "rain", context: "Water falling from clouds." },
+    { word: "wind", context: "Air moving fast." },
+    { word: "snow", context: "Cold white flakes in winter." },
+    { word: "leaf", context: "Grows on a tree branch." },
+    { word: "bird", context: "Has wings and can fly." }
   ],
   challengeWords: ["frog", "tree", "book", "star", "moon", "rain", "wind", "snow", "leaf", "bird"],
   passScore: 80
