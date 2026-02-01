@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 24: Accessories</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #db2777;
+            /* Pink 600 */
+            --secondary: #9333ea;
+            /* Purple 600 */
+            --accent: #f472b6;
+            /* Pink 400 */
+            --bg-color: #fdf2f8;
+            /* Pink 50 */
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-color: #831843;
+            /* Pink 900 */
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%);
+            color: var(--text-color);
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 4px solid #fff;
+            border-radius: 40px;
+            padding: 2.5rem;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(219, 39, 119, 0.15);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #db2777, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .icon-display {
+            font-size: 6rem;
+            margin: 1rem 0;
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.1));
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .word-display {
+            font-size: 3rem;
+            letter-spacing: 0.3rem;
+            margin: 1rem 0;
+            font-weight: 600;
+            color: var(--secondary);
+            min-height: 60px;
+        }
+
+        .input-box {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2rem;
+            padding: 15px;
+            border: 3px solid #fbcfe8;
+            border-radius: 15px;
+            width: 80%;
+            text-align: center;
+            outline: none;
+            color: var(--primary);
+            background: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .input-box:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: inherit;
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05) translateY(-2px);
+        }
+
+        .phase-label {
+            font-size: 1.2rem;
+            color: #9d174d;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Sparkle Element */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            background: white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-card" id="card">
+        <!-- Content injected by JS -->
+    </div>
+
+    <script>
+        const lessonData = {
+            title: "Fashion Spelling",
+            items: [
+  {
+    "word": "necklace",
+    "icon": "📿",
+    "context": "Jewelry for your neck."
+  },
+  {
+    "word": "glasses",
+    "icon": "👓",
+    "context": "Help you see better."
+  },
+  {
+    "word": "mittens",
+    "icon": "🧤",
+    "context": "Warm hands in snow."
+  },
+  {
+    "word": "umbrella",
+    "icon": "☂️",
+    "context": "Blocks the rain."
+  },
+  {
+    "word": "wallet",
+    "icon": "👛",
+    "context": "Holds your money."
+  },
+  {
+    "word": "watch",
+    "icon": "⌚",
+    "context": "Tells the time."
+  },
+  {
+    "word": "crown",
+    "icon": "👑",
+    "context": "For a queen."
+  },
+  {
+    "word": "ring",
+    "icon": "💍",
+    "context": "Wear on your finger."
+  },
+  {
+    "word": "belt",
+    "icon": "a belt",
+    "context": "Holds up pants."
+  },
+  {
+    "word": "helmet",
+    "icon": "⛑️",
+    "context": "Protects your head."
+  }
+]
+        };
+
+        let state = {
+            phase: 'start', // start, teach, play, end
+            idx: 0,
+            score: 0,
+            streak: 0
+        };
+
+        const LESSON_ID = 36;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            // Try to find a female voice for this lesson theme if available (optional polish)
+            const voices = window.speechSynthesis.getVoices();
+            const female = voices.find(v => v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google US English'));
+            if (female) msg.voice = female;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function render() {
+            const card = document.getElementById('card');
+            card.innerHTML = '';
+
+            if (state.phase === 'start') {
+                card.innerHTML = `
+                    <h1>Accessories</h1>
+                    <div class="icon-display">👗</div>
+                    <p style="font-size:1.5rem; margin-bottom: 30px;">Let's learn how to spell clothes!</p>
+                    <button class="btn" onclick="startTeach()">Start Fashion Show! ✨</button>
+                `;
+            }
+            else if (state.phase === 'teach') {
+                const item = lessonData.items[state.idx];
+                card.innerHTML = `
+                    <div class="phase-label">Let's Learn</div>
+                    <div class="icon-display">${item.icon}</div>
+                    <div class="word-display">${item.word}</div>
+                    <p style="font-size:1.4rem;">${item.context}</p>
+                    <button class="btn" onclick="nextTeach()">Next Item ➔</button>
+                    <button class="btn" style="background:var(--secondary); margin-left:10px;" onclick="speak('${item.word}')">🔊 Listen</button>
+                `;
+            }
+            else if (state.phase === 'play') {
+                const item = lessonData.items[state.idx];
+                card.innerHTML = `
+                    <div class="phase-label">Spelling Quiz ${state.idx + 1}/${lessonData.items.length}</div>
+                    <div class="icon-display">${item.icon}</div>
+                    <input type="text" id="ansInput" class="input-box" placeholder="Type here..." autocomplete="off">
+                    <br>
+                    <button class="btn" onclick="checkAnswer()">Check ✨</button>
+                    <button class="btn" style="background:var(--secondary); margin-left:10px;" onclick="speak('${item.word}')">🔊 Help</button>
+                    <div id="feedback" style="margin-top:15px; font-weight:bold; height:20px;"></div>
+                `;
+
+                setTimeout(() => {
+                    const inp = document.getElementById('ansInput');
+                    if (inp) {
+                        inp.focus();
+                        inp.onkeypress = (e) => { if (e.key === 'Enter') checkAnswer(); };
+                    }
+                }, 100);
+            }
+            else if (state.phase === 'end') {
+                card.innerHTML = `
+                    <h1>Fashion Star! 🌟</h1>
+                    <div class="icon-display">👑</div>
+                    <p style="font-size:1.5rem;">You spelled them all correctly!</p>
+                    <div style="font-size:2rem; margin:20px;">Score: ${state.score}</div>
+                    <button class="btn" onclick="window.parent.postMessage({ type: 'lessonCompleted', lessonId: ${LESSON_ID} }, '*')">Finish Lesson</button>
+                `;
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                speak("You are a fashion star! Lesson complete!");
+            }
+        }
+
+        function startTeach() {
+            state.phase = 'teach';
+            state.idx = 0;
+            speak("Look at the picture and the word.");
+            render();
+            // Auto speak first word
+            setTimeout(() => speak(lessonData.items[0].word), 500);
+        }
+
+        function nextTeach() {
+            state.idx++;
+            if (state.idx >= lessonData.items.length) {
+                state.phase = 'play';
+                state.idx = 0;
+                speak("Now it's time to spell them yourself!");
+                render();
+            } else {
+                render();
+                speak(lessonData.items[state.idx].word);
+            }
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('ansInput');
+            const feedback = document.getElementById('feedback');
+            const target = lessonData.items[state.idx].word;
+
+            if (input.value.toLowerCase().trim() === target) {
+                state.score += 10;
+                feedback.style.color = 'green';
+                feedback.innerText = "Correct! 🌟";
+                speak("Correct!");
+                confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
+
+                setTimeout(() => {
+                    state.idx++;
+                    if (state.idx >= lessonData.items.length) {
+                        state.phase = 'end';
+                    }
+                    render();
+                }, 1500);
+            } else {
+                feedback.style.color = 'red';
+                feedback.innerText = "Try again!";
+                input.classList.add('error');
+                speak("Try again.");
+                setTimeout(() => input.classList.remove('error'), 500);
+            }
+        }
+
+        // Init
+        render();
+
+    </script>
+</body>
+
+</html>

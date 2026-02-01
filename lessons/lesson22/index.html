@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 22: Vowel Teams</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --bg-color: #1e1b4b;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #fef3c7;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #fbbf24, #f87171);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .word-display {
+            font-size: 5rem;
+            letter-spacing: 0.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .missing-letter {
+            color: var(--primary);
+            border-bottom: 4px solid var(--primary);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .clue-text {
+            font-size: 1.5rem;
+            color: #e2e8f0;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .options-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .correct {
+            background: #22c55e !important;
+            border-color: #22c55e !important;
+        }
+
+        .wrong {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        #message-area {
+            height: 30px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-card">
+        <h1>Vowel Teams</h1>
+
+        <div class="word-display">
+            <span id="part1">b</span><span id="letter-slot" class="missing-letter">___</span><span id="part2">t</span>
+        </div>
+
+        <div class="clue-text" id="clue">"Meow!"</div>
+
+        <div class="options-grid" id="options"></div>
+
+        <div id="message-area"></div>
+    </div>
+
+    <script>
+        const levels = [
+  {
+    "word": "boat",
+    "p1": "b",
+    "p2": "t",
+    "clue": "Floats on water.",
+    "answer": "oa",
+    "options": [
+      "oa",
+      "ea",
+      "ai",
+      "ee"
+    ]
+  },
+  {
+    "word": "rain",
+    "p1": "r",
+    "p2": "n",
+    "clue": "Falls from clouds.",
+    "answer": "ai",
+    "options": [
+      "ai",
+      "ay",
+      "ea",
+      "oa"
+    ]
+  },
+  {
+    "word": "feet",
+    "p1": "f",
+    "p2": "t",
+    "clue": "You walk on them.",
+    "answer": "ee",
+    "options": [
+      "ee",
+      "ea",
+      "ie",
+      "oe"
+    ]
+  },
+  {
+    "word": "moon",
+    "p1": "m",
+    "p2": "n",
+    "clue": "Shines at night.",
+    "answer": "oo",
+    "options": [
+      "oo",
+      "ou",
+      "au",
+      "oi"
+    ]
+  },
+  {
+    "word": "soap",
+    "p1": "s",
+    "p2": "p",
+    "clue": "Wash your hands.",
+    "answer": "oa",
+    "options": [
+      "oa",
+      "ow",
+      "ou",
+      "oo"
+    ]
+  },
+  {
+    "word": "leaf",
+    "p1": "l",
+    "p2": "f",
+    "clue": "Grows on trees.",
+    "answer": "ea",
+    "options": [
+      "ea",
+      "ee",
+      "ey",
+      "ie"
+    ]
+  }
+];
+
+        let currentLevelIdx = 0;
+        let isAnswering = false;
+        const totalToWin = 5;
+        levels.sort(() => Math.random() - 0.5);
+
+        const LESSON_ID = 34;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevelIdx >= Math.min(levels.length, totalToWin)) {
+                document.querySelector('.glass-card').innerHTML = `
+                    <h1>Excellent!</h1>
+                    <div style="font-size:3rem;">👑</div>
+                    <p>You know your vowels!</p>
+                `;
+                speak("Excellent work! Lesson complete!");
+                setTimeout(() => {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                }, 2000);
+                return;
+            }
+
+            const lvl = levels[currentLevelIdx];
+            isAnswering = false;
+
+            document.getElementById('letter-slot').innerText = '_';
+            document.getElementById('part1').innerText = lvl.p1;
+            document.getElementById('part2').innerText = lvl.p2;
+            document.getElementById('clue').innerText = `"${lvl.clue}"`;
+            document.getElementById('message-area').innerText = "";
+
+            speak(`What vowel goes in the middle of... ${lvl.word}? ${lvl.clue}`);
+
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+
+            let opts = ["a", "e", "i", "o", "u"]; // Always show all vowels? Or specific subset from data?
+            // User requested "Select between R T S F".
+            // For vowels, showing all 5 is standard practice.
+            // But let's use the options from data to keep it focused if needed.
+            opts = lvl.options;
+            opts.sort(() => Math.random() - 0.5);
+
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.innerText = opt;
+                btn.onclick = () => check(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function check(char, btn) {
+            if (isAnswering) return;
+            const lvl = levels[currentLevelIdx];
+
+            if (char === lvl.answer) {
+                isAnswering = true;
+                btn.classList.add('correct');
+                document.getElementById('letter-slot').innerText = char;
+                document.getElementById('message-area').innerText = "Correct! " + lvl.word.toUpperCase();
+
+                speak(`That's right! ${lvl.p1}, ${char}, ${lvl.p2} spells ${lvl.word}!`);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+                currentLevelIdx++;
+                setTimeout(loadLevel, 2000);
+            } else {
+                btn.classList.add('wrong');
+                speak("Try another vowel.");
+                setTimeout(() => btn.classList.remove('wrong'), 500);
+            }
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>

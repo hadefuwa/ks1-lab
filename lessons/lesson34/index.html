@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 34: 3-Digit Addition Mastery (Hard)</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --gold: #ffeb3b;
+            --neon-green: #4ade80;
+        }
+
+        body {
+            margin: 0;
+            background: #0b0118;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-box {
+            background: rgba(20, 0, 40, 0.9);
+            border: 5px solid var(--neon-blue);
+            border-radius: 40px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 0 30px var(--neon-blue);
+            width: 90%;
+            max-width: 600px;
+            display: none;
+            /* Hidden until start */
+        }
+
+        #start-screen {
+            text-align: center;
+        }
+
+        .big-start-btn {
+            background: linear-gradient(180deg, #ff00ff, #7b00ff);
+            border: none;
+            color: white;
+            padding: 50px 80px;
+            font-size: 3.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 15px 0 #4b0099, 0 0 50px rgba(255, 0, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        .big-start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .big-start-btn:active {
+            transform: translateY(10px);
+            box-shadow: 0 5px 0 #4b0099;
+        }
+
+        .level-badge {
+            background: var(--neon-pink);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+        }
+
+        .score-board {
+            font-size: 1.5rem;
+            color: var(--neon-green);
+            margin: 15px 0;
+        }
+
+        .equation {
+            font-size: 3.5rem;
+            margin: 20px 0;
+            text-shadow: 3px 3px var(--neon-pink);
+            letter-spacing: 2px;
+        }
+
+        .place-value-highlight {
+            color: var(--gold);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            background: #4361ee;
+            border: none;
+            padding: 20px;
+            font-size: 2.5rem;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #2a087a;
+            font-family: inherit;
+        }
+
+        .answer-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #2a087a;
+        }
+
+        .teacher-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: var(--gold);
+            min-height: 60px;
+            border-left: 5px solid var(--gold);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="start-screen">
+        <button class="big-start-btn" onclick="startGame()">🚀 START<br>LESSON 8</button>
+    </div>
+
+    <div id="game-box">
+        <span class="level-badge" id="level-display">Level 1: Hundreds & Tens</span>
+        <div class="score-board">⭐ Stars: <span id="score">0</span></div>
+        <div class="equation" id="display">...</div>
+        <div class="grid" id="options"></div>
+        <div class="teacher-box" id="teacher-text">Loading...</div>
+    </div>
+
+    <script>
+        let score = 0;
+        let currentAns = 0;
+        let level = 1;
+        let isAnswering = false;
+        let lastAns = 0;
+        let correctCount = 0;
+
+        const levels = [
+            { name: "Simple Addition", type: "simple" }, // No carrying
+            { name: "Ones Carry", type: "carry_ones" }, // Carry over in ones place
+            { name: "Tens Carry", type: "carry_tens" }, // Carry over in tens place
+            { name: "Mastery", type: "mixed" } // Random tough ones
+        ];
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 0.9;
+            msg.pitch = 1.1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-box').style.display = 'block';
+            generate();
+        }
+
+        function generate() {
+            isAnswering = false;
+            let config = levels[Math.min(level - 1, levels.length - 1)];
+            document.getElementById('level-display').innerText = `Level ${level}: ${config.name}`;
+
+            let n1, n2;
+            let isValid = false;
+
+            // Logic to generate 3-digit numbers based on level difficulty
+            do {
+                n1 = Math.floor(Math.random() * 800) + 100; // 100-899
+                n2 = Math.floor(Math.random() * 800) + 100; // 100-899
+
+                // Ensure result doesn't exceed 4 digits excessively (optional, but keeps it cleaner)
+                if (n1 + n2 > 9999) continue;
+
+                let ones1 = n1 % 10;
+                let ones2 = n2 % 10;
+                let tens1 = Math.floor(n1 / 10) % 10;
+                let tens2 = Math.floor(n2 / 10) % 10;
+
+                if (config.type === "simple") {
+                    // No carrying: Ones sum < 10 AND Tens sum < 10
+                    if (ones1 + ones2 < 10 && tens1 + tens2 < 10) isValid = true;
+                } else if (config.type === "carry_ones") {
+                    // Carry in ones: Ones sum >= 10
+                    if (ones1 + ones2 >= 10 && tens1 + tens2 < 10) isValid = true;
+                } else if (config.type === "carry_tens") {
+                    // Carry in tens: Tens sum >= 10
+                    if (tens1 + tens2 >= 10) isValid = true;
+                } else {
+                    // Mixed
+                    isValid = true;
+                }
+
+                // Prevent duplicates
+                if ((n1 + n2) === lastAns) isValid = false;
+
+            } while (!isValid);
+
+            lastAns = n1 + n2;
+            currentAns = n1 + n2;
+
+            document.getElementById('display').innerHTML = `${n1} + ${n2} = <span class='place-value-highlight'>?</span>`;
+
+            // Helpful tip logic
+            let tipText = "Add the ones, then the tens, then the hundreds.";
+            if (config.type === "simple") {
+                tipText = `Start with ${n1 % 10} + ${n2 % 10}, then move left!`;
+            } else if (config.type.includes("carry")) {
+                tipText = "Don't forget to carry over if a column adds to 10 or more!";
+            }
+
+            document.getElementById('teacher-text').innerText = tipText;
+            speak(`${n1} plus ${n2}.`);
+
+            // Generate Choices
+            let choices = [currentAns];
+            while (choices.length < 4) {
+                let wrong;
+                let offsetType = Math.floor(Math.random() * 40);
+
+                if (offsetType === 0) {
+                    // Close by 10 (common error)
+                    wrong = currentAns + (Math.random() > 0.5 ? 10 : -10);
+                } else if (offsetType === 1) {
+                    // Close by 100
+                    wrong = currentAns + (Math.random() > 0.5 ? 100 : -100);
+                } else if (offsetType === 2) {
+                    // Close by 1 (counting error)
+                    wrong = currentAns + (Math.random() > 0.5 ? 1 : -1);
+                } else {
+                    // Random digits swap or arithmetic error simulation
+                    wrong = currentAns + (Math.floor(Math.random() * 20) - 10);
+                }
+
+                if (wrong <= 0 || wrong === currentAns) wrong = currentAns + 5;
+                if (!choices.includes(wrong)) {
+                    choices.push(wrong);
+                }
+            }
+            choices.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('options');
+            grid.innerHTML = '';
+            choices.forEach(val => {
+                const b = document.createElement('button');
+                b.className = 'answer-btn';
+                b.innerText = val;
+                b.onclick = () => check(val, b);
+                grid.appendChild(b);
+            });
+        }
+
+        function check(val, btn) {
+            if (isAnswering) return;
+            isAnswering = true;
+
+            if (val === currentAns) {
+                score++;
+                correctCount++;
+                document.getElementById('score').innerText = score;
+                if (score % 5 === 0) {
+                    level++;
+                    speak("Level Up! You are mastering addition!");
+                } else {
+                    speak("Correct! Well done.");
+                }
+
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                btn.style.background = "#4ade80"; // Success Green
+
+                if (correctCount >= 10) {
+                    speak("You are a true addition master! Lesson complete!");
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 8 }, '*');
+                }
+
+                setTimeout(generate, 2000);
+            } else {
+                speak("Try again. Take your time to add each column.");
+                btn.style.background = "#ff0055"; // Error Red
+                setTimeout(() => { isAnswering = false; }, 1000);
+            }
+        }
+    </script>
+</body>
+
+</html>

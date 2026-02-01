@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 21: Blend Beginnings</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #6366f1;
+            --accent: #f43f5e;
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .word-display {
+            font-size: 5rem;
+            letter-spacing: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .missing-letter {
+            color: var(--accent);
+            border-bottom: 4px solid var(--accent);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .clue-text {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            font-size: 2rem;
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .correct {
+            background: #22c55e !important;
+            border-color: #22c55e !important;
+        }
+
+        .wrong {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        #message-area {
+            height: 30px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-card">
+        <h1>Blend Beginnings</h1>
+
+        <div class="word-display">
+            <span id="letter-slot" <span id="letter-slot" class="missing-letter">_</span><span id="rest-word">ane</span>
+        </div>
+
+        <div class="clue-text" id="clue">"It says Meow!"</div>
+
+        <div class="options-grid" id="options">
+            <!-- Buttons injected here -->
+        </div>
+
+        <div id="message-area"></div>
+    </div>
+
+    <script>
+        const levels = [
+  {
+    "word": "plane",
+    "suffix": "ane",
+    "clue": "Flies in they sky!",
+    "answer": "pl",
+    "options": [
+      "pl",
+      "cl",
+      "st",
+      "gr"
+    ]
+  },
+  {
+    "word": "star",
+    "suffix": "ar",
+    "clue": "Twinkles at night.",
+    "answer": "st",
+    "options": [
+      "st",
+      "pl",
+      "br",
+      "fl"
+    ]
+  },
+  {
+    "word": "crab",
+    "suffix": "ab",
+    "clue": "Has claws on the beach.",
+    "answer": "cr",
+    "options": [
+      "cr",
+      "dr",
+      "fr",
+      "tr"
+    ]
+  },
+  {
+    "word": "frog",
+    "suffix": "og",
+    "clue": "Jumps and says ribbit.",
+    "answer": "fr",
+    "options": [
+      "fr",
+      "gr",
+      "pr",
+      "tr"
+    ]
+  },
+  {
+    "word": "drum",
+    "suffix": "um",
+    "clue": "You beat this for music.",
+    "answer": "dr",
+    "options": [
+      "dr",
+      "cr",
+      "br",
+      "gr"
+    ]
+  },
+  {
+    "word": "snake",
+    "suffix": "ake",
+    "clue": "Slithers on the ground.",
+    "answer": "sn",
+    "options": [
+      "sn",
+      "st",
+      "sm",
+      "sp"
+    ]
+  }
+];
+
+        let currentLevelIdx = 0;
+        let isAnswering = false;
+        const totalToWin = 5; // Play 5 random ones or sequence? Let's do sequence then loop or random.
+        // Let's shuffle levels initially
+        levels.sort(() => Math.random() - 0.5);
+
+        const LESSON_ID = 33; // Placeholder
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevelIdx >= Math.min(levels.length, totalToWin)) {
+                // Win
+                document.querySelector('.glass-card').innerHTML = `
+                    <h1>Good Job!</h1>
+                    <div style="font-size:3rem;">🌟</div>
+                    <p>You found all the first letters!</p>
+                `;
+                speak("Amazing! You finished the lesson!");
+                setTimeout(() => {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                }, 2000);
+                return;
+            }
+
+            const lvl = levels[currentLevelIdx];
+            isAnswering = false;
+
+            document.getElementById('letter-slot').innerText = '_';
+            document.getElementById('rest-word').innerText = lvl.suffix;
+            document.getElementById('clue').innerText = `"${lvl.clue}"`;
+            document.getElementById('message-area').innerText = "";
+
+            speak(`Which letter starts the word... ${lvl.word}? ${lvl.clue}`);
+
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+
+            // Shuffle options
+            let opts = [...lvl.options].sort(() => Math.random() - 0.5);
+
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.innerText = opt.toUpperCase();
+                btn.onclick = () => check(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function check(char, btn) {
+            if (isAnswering) return;
+            const lvl = levels[currentLevelIdx];
+
+            if (char === lvl.answer) {
+                isAnswering = true;
+                btn.classList.add('correct');
+                document.getElementById('letter-slot').innerText = char;
+                document.getElementById('message-area').innerText = "Correct! " + lvl.word.toUpperCase();
+
+                speak(`Yes! ${char} makes ${lvl.word}!`);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+                currentLevelIdx++;
+                setTimeout(loadLevel, 2000);
+            } else {
+                btn.classList.add('wrong');
+                speak("Try again.");
+                setTimeout(() => btn.classList.remove('wrong'), 500);
+            }
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>

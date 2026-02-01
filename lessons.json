@@ -88,5 +88,95 @@
         "title": "Lesson 18: Lily's Math Meadow",
         "path": "lessons/lesson18/index.html",
         "id": 10
+    },
+    {
+        "title": "Lesson 19: Digraphs (sh, ch, th)",
+        "path": "lessons/lesson19/index.html",
+        "id": 19
+    },
+    {
+        "title": "Lesson 20: 5-Letter Words",
+        "path": "lessons/lesson20/index.html",
+        "id": 20
+    },
+    {
+        "title": "Lesson 21: Blend Beginnings",
+        "path": "lessons/lesson21/index.html",
+        "id": 33
+    },
+    {
+        "title": "Lesson 22: Vowel Teams",
+        "path": "lessons/lesson22/index.html",
+        "id": 34
+    },
+    {
+        "title": "Lesson 23: Blend Endings",
+        "path": "lessons/lesson23/index.html",
+        "id": 35
+    },
+    {
+        "title": "Lesson 24: Accessories",
+        "path": "lessons/lesson24/index.html",
+        "id": 36
+    },
+    {
+        "title": "Lesson 25: Making Ten Magic (Hard)",
+        "path": "lessons/lesson25/index.html",
+        "id": 29
+    },
+    {
+        "title": "Lesson 26: Tens and Singles (Hard)",
+        "path": "lessons/lesson26/index.html",
+        "id": 30
+    },
+    {
+        "title": "Lesson 27: Double Digit Dash (Hard)",
+        "path": "lessons/lesson27/index.html",
+        "id": 31
+    },
+    {
+        "title": "Lesson 28: Big Number Boost (Hard)",
+        "path": "lessons/lesson28/index.html",
+        "id": 32
+    },
+    {
+        "title": "Lesson 29: Base-10 Block Party (Hard)",
+        "path": "lessons/lesson29/index.html",
+        "id": 21
+    },
+    {
+        "title": "Lesson 30: Space Block Adder (Hard)",
+        "path": "lessons/lesson30/index.html",
+        "id": 22
+    },
+    {
+        "title": "Lesson 31: Space Sums Academy (Hard)",
+        "path": "lessons/lesson31/index.html",
+        "id": 23
+    },
+    {
+        "title": "Lesson 32: Whole Hundreds Addition (Hard)",
+        "path": "lessons/lesson32/index.html",
+        "id": 24
+    },
+    {
+        "title": "Lesson 33: The 50s Nebula (Hard)",
+        "path": "lessons/lesson33/index.html",
+        "id": 25
+    },
+    {
+        "title": "Lesson 34: 3-Digit Addition Mastery (Hard)",
+        "path": "lessons/lesson34/index.html",
+        "id": 26
+    },
+    {
+        "title": "Lesson 35: Keyboard Block Mission (Hard)",
+        "path": "lessons/lesson35/index.html",
+        "id": 27
+    },
+    {
+        "title": "Lesson 36: Lily's Math Meadow (Hard)",
+        "path": "lessons/lesson36/index.html",
+        "id": 28
     }
 ]

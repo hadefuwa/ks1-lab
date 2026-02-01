@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 23: Blend Endings</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --secondary: #8b5cf6;
+            --bg-color: #312e81;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #e0e7ff;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #f472b6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .word-display {
+            font-size: 5rem;
+            letter-spacing: 0.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .missing-letter {
+            color: var(--primary);
+            border-bottom: 4px solid var(--primary);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .clue-text {
+            font-size: 1.5rem;
+            color: #c7d2fe;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            font-size: 2rem;
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .correct {
+            background: #22c55e !important;
+            border-color: #22c55e !important;
+        }
+
+        .wrong {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        #message-area {
+            height: 30px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-card">
+        <h1>Blend Endings</h1>
+
+        <div class="word-display">
+            <span id="prefix">ki</span><span id="letter-slot" class="missing-letter">__</span>
+        </div>
+
+        <div class="clue-text" id="clue">"Quack Quack!"</div>
+
+        <div class="options-grid" id="options"></div>
+
+        <div id="message-area"></div>
+    </div>
+
+    <script>
+        const levels = [
+  {
+    "word": "king",
+    "prefix": "ki",
+    "clue": "Wears a crown.",
+    "answer": "ng",
+    "options": [
+      "ng",
+      "nk",
+      "nd",
+      "nt"
+    ]
+  },
+  {
+    "word": "bank",
+    "prefix": "ba",
+    "clue": "Keep money here.",
+    "answer": "nk",
+    "options": [
+      "nk",
+      "ng",
+      "ck",
+      "st"
+    ]
+  },
+  {
+    "word": "hand",
+    "prefix": "ha",
+    "clue": "Has five fingers.",
+    "answer": "nd",
+    "options": [
+      "nd",
+      "nt",
+      "st",
+      "mp"
+    ]
+  },
+  {
+    "word": "lamp",
+    "prefix": "la",
+    "clue": "Gives light.",
+    "answer": "mp",
+    "options": [
+      "mp",
+      "nd",
+      "nk",
+      "ft"
+    ]
+  },
+  {
+    "word": "milk",
+    "prefix": "mi",
+    "clue": "White drink from cows.",
+    "answer": "lk",
+    "options": [
+      "lk",
+      "lt",
+      "ld",
+      "lf"
+    ]
+  },
+  {
+    "word": "nest",
+    "prefix": "ne",
+    "clue": "Bird home.",
+    "answer": "st",
+    "options": [
+      "st",
+      "sk",
+      "sp",
+      "ft"
+    ]
+  }
+];
+
+        let currentLevelIdx = 0;
+        let isAnswering = false;
+        const totalToWin = 5;
+        levels.sort(() => Math.random() - 0.5);
+
+        const LESSON_ID = 35;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevelIdx >= Math.min(levels.length, totalToWin)) {
+                document.querySelector('.glass-card').innerHTML = `
+                    <h1>You Did It!</h1>
+                    <div style="font-size:3rem;">🎉</div>
+                    <p>You are a Master Speller!</p>
+                `;
+                speak("Wonderful! You finished the lesson!");
+                setTimeout(() => {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                }, 2000);
+                return;
+            }
+
+            const lvl = levels[currentLevelIdx];
+            isAnswering = false;
+
+            document.getElementById('letter-slot').innerText = '_';
+            document.getElementById('prefix').innerText = lvl.prefix;
+            document.getElementById('clue').innerText = `"${lvl.clue}"`;
+            document.getElementById('message-area').innerText = "";
+
+            speak(`How does the word end? ${lvl.word}. ${lvl.clue}`);
+
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+
+            let opts = [...lvl.options].sort(() => Math.random() - 0.5);
+
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.innerText = opt; // Could be digraph like 'ck'
+                btn.onclick = () => check(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function check(char, btn) {
+            if (isAnswering) return;
+            const lvl = levels[currentLevelIdx];
+
+            if (char === lvl.answer) {
+                isAnswering = true;
+                btn.classList.add('correct');
+                document.getElementById('letter-slot').innerText = char;
+                document.getElementById('message-area').innerText = "Correct! " + lvl.word.toUpperCase();
+
+                speak(`Correct! ${lvl.prefix} plus ${char} makes ${lvl.word}!`);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+                currentLevelIdx++;
+                setTimeout(loadLevel, 2000);
+            } else {
+                btn.classList.add('wrong');
+                speak("Try again.");
+                setTimeout(() => btn.classList.remove('wrong'), 500);
+            }
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>
