@@ -10,42 +10,57 @@
         "id": 2
     },
     {
-        "title": "Lesson 3: Base-10 Block Party",
+        "title": "Lesson 3: Making Ten Magic",
+        "path": "lessons/lesson_carry1/index.html",
+        "id": 11
+    },
+    {
+        "title": "Lesson 4: Tens and Singles",
+        "path": "lessons/lesson_carry2/index.html",
+        "id": 12
+    },
+    {
+        "title": "Lesson 5: Double Digit Dash",
+        "path": "lessons/lesson_carry3/index.html",
+        "id": 13
+    },
+    {
+        "title": "Lesson 6: Base-10 Block Party",
         "path": "lessons/lesson3/index.html",
         "id": 3
     },
     {
-        "title": "Lesson 4: Space Block Adder",
+        "title": "Lesson 7: Space Block Adder",
         "path": "lessons/lesson4/index.html",
         "id": 4
     },
     {
-        "title": "Lesson 5: Space Sums Academy",
+        "title": "Lesson 8: Space Sums Academy",
         "path": "lessons/lesson5/index.html",
         "id": 5
     },
     {
-        "title": "Lesson 6: Whole Hundreds Addition",
+        "title": "Lesson 9: Whole Hundreds Addition",
         "path": "lessons/lesson6/index.html",
         "id": 6
     },
     {
-        "title": "Lesson 7: The 50s Nebula",
+        "title": "Lesson 10: The 50s Nebula",
         "path": "lessons/lesson7/index.html",
         "id": 7
     },
     {
-        "title": "Lesson 8: 3-Digit Addition Mastery",
+        "title": "Lesson 11: 3-Digit Addition Mastery",
         "path": "lessons/lesson8/index.html",
         "id": 8
     },
     {
-        "title": "Lesson 9: Keyboard Block Mission",
+        "title": "Lesson 12: Keyboard Block Mission",
         "path": "lessons/lesson9/index.html",
         "id": 9
     },
     {
-        "title": "Lesson 10: Lily's Math Meadow",
+        "title": "Lesson 13: Lily's Math Meadow",
         "path": "lessons/lesson10/index.html",
         "id": 10
     }

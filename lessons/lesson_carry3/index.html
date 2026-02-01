@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5: Double Digit Dash</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #facc15, #f43f5e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .columns-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .column {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            width: 120px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .col-label {
+            position: absolute;
+            top: -30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        .block-ten {
+            width: 30px;
+            height: 80px;
+            background: #3b82f6;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
+        }
+
+        .block-one {
+            width: 30px;
+            height: 30px;
+            background: #fbbf24;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            animation: popIn 0.3s ease;
+        }
+
+        .regroup-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border: none;
+            padding: 1rem 2rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            margin-top: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+        }
+
+        .regroup-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .equation {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .number {
+            color: #fff;
+        }
+
+        .operator {
+            color: #ec4899;
+        }
+
+        #message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            margin-top: 1rem;
+            color: #a5b4fc;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-panel">
+        <h1>Double Digit Dash</h1>
+        <div id="instruction">Add big numbers! Watch the Ones column overflow!</div>
+
+        <div class="equation">
+            <span id="num1" class="number">18</span>
+            <span class="operator">+</span>
+            <span id="num2" class="number">15</span>
+            <span class="operator">=</span>
+            <span id="result" class="number">?</span>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="col-tens">
+                <div class="col-label">Tens</div>
+            </div>
+            <div class="column" id="col-ones">
+                <div class="col-label">Ones</div>
+            </div>
+        </div>
+
+        <button id="regroupBtn" class="regroup-btn" onclick="regroup()">🔥 Power Up the Ten! 🔥</button>
+
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;"></div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let tensCount = 0;
+        let onesCount = 0;
+        let hasRegrouped = false;
+        let correctCount = 0;
+        const totalToWin = 5;
+        const LESSON_ID = 13;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            generateProblem();
+        }
+
+        function generateProblem() {
+            hasRegrouped = false;
+            document.getElementById('regroupBtn').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('result').innerText = '?';
+            document.getElementById('message').innerText = '';
+
+            // Generate Double + Double with Carry
+            // n1 = 15..35
+            // n2 = 15..35
+            // Ensure ones sum > 10
+
+            const t1 = Math.floor(Math.random() * 3) + 1; // 1-3 tens
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9 ones
+            const n1 = (t1 * 10) + o1;
+
+            const t2 = Math.floor(Math.random() * 2) + 1; // 1-2 tens
+            const minO2 = (11 - o1);
+            const o2 = Math.floor(Math.random() * (9 - minO2 + 1)) + minO2;
+            const n2 = (t2 * 10) + o2;
+
+            currentProblem = { n1, n2, sum: n1 + n2 };
+
+            document.getElementById('num1').innerText = n1;
+            document.getElementById('num2').innerText = n2;
+
+            // Initial State
+            tensCount = t1 + t2;
+            onesCount = o1 + o2;
+
+            renderBlocks();
+            speak(`Add ${n1} plus ${n2}. Whoa, that's a lot of ones!`);
+
+            setTimeout(() => {
+                if (onesCount >= 10) {
+                    document.getElementById('regroupBtn').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function renderBlocks() {
+            const tCol = document.getElementById('col-tens');
+            const oCol = document.getElementById('col-ones');
+            tCol.innerHTML = '<div class="col-label">Tens</div>';
+            oCol.innerHTML = '<div class="col-label">Ones</div>';
+
+            for (let i = 0; i < tensCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-ten';
+                tCol.appendChild(b);
+            }
+            for (let i = 0; i < onesCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-one';
+                oCol.appendChild(b);
+            }
+        }
+
+        function regroup() {
+            if (onesCount >= 10 && !hasRegrouped) {
+                onesCount -= 10;
+                tensCount += 1;
+                renderBlocks();
+                hasRegrouped = true;
+                document.getElementById('regroupBtn').style.display = 'none';
+                speak("Ten ones transform into a Super Ten!");
+                showOptions();
+            }
+        }
+
+        function showOptions() {
+            const correct = currentProblem.sum;
+            let opts = [correct];
+            while (opts.length < 3) {
+                let w = correct + Math.floor(Math.random() * 10 - 5) * 10; // Variate by tens mostly?
+                if (Math.random() > 0.5) w = correct + Math.floor(Math.random() * 5) * (Math.random() > .5 ? 1 : -1);
+
+                if (w !== correct && w > 20 && !opts.includes(w)) opts.push(w);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'regroup-btn';
+                btn.innerText = opt;
+                btn.style.display = 'block';
+                btn.style.margin = '0';
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(val, btn) {
+            if (val === currentProblem.sum) {
+                correctCount++;
+                btn.style.background = '#22c55e';
+                document.getElementById('result').innerText = val;
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+                speak("Awesome! You are a Math Wizard!");
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => {
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
+                } else {
+                    setTimeout(generateProblem, 2000);
+                }
+            } else {
+                btn.style.background = '#ef4444';
+                speak("Check the blocks again.");
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

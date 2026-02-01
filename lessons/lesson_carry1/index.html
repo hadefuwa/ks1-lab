@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 3: Making Ten Magic</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #c084fc, #6366f1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .columns-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .column {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            width: 120px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column-reverse;
+            /* Stack from bottom */
+            align-items: center;
+            position: relative;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .col-label {
+            position: absolute;
+            top: -30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        .block-ten {
+            width: 30px;
+            height: 80px;
+            background: #3b82f6;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .block-one {
+            width: 30px;
+            height: 30px;
+            background: #fbbf24;
+            margin: 2px;
+            border-radius: 4px;
+            /* Circle-ish? No, block is better */
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .regroup-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border: none;
+            padding: 1rem 2rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            margin-top: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+            /* Hidden until needed */
+        }
+
+        .regroup-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .equation {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .number {
+            color: #fff;
+        }
+
+        .operator {
+            color: #ec4899;
+        }
+
+        /* Check button */
+        .check-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Message */
+        #message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            margin-top: 1rem;
+            color: #a5b4fc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-panel">
+        <h1>Making Ten Magic</h1>
+        <div id="instruction">Add the blocks together. If you have 10 ones, make a Ten!</div>
+
+        <div class="equation">
+            <span id="num1" class="number">8</span>
+            <span class="operator">+</span>
+            <span id="num2" class="number">5</span>
+            <span class="operator">=</span>
+            <span id="result" class="number">?</span>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="col-tens">
+                <div class="col-label">Tens</div>
+                <!-- Tens blocks go here -->
+            </div>
+            <div class="column" id="col-ones">
+                <div class="col-label">Ones</div>
+                <!-- Ones blocks go here -->
+            </div>
+        </div>
+
+        <button id="regroupBtn" class="regroup-btn" onclick="regroup()">✨ Make a Ten! ✨</button>
+
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+            <!-- Options will be injected here -->
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let tens = 0;
+        let ones = 0;
+        let hasRegrouped = false; // Track if user has regrouped
+        let correctCount = 0;
+        const totalToWin = 5;
+        // Updated IDs to match new lesson index in JSON to preserve completion (Using logic from app.js it matches ID)
+        // We will assign ID 11 to this lesson
+        const LESSON_ID = 11;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function playSound(type) {
+            // Simple synthetic sounds could be added here
+        }
+
+        function init() {
+            generateProblem();
+        }
+
+        function generateProblem() {
+            hasRegrouped = false;
+            document.getElementById('regroupBtn').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('result').innerText = '?';
+            document.getElementById('message').innerText = '';
+
+            // Generate Add Single + Single > 10
+            // Example 8 + 5
+            const n1 = Math.floor(Math.random() * 5) + 5; // 5-9
+            const maxN2 = 9;
+            const minN2 = 11 - n1; // Ensure sum > 10
+            const n2 = Math.floor(Math.random() * (maxN2 - minN2 + 1)) + minN2;
+
+            currentProblem = { n1, n2, sum: n1 + n2 };
+
+            document.getElementById('num1').innerText = n1;
+            document.getElementById('num2').innerText = n2;
+
+            // Render initial blocks (all in ones column for visualization first? Or separate?)
+            // Let's put them all in ones column initially to show "Too many!"
+            // Wait, physically we usually put them in separate piles, then combine.
+            // Let's just dump (n1 + n2) into the ones column visually.
+            ones = n1 + n2;
+            tens = 0;
+            renderBlocks();
+
+            speak(`What is ${n1} plus ${n2}? Look at the ones! There are too many!`);
+
+            // Show Regroup Button after a short delay
+            setTimeout(() => {
+                if (ones >= 10) {
+                    document.getElementById('regroupBtn').style.display = 'block';
+                    speak("Click the button to Make a Ten!");
+                } else {
+                    showOptions(); // Should not happen with current logic but safe fallback
+                }
+            }, 1000);
+        }
+
+        function renderBlocks() {
+            const tCol = document.getElementById('col-tens');
+            const oCol = document.getElementById('col-ones');
+            tCol.innerHTML = '<div class="col-label">Tens</div>';
+            oCol.innerHTML = '<div class="col-label">Ones</div>';
+
+            for (let i = 0; i < tens; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-ten';
+                tCol.appendChild(b);
+            }
+            for (let i = 0; i < ones; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-one';
+                // Add staggered animation delay
+                b.style.animation = `popIn 0.3s ease ${i * 0.05}s backwards`;
+                oCol.appendChild(b);
+            }
+        }
+
+        function regroup() {
+            if (ones >= 10 && !hasRegrouped) {
+                // Animate removal of 10 ones
+                // Ideally we'd animate them moving to tens, but for MVP:
+                ones -= 10;
+                tens += 1;
+                renderBlocks();
+                playSound('pop');
+                hasRegrouped = true;
+                document.getElementById('regroupBtn').style.display = 'none';
+                speak("Ten ones became one ten! Now it's easy to count.");
+                showOptions();
+            }
+        }
+
+        function showOptions() {
+            const correct = currentProblem.sum;
+            // Generate 2 wrong answers
+            let opts = [correct];
+            while (opts.length < 3) {
+                let w = correct + Math.floor(Math.random() * 5) * (Math.random() > .5 ? 1 : -1);
+                if (w !== correct && w > 0 && !opts.includes(w)) opts.push(w);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'regroup-btn'; // Reuse style but smaller?
+                btn.style.display = 'block';
+                btn.style.margin = '0';
+                btn.style.fontSize = '1.2rem';
+                btn.style.padding = '0.8rem 1.5rem';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(val, btn) {
+            if (val === currentProblem.sum) {
+                correctCount++;
+                btn.style.background = '#22c55e'; // Green
+                document.getElementById('result').innerText = val;
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                speak("Correct! You made a ten!");
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => {
+                        speak("You finished the lesson! Great job!");
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
+                } else {
+                    setTimeout(generateProblem, 2000);
+                }
+            } else {
+                btn.style.background = '#ef4444'; // Red
+                speak("Not quite. Count the tens and ones again.");
+            }
+        }
+
+        // Add Keyframes
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes popIn {
+                0% { transform: scale(0); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Start
+        init();
+
+    </script>
+</body>
+
+</html>
