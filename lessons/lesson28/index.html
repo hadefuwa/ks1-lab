@@ -264,10 +264,10 @@
             // Ones digit must be high (e.g. 5-9)
             // Tens digit should NOT be 9 (to avoid double carry per user request "Simple carry")
 
-            const o1 = Math.floor(Math.random() * 50) + 5; // 5-9
-            const t1 = Math.floor(Math.random() * 90); // 0-8 (Avoid 9)
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
+            const t1 = Math.floor(Math.random() * 9); // 0-8 (Avoid 9)
             const h1 = Math.floor(Math.random() * 10); // 0-9
-            const th1 = isFourDigit ? Math.floor(Math.random() * 90) + 1 : 0; // 1-9 or 0
+            const th1 = isFourDigit ? Math.floor(Math.random() * 9) + 1 : 0; // 1-9 or 0
 
             // Ensure n1 is at least 100
             if (!isFourDigit && h1 === 0) {

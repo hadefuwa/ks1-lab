@@ -120,62 +120,82 @@
         "id": 36
     },
     {
-        "title": "Lesson 25: Making Ten Magic (Hard)",
+        "title": "Lesson 25: Tower Power (Vertical)",
+        "path": "lessons/lesson_column_intro/index.html",
+        "id": 40
+    },
+    {
+        "title": "Lesson 26: The Magic Carrier",
+        "path": "lessons/lesson_column_carry/index.html",
+        "id": 41
+    },
+    {
+        "title": "Lesson 27: Construction Crew (Carry)",
+        "path": "lessons/lesson_construction/index.html",
+        "id": 42
+    },
+    {
+        "title": "Lesson 28: Rocket Launch Math",
+        "path": "lessons/lesson_rocket/index.html",
+        "id": 43
+    },
+    {
+        "title": "Lesson 29: Making Ten Magic (Hard)",
         "path": "lessons/lesson25/index.html",
         "id": 29
     },
     {
-        "title": "Lesson 26: Tens and Singles (Hard)",
+        "title": "Lesson 30: Tens and Singles (Hard)",
         "path": "lessons/lesson26/index.html",
         "id": 30
     },
     {
-        "title": "Lesson 27: Double Digit Dash (Hard)",
+        "title": "Lesson 31: Double Digit Dash (Hard)",
         "path": "lessons/lesson27/index.html",
         "id": 31
     },
     {
-        "title": "Lesson 28: Big Number Boost (Hard)",
+        "title": "Lesson 32: Big Number Boost (Hard)",
         "path": "lessons/lesson28/index.html",
         "id": 32
     },
     {
-        "title": "Lesson 29: Base-10 Block Party (Hard)",
+        "title": "Lesson 33: Base-10 Block Party (Hard)",
         "path": "lessons/lesson29/index.html",
         "id": 21
     },
     {
-        "title": "Lesson 30: Space Block Adder (Hard)",
+        "title": "Lesson 34: Space Block Adder (Hard)",
         "path": "lessons/lesson30/index.html",
         "id": 22
     },
     {
-        "title": "Lesson 31: Space Sums Academy (Hard)",
+        "title": "Lesson 35: Space Sums Academy (Hard)",
         "path": "lessons/lesson31/index.html",
         "id": 23
     },
     {
-        "title": "Lesson 32: Whole Hundreds Addition (Hard)",
+        "title": "Lesson 36: Whole Hundreds Addition (Hard)",
         "path": "lessons/lesson32/index.html",
         "id": 24
     },
     {
-        "title": "Lesson 33: The 50s Nebula (Hard)",
+        "title": "Lesson 37: The 50s Nebula (Hard)",
         "path": "lessons/lesson33/index.html",
         "id": 25
     },
     {
-        "title": "Lesson 34: 3-Digit Addition Mastery (Hard)",
+        "title": "Lesson 38: 3-Digit Addition Mastery (Hard)",
         "path": "lessons/lesson34/index.html",
         "id": 26
     },
     {
-        "title": "Lesson 35: Keyboard Block Mission (Hard)",
+        "title": "Lesson 39: Keyboard Block Mission (Hard)",
         "path": "lessons/lesson35/index.html",
         "id": 27
     },
     {
-        "title": "Lesson 36: Lily's Math Meadow (Hard)",
+        "title": "Lesson 40: Lily's Math Meadow (Hard)",
         "path": "lessons/lesson36/index.html",
         "id": 28
     }
