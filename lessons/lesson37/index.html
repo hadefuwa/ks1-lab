@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lesson 37: Greater Than - Animals</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="bg">
+            <div class="cloud c1"></div>
+            <div class="cloud c2"></div>
+            <div class="cloud c3"></div>
+            <div class="cloud c4"></div>
+            <div class="sparkle-field"></div>
+        </div>
+
+        <header>
+            <div class="logo">Primary App</div>
+            <button onclick="location.reload()" class="secondary">Restart</button>
+        </header>
+
+        <div class="layout">
+            <div class="card">
+                <div class="hero">
+                    <div>
+                        <h1 class="hero-title">Animal Compare</h1>
+                        <p class="hero-sub">Count the animals and choose the right sign!</p>
+                    </div>
+                    <div class="cta-row">
+                        <span class="badge">Level 1</span>
+                        <span class="badge">Math</span>
+                    </div>
+                </div>
+
+                <h2 class="task-title" style="text-align: center; margin-top: 20px;">Which group has more?</h2>
+
+                <div class="comparison-container">
+                    <div class="group" id="left-group">
+                        <!-- Animals will go here -->
+                    </div>
+
+                    <div style="font-size: 40px; font-weight: bold; color: var(--muted);">?</div>
+
+                    <div class="group" id="right-group">
+                        <!-- Animals will go here -->
+                    </div>
+                </div>
+
+                <div class="options">
+                    <button class="option-btn" onclick="checkAnswer('>')">&gt;</button>
+                    <button class="option-btn" onclick="checkAnswer('=')">=</button>
+                    <button class="option-btn" onclick="checkAnswer('<')">&lt;</button>
+                </div>
+
+                <div id="feedback" class="feedback" style="text-align: center; height: 30px; margin-top: 10px;"></div>
+
+            </div>
+
+            <div class="panel">
+                <div class="mascot" id="mascot">
+                    <div class="mascot-face">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
+                        <div class="smile"></div>
+                    </div>
+                    <div class="sparkle s1"></div>
+                    <div class="sparkle s2"></div>
+                </div>
+
+                <div class="stat-grid" style="margin-top: 20px;">
+                    <div class="stat">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Goal</div>
+                        <div class="stat-value">10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

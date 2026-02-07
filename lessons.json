@@ -178,5 +178,25 @@
         "title": "Lesson 36: Lily's Math Meadow (Hard)",
         "path": "lessons/lesson36/index.html",
         "id": 28
+    },
+    {
+        "title": "Lesson 37: Greater Than - Animals",
+        "path": "lessons/lesson37/index.html",
+        "id": 37
+    },
+    {
+        "title": "Lesson 38: Greater Than - Numbers (1-10)",
+        "path": "lessons/lesson38/index.html",
+        "id": 38
+    },
+    {
+        "title": "Lesson 39: Greater Than - Big Numbers",
+        "path": "lessons/lesson39/index.html",
+        "id": 39
+    },
+    {
+        "title": "Lesson 40: Greater Than - Equations",
+        "path": "lessons/lesson40/index.html",
+        "id": 40
     }
 ]
