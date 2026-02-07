@@ -133,7 +133,7 @@ function render() {
         <div class="badge" style="margin-bottom: 20px;">Word ${state.currentIndex + 1} / ${lessonData.challengeWords.length}</div>
         <h2 class="task-title">Spell the word!</h2>
         <div class="cta-row" style="justify-content: center; margin-bottom: 20px;">
-           <button class="secondary" id="listen-btn" onclick="speak('${currentWord}')">🔊 Listen</button>
+           <button class="secondary" id="listen-btn" onclick="speakWord('${currentWord}')">🔊 Listen (x2)</button>
         </div>
 
         <input type="text" id="game-input" class="equation" placeholder="Type here..." autocomplete="off">
@@ -208,8 +208,10 @@ function startGame() {
   state.score = 0;
   state.hearts = 3;
   state.streak = 0;
+  state.currentAttempts = 0; // Track attempts
   speak("Time to play! Type the words you hear.");
   render();
+  setTimeout(() => speakWord(lessonData.challengeWords[0]), 3000);
 }
 
 function checkAnswer() {
@@ -222,8 +224,10 @@ function checkAnswer() {
   const targetWord = lessonData.challengeWords[state.currentIndex];
 
   if (userWord === targetWord) {
+    // Correct
     state.score += 10 + (state.streak * 2);
     state.streak++;
+    state.currentAttempts = 0; // Reset attempts
     playSound("correct");
     feedback.innerHTML = `<div class="feedback success">🌟 Correct! Amazing!</div>`;
     playSparkleEffect();
@@ -234,24 +238,37 @@ function checkAnswer() {
       nextWord();
     }, 1400);
   } else {
+    // Incorrect
+    state.currentAttempts++;
     state.streak = 0;
-    state.hearts--;
-    playSound("incorrect");
-    feedback.innerHTML = `<div class="feedback error">❌ Oops! It was "${targetWord}"</div>`;
-    input.value = "";
-    input.classList.add("shake");
-    setTimeout(() => input.classList.remove("shake"), 400);
-    input.focus();
-
-    if (state.hearts <= 0) {
-      setTimeout(() => {
-        state.phase = "gameover";
-        render();
-      }, 1500);
+    
+    if (state.currentAttempts < 3) {
+        // Warning / Retry
+        speak("Try again. Listen carefully.");
+        setTimeout(() => speakWord(targetWord), 2000); // Repeat the word
+        feedback.innerHTML = `<div class="feedback error">❌ Not quite. Try again! (${3 - state.currentAttempts} tries left)</div>`;
+        input.value = "";
+        input.classList.add("shake");
+        setTimeout(() => input.classList.remove("shake"), 400);
+        input.focus();
     } else {
-      setTimeout(() => {
-        nextWord();
-      }, 1800);
+        // Failed this word
+        state.hearts--;
+        state.currentAttempts = 0; // Reset for next word
+        playSound("incorrect");
+        feedback.innerHTML = `<div class="feedback error">❌ Oops! It was "${targetWord}"</div>`;
+        input.value = "";
+        
+        if (state.hearts <= 0) {
+          setTimeout(() => {
+            state.phase = "gameover";
+            render();
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            nextWord();
+          }, 1800);
+        }
     }
   }
   updateStats();
@@ -261,7 +278,7 @@ function nextWord() {
   if (state.currentIndex < lessonData.challengeWords.length - 1) {
     state.currentIndex++;
     render();
-    setTimeout(() => speak(lessonData.challengeWords[state.currentIndex]), 500);
+    setTimeout(() => speakWord(lessonData.challengeWords[state.currentIndex]), 500);
   } else {
     state.phase = "victory";
     playSound("win");
@@ -269,6 +286,27 @@ function nextWord() {
     render();
     window.parent.postMessage({type: 'lessonCompleted', lessonId: 19}, '*');
   }
+}
+
+function speakWord(word) {
+    window.speechSynthesis.cancel();
+    const u1 = new SpeechSynthesisUtterance(word);
+    u1.rate = 0.8;
+    u1.pitch = 1.1;
+    
+    const u2 = new SpeechSynthesisUtterance(word);
+    u2.rate = 0.8;
+    u2.pitch = 1.1;
+    
+    // Queue them up
+    window.speechSynthesis.speak(u1);
+    
+    // Small silence
+    const silence = new SpeechSynthesisUtterance("...");
+    silence.volume = 0;
+    window.speechSynthesis.speak(silence);
+    
+    window.speechSynthesis.speak(u2);
 }
 
 function resetGame() {
