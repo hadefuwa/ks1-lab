@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 25: Tower Power (Simple)</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --highlight: #facc15;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .game-container {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #a5b4fc;
+        }
+
+        .vertical-math {
+            display: flex;
+            justify-content: center;
+            font-size: 4rem;
+            font-family: monospace;
+            line-height: 1.2;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 0.2rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .column.active {
+            background: rgba(250, 204, 21, 0.2);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+
+        .operator {
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 25px;
+            /* Adjust to align with bottom number */
+            font-size: 3rem;
+            color: #ec4899;
+            margin-right: 10px;
+        }
+
+        .line {
+            position: absolute;
+            bottom: 75px;
+            /* Adjust based on input height */
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        input {
+            width: 50px;
+            height: 60px;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--highlight);
+        }
+
+        input.correct {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.5rem;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        #guidance {
+            min-height: 1.5em;
+            font-size: 1.2rem;
+            color: #60a5fa;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <h2>Tower Power</h2>
+        <div id="guidance">Let's add the Ones first!</div>
+
+        <div class="vertical-math" id="board">
+            <div class="operator">+</div>
+            <!-- Digits inserted by JS -->
+        </div>
+
+        <div class="numpad" id="numpad">
+            <button class="btn" onclick="input(7)">7</button>
+            <button class="btn" onclick="input(8)">8</button>
+            <button class="btn" onclick="input(9)">9</button>
+            <button class="btn" onclick="input(4)">4</button>
+            <button class="btn" onclick="input(5)">5</button>
+            <button class="btn" onclick="input(6)">6</button>
+            <button class="btn" onclick="input(1)">1</button>
+            <button class="btn" onclick="input(2)">2</button>
+            <button class="btn" onclick="input(3)">3</button>
+            <button class="btn" style="grid-column: span 3" onclick="input(0)">0</button>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            n1: 0,
+            n2: 0,
+            step: 0, // 0 = ones, 1 = tens
+            score: 0
+        };
+
+        const guid = document.getElementById('guidance');
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            nextProblem();
+        }
+
+        function nextProblem() {
+            // Generate No Carry Problem
+            // Ones sum <= 9
+            const o1 = Math.floor(Math.random() * 6); // 0-5
+            const o2 = Math.floor(Math.random() * (9 - o1)); // ensure sum <= 9
+
+            const t1 = Math.floor(Math.random() * 8) + 1; // 1-8
+            // No tens for second number (simplest case) or low chance
+            const t2 = 0;
+
+            state.n1 = t1 * 10 + o1;
+            state.n2 = o2; // Keep it simple: 2 digit + 1 digit
+
+            state.digits = {
+                t1, o1,
+                t2, o2
+            };
+
+            state.step = 0;
+            render();
+            speak("Add the Ones first.");
+        }
+
+        function render() {
+            const board = document.getElementById('board');
+            board.innerHTML = `
+            <div class="operator">+</div>
+            <div class="column ${state.step === 1 ? 'active' : ''}" id="col-tens">
+                <div>${state.digits.t1 || '&nbsp;'}</div>
+                <div>${state.digits.t2 || '&nbsp;'}</div>
+                <div style="height: 4px; background:white; width: 100%; margin: 5px 0;"></div>
+                <input id="ans-tens" readonly placeholder="?" value="${state.step > 1 ? (state.digits.t1 + state.digits.t2) : ''}">
+            </div>
+            <div class="column ${state.step === 0 ? 'active' : ''}" id="col-ones">
+                <div>${state.digits.o1}</div>
+                <div>${state.digits.o2}</div>
+                <div style="height: 4px; background:white; width: 100%; margin: 5px 0;"></div>
+                <input id="ans-ones" readonly placeholder="?" value="${state.step > 0 ? (state.digits.o1 + state.digits.o2) : ''}">
+            </div>
+        `;
+
+            if (state.step === 0) {
+                guid.innerText = `What is ${state.digits.o1} + ${state.digits.o2}?`;
+            } else if (state.step === 1) {
+                guid.innerText = `Now add the Tens: ${state.digits.t1} + ${state.digits.t2 || 0}`;
+            } else {
+                guid.innerText = "Great job!";
+            }
+        }
+
+        function input(num) {
+            if (state.step === 0) {
+                const correct = state.digits.o1 + state.digits.o2;
+                if (num === correct) {
+                    // simple single digit check
+                    state.step = 1;
+                    speak(`${num}. Correct. Now the tens.`);
+                    render();
+                } else {
+                    speak("Try again.");
+                    shake();
+                }
+            } else if (state.step === 1) {
+                const correct = state.digits.t1 + state.digits.t2;
+                if (num === correct) {
+                    state.step = 2;
+                    render();
+                    complete();
+                } else {
+                    shake();
+                }
+            }
+        }
+
+        function shake() {
+            document.querySelector('.active input').animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-10px)' },
+                { transform: 'translateX(10px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+        }
+
+        function complete() {
+            speak("Fantastic!");
+            confetti();
+            state.score++;
+            setTimeout(() => {
+                if (state.score >= 5) {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 40 }, '*'); // Maps to new ID we'll assign
+                    speak("Lesson Complete!");
+                } else {
+                    nextProblem();
+                }
+            }, 2000);
+        }
+
+        init();
+
+    </script>
+</body>
+
+</html>

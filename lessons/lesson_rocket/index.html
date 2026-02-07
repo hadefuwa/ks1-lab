@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson 28: Rocket Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .terminal {
+            width: 700px;
+            border: 4px solid #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #0f0;
+            background: rgba(0, 20, 0, 0.9);
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            border-bottom: 2px dashed #0f0;
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .screen {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0;
+        }
+
+        .module {
+            border: 1px solid #0f0;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+
+        .value {
+            font-size: 3rem;
+            margin: 10px 0;
+        }
+
+        .input-area {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input {
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-size: 2rem;
+            padding: 10px;
+            font-family: inherit;
+            width: 100px;
+            text-align: center;
+            outline: none;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .log {
+            height: 100px;
+            overflow-y: auto;
+            border-top: 1px solid #050;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #0c0;
+            text-align: left;
+            padding: 5px;
+        }
+
+        .rocket-container {
+            position: absolute;
+            right: -150px;
+            bottom: 0;
+            width: 100px;
+            height: 200px;
+            transition: transform 3s ease-in;
+        }
+
+        .rocket {
+            font-size: 5rem;
+            transform: rotate(-45deg);
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        .alert {
+            color: red;
+            font-weight: bold;
+            animation: blink 0.5s infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="terminal">
+        <h1>LAUNCH CONTROL SYSTEM</h1>
+
+        <div class="screen">
+            <div class="module" id="mod-tens">
+                <div class="label">SECTOR TENS</div>
+                <div class="value" id="val-tens">0</div>
+            </div>
+            <div class="module" id="mod-ones">
+                <div class="label">SECTOR ONES</div>
+                <div class="value" id="val-ones">0</div>
+            </div>
+        </div>
+
+        <div class="input-area" id="input-area">
+            <div id="prompt">CALCULATING ONES FLUX... (8 + 5)</div>
+            <input type="number" id="cmd-input" autofocus>
+        </div>
+
+        <div class="log" id="sys-log">
+            > SYSTEM INITIALIZED<br>
+            > WAITING FOR INPUT...
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('sys-log');
+        const input = document.getElementById('cmd-input');
+        const prompt = document.getElementById('prompt');
+
+        let state = {
+            n1: 0,
+            n2: 0,
+            stage: 0 // 0: input ones sum, 1: overflow handling, 2: input final tens
+        };
+
+        function logMsg(msg) {
+            log.innerHTML += `> ${msg}<br>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.pitch = 0.8; // Robo voice
+            msg.rate = 1.1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            // Problem: 38 + 5 for example
+            const t1 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const o1 = Math.floor(Math.random() * 4) + 6; // 6-9
+            const o2 = Math.floor(Math.random() * 4) + 5; // 5-8
+            // sum ones >= 11
+
+            state.t_display = t1;
+            state.o_sum_target = o1 + o2;
+            state.o1 = o1;
+            state.o2 = o2;
+
+            document.getElementById('val-tens').innerText = t1;
+            document.getElementById('val-ones').innerText = `${o1} + ${o2}`;
+
+            prompt.innerText = `ENTER SUM OF SECTOR ONES (${o1} + ${o2}):`;
+            speak("System Ready. Enter sum of ones sector.");
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') processInput();
+            });
+        }
+
+        function processInput() {
+            const val = parseInt(input.value);
+            input.value = '';
+
+            if (state.stage === 0) {
+                if (val === state.o_sum_target) {
+                    logMsg(`ONES SUM CONFIRMED: ${val}`);
+                    speak("Sum confirmed.");
+
+                    // Overflow animation
+                    document.getElementById('val-ones').innerText = val; // Show 13
+                    document.getElementById('val-ones').style.color = 'red';
+
+                    logMsg("WARNING: SECTOR ONES OVERLOAD > 9");
+                    logMsg("INITIATING CARRY SEQUENCE...");
+                    speak("Warning. Overload. Carrying to Tens Sector.");
+
+                    // Animate
+                    setTimeout(() => {
+                        const tenPart = Math.floor(val / 10);
+                        const onePart = val % 10;
+
+                        document.getElementById('val-ones').innerText = onePart;
+                        document.getElementById('val-ones').style.color = '#0f0';
+
+                        // Route to tens
+                        document.getElementById('val-tens').innerText = `${state.t_display} + ${tenPart}`;
+                        document.getElementById('mod-tens').style.borderColor = 'yellow';
+
+                        state.final_tens_target = state.t_display + tenPart;
+                        state.stage = 1;
+
+                        prompt.innerText = `CALCULATE NEW TENS TOTAL (${state.t_display} + ${tenPart}):`;
+                        speak("Enter new Tens total.");
+                    }, 2000);
+
+                } else {
+                    logMsg("ERROR: INCORRECT SUM. RETRY.");
+                    speak("Incorrect. Retry.");
+                }
+            } else if (state.stage === 1) {
+                if (val === state.final_tens_target) {
+                    document.getElementById('val-tens').innerText = val;
+                    document.getElementById('mod-tens').style.borderColor = '#0f0';
+
+                    logMsg("CALCULATIONS COMPLETE.");
+                    logMsg("TRAJECTORY SET.");
+                    logMsg("LAUNCHING...");
+                    speak("Calculations correct. Launching!");
+
+                    setTimeout(() => {
+                        confetti();
+                        logMsg("MISSION SUCCESS.");
+                        setTimeout(() => {
+                            window.parent.postMessage({ type: 'lessonCompleted', lessonId: 43 }, '*');
+                        }, 2000);
+                    }, 1000);
+                } else {
+                    logMsg("ERROR: INCORRECT TENS. CHECK CARRY.");
+                    speak("Incorrect. Check the carried one.");
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

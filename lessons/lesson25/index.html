@@ -247,9 +247,10 @@
             // Render initial blocks (all in ones column for visualization first? Or separate?)
             // Let's put them all in ones column initially to show "Too many!"
             // Wait, physically we usually put them in separate piles, then combine.
-            // Let's just dump (n1 + n2) into the ones column visually.
-            ones = n1 + n2;
-            tens = 0;
+            // Parse existing tens from n1
+            tens = Math.floor(n1 / 10);
+            // Ones column gets ones from n1 + n2
+            ones = (n1 % 10) + n2;
             renderBlocks();
 
             speak(`What is ${n1} plus ${n2}? Look at the ones! There are too many!`);

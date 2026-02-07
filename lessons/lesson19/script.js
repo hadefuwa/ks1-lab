@@ -267,7 +267,7 @@ function nextWord() {
     playSound("win");
     burstConfetti(50);
     render();
-    window.parent.postMessage({type: 'lessonCompleted', lessonId: 1}, '*');
+    window.parent.postMessage({type: 'lessonCompleted', lessonId: 19}, '*');
   }
 }
 

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 26: The Magic Carrier</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --highlight: #ec4899;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 400px;
+        }
+
+        .vertical-math {
+            display: flex;
+            justify-content: center;
+            font-size: 4rem;
+            font-family: monospace;
+            line-height: 1.2;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .column.active {
+            background: rgba(236, 72, 153, 0.15);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+            border: 1px dashed rgba(236, 72, 153, 0.5);
+        }
+
+        .carry-box {
+            position: absolute;
+            top: -40px;
+            width: 30px;
+            height: 30px;
+            font-size: 1.5rem;
+            color: #facc15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .carry-box.show {
+            opacity: 1;
+            top: 0;
+        }
+
+        input {
+            width: 60px;
+            height: 70px;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.5rem;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .flying-ten {
+            position: fixed;
+            font-size: 2rem;
+            color: #facc15;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 100;
+            transition: all 1s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <h2>The Magic Carrier</h2>
+        <div id="guidance" style="color: #a5b4fc; min-height: 1.5em; margin-bottom: 20px;">Start with the Ones!</div>
+
+        <div class="vertical-math" id="board">
+            <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
+
+            <!-- Tens -->
+            <div class="column" id="col-tens">
+                <div class="carry-box" id="carry-indicator">1</div>
+                <div id="val-t1">1</div>
+                <div id="val-t2" style="opacity: 0">0</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-tens" readonly placeholder="?">
+            </div>
+
+            <!-- Ones -->
+            <div class="column active" id="col-ones">
+                <div id="val-o1">5</div>
+                <div id="val-o2">5</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-ones" readonly placeholder="?">
+            </div>
+        </div>
+
+        <div class="numpad" id="numpad">
+            <!-- Buttons 0-9 generated below -->
+        </div>
+    </div>
+
+    <script>
+        // Logic: 
+        // 1. User enters sum of ones (e.g. 12).
+        // 2. We detect it's > 9. 
+        // 3. We show "12" briefly in the Ones box? Or simpler: 
+        //    User presses '1' then '2'?
+        //    Better: User calculates 5+7=12. 
+        //    We ask "What is 5 + 7?". Keyboard 0-18 range? Or standard numpad.
+        //    If they type '12', we say "The 1 flies away!"
+
+        let state = { t1: 1, o1: 5, o2: 7, step: 0, score: 0 }; // 15 + 7
+        // step 0: waiting for ones sum
+        // step 1: ones entered, animating carry
+        // step 2: waiting for tens sum
+
+        function init() {
+            const pad = document.getElementById('numpad');
+            [7, 8, 9, 4, 5, 6, 1, 2, 3, 0].forEach(n => {
+                const b = document.createElement('button');
+                b.className = 'btn';
+                b.innerText = n;
+                if (n === 0) b.style.gridColumn = 'span 3';
+                b.onclick = () => input(n);
+                pad.appendChild(b);
+            });
+            nextProblem();
+        }
+
+        function nextProblem() {
+            // Generate Carry Problem
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
+            const o2 = Math.floor(Math.random() * (9 - (10 - o1) + 1)) + (10 - o1); // ensure sum >= 10
+            // e.g. o1=8 (needs >=2). Random(0..7)+2.
+
+            const t1 = Math.floor(Math.random() * 5) + 1; // 1-5
+
+            state = { t1, o1, o2, step: 0, score: state.score };
+            renderBoard();
+            speak(`What is ${o1} plus ${o2}?`);
+
+            document.getElementById('col-tens').classList.remove('active');
+            document.getElementById('col-ones').classList.add('active');
+            document.getElementById('carry-indicator').style.opacity = '0';
+            document.getElementById('in-ones').value = '';
+            document.getElementById('in-tens').value = '';
+        }
+
+        function renderBoard() {
+            document.getElementById('val-t1').innerText = state.t1;
+            document.getElementById('val-o1').innerText = state.o1;
+            document.getElementById('val-o2').innerText = state.o2;
+        }
+
+        // Accumulate input for double digits?
+        let currentInput = "";
+
+        function input(n) {
+            if (state.step === 0) {
+                // Ones place. Expecting sum (10-18)
+                currentInput += n;
+                const target = state.o1 + state.o2;
+                const targetStr = target.toString(); // e.g. "12"
+
+                // Check if matches or partial
+                if (currentInput === targetStr) {
+                    // Correct sum entered
+                    document.getElementById('in-ones').value = currentInput;
+                    currentInput = "";
+
+                    speak("That's right! But wait... it's too big!");
+                    setTimeout(doCarryAnimation, 1000, target);
+                    state.step = 1;
+                } else if (currentInput.length >= targetStr.length) {
+                    // Wrong
+                    speak("Try again.");
+                    currentInput = "";
+                    shake(document.getElementById('in-ones'));
+                } else {
+                    // Partial typing (e.g. typed '1' of '12'), just show it?
+                    // Actually standard calc: usually right to left? No, user thinks "12".
+                    // Let's visual update
+                    document.getElementById('in-ones').value = currentInput;
+                }
+            } else if (state.step === 2) {
+                // Tens place. Simple single input usually.
+                // tens = t1 + carried 1
+                const target = state.t1 + 1;
+                if (n === target) {
+                    document.getElementById('in-tens').value = n;
+                    complete();
+                } else {
+                    shake(document.getElementById('in-tens'));
+                    speak("Count the tens again. Don't forget the carried one!");
+                }
+            }
+        }
+
+        function doCarryAnimation(sumVal) {
+            // sumVal e.g. 12
+            const onesVal = sumVal % 10;
+            const tenVal = 1; // Always 1 for this level (max 9+9=18)
+
+            // 1. create flying element at input pos
+            const inputRect = document.getElementById('in-ones').getBoundingClientRect();
+
+            const flyer = document.createElement('div');
+            flyer.className = 'flying-ten';
+            flyer.innerText = '1';
+            flyer.style.left = (inputRect.left + 5) + 'px';
+            flyer.style.top = (inputRect.top + 5) + 'px';
+            document.body.appendChild(flyer);
+
+            // Update ones input to just show the ones digit
+            document.getElementById('in-ones').value = onesVal;
+
+            speak("The ten flies to the top!");
+
+            // 2. Animate to tens column top
+            const targetRect = document.getElementById('carry-indicator').getBoundingClientRect();
+
+            setTimeout(() => {
+                flyer.style.left = targetRect.left + 'px';
+                flyer.style.top = targetRect.top + 'px';
+            }, 100);
+
+            setTimeout(() => {
+                flyer.remove();
+                document.getElementById('carry-indicator').style.opacity = '1';
+
+                // Activate tens column
+                document.getElementById('col-ones').classList.remove('active');
+                document.getElementById('col-tens').classList.add('active');
+                document.getElementById('guidance').innerText = `Now add the Tens: ${state.t1} + 1`;
+
+                state.step = 2;
+            }, 1100);
+        }
+
+        function shake(el) {
+            el.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-10px)' },
+                { transform: 'translateX(10px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+        }
+
+        function complete() {
+            speak("You did it!");
+            confetti();
+            state.score++;
+            setTimeout(() => {
+                if (state.score >= 5) {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 41 }, '*'); // New ID
+                } else {
+                    nextProblem();
+                }
+            }, 2000);
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
