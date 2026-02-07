@@ -218,5 +218,25 @@
         "title": "Lesson 40: Greater Than - Equations",
         "path": "lessons/lesson40/index.html",
         "id": 40
+    },
+    {
+        "title": "Lesson 41: Tower Power (Simple)",
+        "path": "lessons/lesson41/index.html",
+        "id": 41
+    },
+    {
+        "title": "Lesson 42: The Magic Carrier",
+        "path": "lessons/lesson42/index.html",
+        "id": 42
+    },
+    {
+        "title": "Lesson 43: Construction Crew",
+        "path": "lessons/lesson43/index.html",
+        "id": 43
+    },
+    {
+        "title": "Lesson 44: Rocket Math",
+        "path": "lessons/lesson44/index.html",
+        "id": 44
     }
 ]

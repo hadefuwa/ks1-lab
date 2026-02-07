@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 25: Tower Power (Simple)</title>
+    <title>Lesson 41: Tower Power (Simple)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -278,7 +278,7 @@
             state.score++;
             setTimeout(() => {
                 if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 40 }, '*'); // Maps to new ID we'll assign
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 41 }, '*');
                     speak("Lesson Complete!");
                 } else {
                     nextProblem();

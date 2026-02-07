@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 26: The Magic Carrier</title>
+    <title>Lesson 42: The Magic Carrier</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -317,7 +317,7 @@
             state.score++;
             setTimeout(() => {
                 if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 41 }, '*'); // New ID
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 42 }, '*');
                 } else {
                     nextProblem();
                 }
