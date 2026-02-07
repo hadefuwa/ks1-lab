@@ -1,6 +1,9 @@
 let currentLeft = 0;
 let currentRight = 0;
 let score = 0;
+let lives = 3;
+let currentAttempts = 0;
+let buttonsDisabled = false;
 const goal = 10;
 const lessonId = 39;
 
@@ -13,26 +16,32 @@ const mascot = document.getElementById('mascot');
 
 function init() {
   score = 0;
+  lives = 3;
   updateScore();
+  updateLives();
   generateQuestion();
 }
 
 function generateQuestion() {
   feedbackEl.textContent = '';
   feedbackEl.className = 'feedback';
-  
+  currentAttempts = 0;
+  buttonsDisabled = false;
+
   // Pick random numbers 1-50
   currentLeft = Math.floor(Math.random() * 50) + 1;
   currentRight = Math.floor(Math.random() * 50) + 1;
-  
+
   // Render
   leftNum.textContent = currentLeft;
   rightNum.textContent = currentRight;
 }
 
 function checkAnswer(operator) {
+  if (buttonsDisabled) return;
+
   let isCorrect = false;
-  
+
   if (operator === '>') {
     isCorrect = currentLeft > currentRight;
   } else if (operator === '<') {
@@ -49,9 +58,11 @@ function checkAnswer(operator) {
 }
 
 function handleCorrect() {
+  buttonsDisabled = true;
   feedbackEl.textContent = "Correct! You are doing great!";
   feedbackEl.className = "feedback success";
   score++;
+  currentAttempts = 0;
   updateScore();
   mascot.classList.add('burst');
   setTimeout(() => mascot.classList.remove('burst'), 500);
@@ -64,14 +75,57 @@ function handleCorrect() {
 }
 
 function handleIncorrect() {
-  feedbackEl.textContent = "Oops! Try again.";
-  feedbackEl.className = "feedback error";
-  mascot.classList.add('shake');
-  setTimeout(() => mascot.classList.remove('shake'), 500);
+  currentAttempts++;
+
+  if (currentAttempts >= 2) {
+    // Failed this question after 2 wrong attempts
+    buttonsDisabled = true;
+    lives--;
+    updateLives();
+
+    let correctAnswer = '=';
+    if (currentLeft > currentRight) correctAnswer = '>';
+    else if (currentLeft < currentRight) correctAnswer = '<';
+
+    feedbackEl.textContent = `Wrong! The answer was "${correctAnswer}". You lost a life!`;
+    feedbackEl.className = "feedback error";
+
+    if (lives <= 0) {
+      setTimeout(gameOver, 1500);
+    } else {
+      setTimeout(generateQuestion, 2000);
+    }
+  } else {
+    // First wrong attempt - give one more chance
+    feedbackEl.textContent = `Not quite! Try again. (${2 - currentAttempts} chance left)`;
+    feedbackEl.className = "feedback error";
+    mascot.classList.add('shake');
+    setTimeout(() => mascot.classList.remove('shake'), 500);
+  }
 }
 
 function updateScore() {
   scoreEl.textContent = score;
+}
+
+function updateLives() {
+  const livesEl = document.getElementById('lives');
+  if (livesEl) {
+    livesEl.textContent = lives;
+  }
+}
+
+function gameOver() {
+  feedbackEl.textContent = "Game Over! You ran out of lives. Try again!";
+  feedbackEl.className = "feedback error";
+  leftNum.textContent = '?';
+  rightNum.textContent = '?';
+
+  setTimeout(() => {
+    if (confirm('You ran out of lives! Would you like to try again?')) {
+      location.reload();
+    }
+  }, 1000);
 }
 
 function finishLesson() {

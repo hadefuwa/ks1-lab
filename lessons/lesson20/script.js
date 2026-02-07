@@ -39,7 +39,8 @@ let state = {
   score: 0,
   currentIndex: 0,
   hearts: 3,
-  streak: 0
+  streak: 0,
+  currentAttempts: 0
 };
 
 // Initialize
@@ -208,6 +209,7 @@ function startGame() {
   state.score = 0;
   state.hearts = 3;
   state.streak = 0;
+  state.currentAttempts = 0;
   speak("Time to play! Type the words you hear.");
   render();
 }
@@ -224,6 +226,7 @@ function checkAnswer() {
   if (userWord === targetWord) {
     state.score += 10 + (state.streak * 2);
     state.streak++;
+    state.currentAttempts = 0;
     playSound("correct");
     feedback.innerHTML = `<div class="feedback success">🌟 Correct! Amazing!</div>`;
     playSparkleEffect();
@@ -234,30 +237,42 @@ function checkAnswer() {
       nextWord();
     }, 1400);
   } else {
+    state.currentAttempts++;
     state.streak = 0;
-    state.hearts--;
-    playSound("incorrect");
-    feedback.innerHTML = `<div class="feedback error">❌ Oops! It was "${targetWord}"</div>`;
-    input.value = "";
-    input.classList.add("shake");
-    setTimeout(() => input.classList.remove("shake"), 400);
-    input.focus();
 
-    if (state.hearts <= 0) {
-      setTimeout(() => {
-        state.phase = "gameover";
-        render();
-      }, 1500);
+    if (state.currentAttempts < 3) {
+      // Give more chances
+      playSound("incorrect");
+      feedback.innerHTML = `<div class="feedback error">❌ Not quite! Try again. (${3 - state.currentAttempts} tries left)</div>`;
+      input.value = "";
+      input.classList.add("shake");
+      setTimeout(() => input.classList.remove("shake"), 400);
+      input.focus();
     } else {
-      setTimeout(() => {
-        nextWord();
-      }, 1800);
+      // Failed after 3 attempts
+      state.hearts--;
+      state.currentAttempts = 0;
+      playSound("incorrect");
+      feedback.innerHTML = `<div class="feedback error">❌ Oops! It was "${targetWord}". You lost a life!</div>`;
+      input.value = "";
+
+      if (state.hearts <= 0) {
+        setTimeout(() => {
+          state.phase = "gameover";
+          render();
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          nextWord();
+        }, 1800);
+      }
     }
   }
   updateStats();
 }
 
 function nextWord() {
+  state.currentAttempts = 0;
   if (state.currentIndex < lessonData.challengeWords.length - 1) {
     state.currentIndex++;
     render();
