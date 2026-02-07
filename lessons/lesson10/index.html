@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 6: Big Number Boost</title>
+    <title>Lesson 10: Big Number Boost</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -246,6 +246,8 @@
         }
 
         function init() {
+            // Hide thousands column as we are focusing on Hundreds for now
+            document.getElementById('col-th').style.display = 'none';
             generateProblem();
         }
 
@@ -256,64 +258,58 @@
             document.getElementById('result').innerText = '?';
             document.getElementById('message').innerText = '';
 
-            // Generate 3 or 4 digit + 1 digit
-            const isFourDigit = Math.random() > 0.5;
-            let n1;
+            // Progressive Difficulty
+            // Questions 1-2: No Carry (Easier)
+            // Questions 3-5: Carry (Harder)
+            const isCarryRound = correctCount >= 2;
 
-            // Create a number that will trigger a carry in ones place only
-            // Ones digit must be high (e.g. 5-9)
-            // Tens digit should NOT be 9 (to avoid double carry per user request "Simple carry")
+            // Generate 3 digit number (Hundreds)
+            // Hundreds: 1-9
+            // Tens: 0-9
+            const h1 = Math.floor(Math.random() * 9) + 1;
+            const t1 = Math.floor(Math.random() * 10);
 
-            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const t1 = Math.floor(Math.random() * 9); // 0-8 (Avoid 9)
-            const h1 = Math.floor(Math.random() * 10); // 0-9
-            const th1 = isFourDigit ? Math.floor(Math.random() * 9) + 1 : 0; // 1-9 or 0
+            let o1, n2;
 
-            // Ensure n1 is at least 100
-            if (!isFourDigit && h1 === 0) {
-                // Force h1 to be at least 1
-                n1 = (1 * 100) + (t1 * 10) + o1;
-                counts.h = 1;
+            if (isCarryRound) {
+                // Carry Logic (Sum > 9)
+                o1 = Math.floor(Math.random() * 5) + 5; // 5-9
+                const minN2 = 10 - o1;
+                n2 = Math.floor(Math.random() * (9 - minN2 + 1)) + minN2; // Ensures o1+n2 >= 10
             } else {
-                n1 = (th1 * 1000) + (h1 * 100) + (t1 * 10) + o1;
+                // No Carry Logic (Sum <= 9)
+                o1 = Math.floor(Math.random() * 5); // 0-4
+                n2 = Math.floor(Math.random() * (9 - o1)); // Ensures o1+n2 <= 9
             }
 
-            // Calculate Addend
-            // Need n2 such that o1 + n2 >= 10
-            const minN2 = 10 - o1;
-            const n2 = Math.floor(Math.random() * (9 - minN2 + 1)) + minN2;
-
+            const n1 = (h1 * 100) + (t1 * 10) + o1;
             currentProblem = { n1, n2, sum: n1 + n2 };
 
             document.getElementById('num1').innerText = n1.toLocaleString();
             document.getElementById('num2').innerText = n2;
 
             // Set Initial Counts
-            // n1 parts
-            counts.th = Math.floor(n1 / 1000);
-            counts.h = Math.floor((n1 % 1000) / 100);
-            counts.t = Math.floor((n1 % 100) / 10);
-            let onesStart = n1 % 10;
-
-            // Allow ones to overflow visually (n1 ones + n2 ones)
-            counts.o = onesStart + n2;
+            counts.h = h1;
+            counts.t = t1;
+            counts.o = o1 + n2; // Visual 'overflow' before regroup
 
             renderBlocks();
-            speak(`Add ${n2} to ${n1}. Look how many ones we have!`);
 
-            setTimeout(() => {
-                if (counts.o >= 10) {
+            if (isCarryRound) {
+                speak(`Add ${n2} to ${n1}. We have too many ones! Click the button to regroup.`);
+                setTimeout(() => {
                     document.getElementById('regroupBtn').style.display = 'block';
-                }
-            }, 1000);
+                }, 1000);
+            } else {
+                speak(`Add ${n2} to ${n1}. Count the ones!`);
+                // No regroup button needed, show options immediately
+                setTimeout(showOptions, 1000);
+            }
         }
 
         function renderBlocks() {
-            // Check for too many blocks to render (limit 15 per col to fit)
-            const limit = 20;
-
+            const limit = 15; // Lower limit slightly to fit comfortably
             const cols = {
-                th: document.getElementById('col-th'),
                 h: document.getElementById('col-h'),
                 t: document.getElementById('col-t'),
                 o: document.getElementById('col-o')
@@ -327,7 +323,6 @@
             });
 
             // Fill
-            fillCol(cols.th, counts.th, 'block-1000', limit);
             fillCol(cols.h, counts.h, 'block-100', limit);
             fillCol(cols.t, counts.t, 'block-10', limit);
             fillCol(cols.o, counts.o, 'block-1', limit);
@@ -340,18 +335,27 @@
                 b.className = className;
                 container.appendChild(b);
             }
-            // If we have more than limit, maybe show a number?
-            // For this lesson, we should keep numbers reasonable so we don't need to obscure blocks
+            // Add a text counter if it exceeds count or just to help
+            if (count > 0) {
+                const counter = document.createElement('div');
+                counter.style.color = 'white';
+                counter.style.fontWeight = 'bold';
+                counter.style.marginTop = 'auto'; // Push to bottom? No, col is col-reverse
+                counter.style.marginBottom = '5px';
+                counter.innerText = count;
+                container.appendChild(counter); // Will appear at bottom due to flex-col-reverse
+            }
         }
 
         function regroup() {
             if (counts.o >= 10 && !hasRegrouped) {
+                // Animate removal?
                 counts.o -= 10;
                 counts.t += 1;
                 renderBlocks();
                 hasRegrouped = true;
                 document.getElementById('regroupBtn').style.display = 'none';
-                speak("Ten ones jump over to become one ten!");
+                speak("Ten ones transform into one ten!");
                 showOptions();
             }
         }
@@ -360,18 +364,13 @@
             const correct = currentProblem.sum;
             let opts = [correct];
             while (opts.length < 3) {
-                // Distractors:
-                // 1. Didn't carry (sum - 10)
-                // 2. Added to wrong place (e.g. + 20 instead of + 2)
-                // 3. Random close number
-
                 let wrong;
                 const r = Math.random();
                 if (r < 0.33) wrong = correct - 10;
                 else if (r < 0.66) wrong = correct + 10;
                 else wrong = correct + (Math.floor(Math.random() * 5) + 1);
 
-                if (wrong !== correct && wrong > 0 && !opts.includes(wrong)) opts.push(wrong);
+                if (wrong !== correct && wrong > 0 && !opts.includes(wrong) && Math.abs(wrong - correct) < 20) opts.push(wrong);
             }
             opts.sort(() => Math.random() - 0.5);
 
@@ -393,12 +392,12 @@
                 correctCount++;
                 btn.style.background = '#22c55e';
                 document.getElementById('result').innerText = val.toLocaleString();
-                confetti({
-                    particleCount: 150,
-                    spread: 80,
-                    origin: { y: 0.6 }
-                });
-                speak("That's right! You calculated the Big Number properly!");
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+
+                let praise = "Correct!";
+                if (correctCount === 2) praise = "Great! Now let's try some harder ones with carrying.";
+
+                speak(praise);
 
                 if (correctCount >= totalToWin) {
                     setTimeout(() => {
@@ -409,7 +408,7 @@
                 }
             } else {
                 btn.style.background = '#ef4444';
-                speak("Oops, not quite. Double check your addition.");
+                speak("Not quite. Count the blocks carefully.");
             }
         }
 
