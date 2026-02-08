@@ -4,7 +4,7 @@ const app = document.getElementById("app");
 const lessonData = {
   title: "KS1 Lab",
   mascot: "Bouncy",
-  introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some 4-letter magic words!",
+  introText: "Welcome to KS1 Lab! I'm Bouncy. Let's learn some 5-letter magic words!",
   teachWords: [
   {
     "word": "apple",
@@ -17,6 +17,34 @@ const lessonData = {
   {
     "word": "table",
     "context": "Eat dinner on this."
+  },
+  {
+    "word": "train",
+    "context": "A vehicle that runs on tracks."
+  },
+  {
+    "word": "bread",
+    "context": "A baked food made from flour."
+  },
+  {
+    "word": "spoon",
+    "context": "A utensil used for eating soup."
+  },
+  {
+    "word": "clock",
+    "context": "A device that shows time."
+  },
+  {
+    "word": "house",
+    "context": "A building where people live."
+  },
+  {
+    "word": "smile",
+    "context": "An expression showing happiness."
+  },
+  {
+    "word": "grape",
+    "context": "A small, round fruit."
   }
 ],
   challengeWords: [
@@ -129,6 +157,7 @@ function render() {
     `;
   } else if (state.phase === "play") {
     const currentWord = lessonData.challengeWords[state.currentIndex];
+    const prefilled = currentWord[0] + '_'.repeat(currentWord.length - 2) + currentWord[currentWord.length - 1];
     content.innerHTML = `
       <div style="text-align: center;">
         <div class="badge" style="margin-bottom: 20px;">Word ${state.currentIndex + 1} / ${lessonData.challengeWords.length}</div>
@@ -137,7 +166,7 @@ function render() {
            <button class="secondary" id="listen-btn" onclick="speak('${currentWord}')">🔊 Listen</button>
         </div>
 
-        <input type="text" id="game-input" class="equation" placeholder="Type here..." autocomplete="off">
+        <input type="text" id="game-input" class="equation" placeholder="Fill in the blanks..." value="${prefilled}" autocomplete="off">
 
         <div class="cta-row" style="justify-content: center; margin-top: 20px;">
           <button onclick="checkAnswer()">✨ check</button>
@@ -244,7 +273,9 @@ function checkAnswer() {
       // Give more chances
       playSound("incorrect");
       feedback.innerHTML = `<div class="feedback error">❌ Not quite! Try again. (${3 - state.currentAttempts} tries left)</div>`;
-      input.value = "";
+      const currentWord = lessonData.challengeWords[state.currentIndex];
+      const prefilled = currentWord[0] + '_'.repeat(currentWord.length - 2) + currentWord[currentWord.length - 1];
+      input.value = prefilled;
       input.classList.add("shake");
       setTimeout(() => input.classList.remove("shake"), 400);
       input.focus();
