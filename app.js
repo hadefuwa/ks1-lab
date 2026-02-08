@@ -27,7 +27,13 @@ function renderSidebar() {
   sidebar.innerHTML = `
     <h2>Lesson Progress</h2>
     <ul>
-      ${lessons.map(lesson => `<li>${lesson.title} ${completedLessons.includes(lesson.id) ? '✅' : '❌'}</li>`).join('')}
+      ${lessons.map(lesson => `
+        <li>
+          <button onclick="loadLesson('${lesson.path}')">
+            ${lesson.title} ${completedLessons.includes(lesson.id) ? '✅' : '❌'}
+          </button>
+        </li>
+      `).join('')}
     </ul>
   `;
 }
