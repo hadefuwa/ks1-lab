@@ -511,3 +511,36 @@ button:active {
   75% { transform: translateX(-4px); }
   100% { transform: translateX(0); }
 }
+
+.word-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.word-input.shake {
+  animation: shake 0.4s;
+}
+
+.letter-input {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 24px;
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  margin: 0 4px;
+  outline: none;
+  font-family: var(--font);
+}
+
+.letter-input:focus {
+  border-color: var(--accent);
+}
+
+.letter-input:disabled {
+  background: #f0f0f0;
+  color: var(--muted);
+}

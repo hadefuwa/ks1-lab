@@ -157,7 +157,6 @@ function render() {
     `;
   } else if (state.phase === "play") {
     const currentWord = lessonData.challengeWords[state.currentIndex];
-    const prefilled = currentWord[0] + '_'.repeat(currentWord.length - 2) + currentWord[currentWord.length - 1];
     content.innerHTML = `
       <div style="text-align: center;">
         <div class="badge" style="margin-bottom: 20px;">Word ${state.currentIndex + 1} / ${lessonData.challengeWords.length}</div>
@@ -166,7 +165,7 @@ function render() {
            <button class="secondary" id="listen-btn" onclick="speak('${currentWord}')">🔊 Listen</button>
         </div>
 
-        <input type="text" id="game-input" class="equation" placeholder="Fill in the blanks..." value="${prefilled}" autocomplete="off">
+        <div class="word-input" id="word-input"></div>
 
         <div class="cta-row" style="justify-content: center; margin-top: 20px;">
           <button onclick="checkAnswer()">✨ check</button>
@@ -174,6 +173,49 @@ function render() {
         <div id="feedback-area"></div>
       </div>
     `;
+
+    // Populate word input
+    const wordInput = document.getElementById("word-input");
+    const letters = currentWord.split('');
+    for (let i = 0; i < letters.length; i++) {
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.maxLength = 1;
+      inp.className = "letter-input";
+      if (i === 0 || i === letters.length - 1) {
+        inp.value = letters[i];
+        inp.disabled = true;
+      } else {
+        inp.placeholder = "_";
+      }
+      wordInput.appendChild(inp);
+    }
+
+    // Add event listeners
+    const editableInputs = wordInput.querySelectorAll("input:not([disabled])");
+    editableInputs.forEach((inp, index) => {
+      inp.addEventListener('input', function() {
+        if (this.value) {
+          if (index < editableInputs.length - 1) {
+            editableInputs[index + 1].focus();
+          } else {
+            // Last one filled, auto-check
+            checkAnswer();
+          }
+        }
+      });
+      inp.addEventListener('keydown', function(event) {
+        if (event.key === 'Backspace' && !this.value) {
+          event.preventDefault();
+          if (index > 0) {
+            editableInputs[index - 1].focus();
+          }
+        }
+      });
+    });
+
+    // Focus first editable
+    if (editableInputs.length > 0) editableInputs[0].focus();
   } else if (state.phase === "victory") {
     content.innerHTML = `
       <div style="text-align: center;">
@@ -196,23 +238,6 @@ function render() {
   container.appendChild(sidebar);
 
   app.appendChild(container);
-
-  // Focus input if in game
-  if (state.phase === "play") {
-    setTimeout(() => {
-      const inp = document.getElementById("game-input");
-      if (inp) inp.focus();
-    }, 100);
-
-    const inp = document.getElementById("game-input");
-    if (inp) {
-      inp.addEventListener("keyup", function (event) {
-        if (event.key === "Enter") {
-          checkAnswer();
-        }
-      });
-    }
-  }
 }
 
 // Logic Functions
@@ -244,12 +269,12 @@ function startGame() {
 }
 
 function checkAnswer() {
-  const input = document.getElementById("game-input");
+  const inputs = document.querySelectorAll("#word-input input");
   const feedback = document.getElementById("feedback-area");
 
-  if (!input) return;
+  if (!inputs || inputs.length === 0) return;
 
-  const userWord = input.value.trim().toLowerCase();
+  const userWord = Array.from(inputs).map(inp => inp.value).join('').toLowerCase();
   const targetWord = lessonData.challengeWords[state.currentIndex];
 
   if (userWord === targetWord) {
@@ -273,19 +298,25 @@ function checkAnswer() {
       // Give more chances
       playSound("incorrect");
       feedback.innerHTML = `<div class="feedback error">❌ Not quite! Try again. (${3 - state.currentAttempts} tries left)</div>`;
-      const currentWord = lessonData.challengeWords[state.currentIndex];
-      const prefilled = currentWord[0] + '_'.repeat(currentWord.length - 2) + currentWord[currentWord.length - 1];
-      input.value = prefilled;
-      input.classList.add("shake");
-      setTimeout(() => input.classList.remove("shake"), 400);
-      input.focus();
+      // Clear editable inputs
+      inputs.forEach(inp => { if (!inp.disabled) inp.value = ""; });
+      // Shake the word-input
+      const wordInput = document.getElementById("word-input");
+      if (wordInput) {
+        wordInput.classList.add("shake");
+        setTimeout(() => wordInput.classList.remove("shake"), 400);
+      }
+      // Focus first editable
+      const editableInputs = document.querySelectorAll("#word-input input:not([disabled])");
+      if (editableInputs.length > 0) editableInputs[0].focus();
     } else {
       // Failed after 3 attempts
       state.hearts--;
       state.currentAttempts = 0;
       playSound("incorrect");
       feedback.innerHTML = `<div class="feedback error">❌ Oops! It was "${targetWord}". You lost a life!</div>`;
-      input.value = "";
+      // Clear editable inputs
+      inputs.forEach(inp => { if (!inp.disabled) inp.value = ""; });
 
       if (state.hearts <= 0) {
         setTimeout(() => {
