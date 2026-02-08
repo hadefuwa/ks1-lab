@@ -12,82 +12,82 @@
     {
         "title": "Lesson 3: First Letter Fun",
         "path": "lessons/lesson3/index.html",
-        "id": 15
+        "id": 3
     },
     {
         "title": "Lesson 4: Vowel Power",
         "path": "lessons/lesson4/index.html",
-        "id": 16
+        "id": 4
     },
     {
         "title": "Lesson 5: Perfect Endings",
         "path": "lessons/lesson5/index.html",
-        "id": 17
+        "id": 5
     },
     {
         "title": "Lesson 6: Fashion Spelling",
         "path": "lessons/lesson6/index.html",
-        "id": 18
+        "id": 6
     },
     {
         "title": "Lesson 7: Making Ten Magic",
         "path": "lessons/lesson7/index.html",
-        "id": 11
+        "id": 7
     },
     {
         "title": "Lesson 8: Tens and Singles",
         "path": "lessons/lesson8/index.html",
-        "id": 12
+        "id": 8
     },
     {
         "title": "Lesson 9: Double Digit Dash",
         "path": "lessons/lesson9/index.html",
-        "id": 13
+        "id": 9
     },
     {
         "title": "Lesson 10: Big Number Boost",
         "path": "lessons/lesson10/index.html",
-        "id": 14
+        "id": 10
     },
     {
         "title": "Lesson 11: Base-10 Block Party",
         "path": "lessons/lesson11/index.html",
-        "id": 3
+        "id": 11
     },
     {
         "title": "Lesson 12: Space Block Adder",
         "path": "lessons/lesson12/index.html",
-        "id": 4
+        "id": 12
     },
     {
         "title": "Lesson 13: Space Sums Academy",
         "path": "lessons/lesson13/index.html",
-        "id": 5
+        "id": 13
     },
     {
         "title": "Lesson 14: Whole Hundreds Addition",
         "path": "lessons/lesson14/index.html",
-        "id": 6
+        "id": 14
     },
     {
         "title": "Lesson 15: The 50s Nebula",
         "path": "lessons/lesson15/index.html",
-        "id": 7
+        "id": 15
     },
     {
         "title": "Lesson 16: 3-Digit Addition Mastery",
         "path": "lessons/lesson16/index.html",
-        "id": 8
+        "id": 16
     },
     {
         "title": "Lesson 17: Keyboard Block Mission",
         "path": "lessons/lesson17/index.html",
-        "id": 9
+        "id": 17
     },
     {
         "title": "Lesson 18: Lily's Math Meadow",
         "path": "lessons/lesson18/index.html",
-        "id": 10
+        "id": 18
     },
     {
         "title": "Lesson 19: Digraphs (sh, ch, th)",
@@ -102,42 +102,42 @@
     {
         "title": "Lesson 21: Blend Beginnings",
         "path": "lessons/lesson21/index.html",
-        "id": 33
+        "id": 21
     },
     {
         "title": "Lesson 22: Vowel Teams",
         "path": "lessons/lesson22/index.html",
-        "id": 34
+        "id": 22
     },
     {
         "title": "Lesson 23: Blend Endings",
         "path": "lessons/lesson23/index.html",
-        "id": 35
+        "id": 23
     },
     {
         "title": "Lesson 24: Accessories",
         "path": "lessons/lesson24/index.html",
-        "id": 36
+        "id": 24
     },
     {
         "title": "Lesson 25: Tower Power (Vertical)",
-        "path": "lessons/lesson_column_intro/index.html",
-        "id": 40
+        "path": "lessons/lesson25/index.html",
+        "id": 25
     },
     {
         "title": "Lesson 26: The Magic Carrier",
-        "path": "lessons/lesson_column_carry/index.html",
-        "id": 41
+        "path": "lessons/lesson26/index.html",
+        "id": 26
     },
     {
         "title": "Lesson 27: Construction Crew (Carry)",
-        "path": "lessons/lesson_construction/index.html",
-        "id": 42
+        "path": "lessons/lesson27/index.html",
+        "id": 27
     },
     {
         "title": "Lesson 28: Rocket Launch Math",
-        "path": "lessons/lesson_rocket/index.html",
-        "id": 43
+        "path": "lessons/lesson28/index.html",
+        "id": 28
     },
     {
         "title": "Lesson 29: Making Ten Magic (Hard)",
@@ -162,62 +162,62 @@
     {
         "title": "Lesson 33: Base-10 Block Party (Hard)",
         "path": "lessons/lesson29/index.html",
-        "id": 21
+        "id": 33
     },
     {
         "title": "Lesson 34: Space Block Adder (Hard)",
         "path": "lessons/lesson30/index.html",
-        "id": 22
+        "id": 34
     },
     {
         "title": "Lesson 35: Space Sums Academy (Hard)",
         "path": "lessons/lesson31/index.html",
-        "id": 23
+        "id": 35
     },
     {
         "title": "Lesson 36: Whole Hundreds Addition (Hard)",
         "path": "lessons/lesson32/index.html",
-        "id": 24
+        "id": 36
     },
     {
         "title": "Lesson 37: The 50s Nebula (Hard)",
         "path": "lessons/lesson33/index.html",
-        "id": 25
+        "id": 37
     },
     {
         "title": "Lesson 38: 3-Digit Addition Mastery (Hard)",
         "path": "lessons/lesson34/index.html",
-        "id": 26
+        "id": 38
     },
     {
         "title": "Lesson 39: Keyboard Block Mission (Hard)",
         "path": "lessons/lesson35/index.html",
-        "id": 27
+        "id": 39
     },
     {
         "title": "Lesson 40: Lily's Math Meadow (Hard)",
         "path": "lessons/lesson36/index.html",
-        "id": 28
-    },
-    {
-        "title": "Lesson 37: Greater Than - Animals",
-        "path": "lessons/lesson37/index.html",
-        "id": 37
-    },
-    {
-        "title": "Lesson 38: Greater Than - Numbers (1-10)",
-        "path": "lessons/lesson38/index.html",
-        "id": 38
-    },
-    {
-        "title": "Lesson 39: Greater Than - Big Numbers",
-        "path": "lessons/lesson39/index.html",
-        "id": 39
-    },
-    {
-        "title": "Lesson 40: Greater Than - Equations",
-        "path": "lessons/lesson40/index.html",
         "id": 40
+    },
+    {
+        "title": "Lesson 41: Tower Power (Simple)",
+        "path": "lessons/lesson41/index.html",
+        "id": 41
+    },
+    {
+        "title": "Lesson 42: The Magic Carrier",
+        "path": "lessons/lesson42/index.html",
+        "id": 42
+    },
+    {
+        "title": "Lesson 43: Construction Crew",
+        "path": "lessons/lesson43/index.html",
+        "id": 43
+    },
+    {
+        "title": "Lesson 44: Rocket Math",
+        "path": "lessons/lesson44/index.html",
+        "id": 44
     },
     {
         "title": "Lesson 41: Tower Power (Simple)",
