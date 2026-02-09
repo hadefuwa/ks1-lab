@@ -273,12 +273,11 @@
                     <h1>Good Job!</h1>
                     <div style="font-size:3rem;">🌟</div>
                     <p>You found all the first letters!</p>
+                    <button style="margin-top: 20px; padding: 15px 30px; font-size: 1.5rem; cursor: pointer; border-radius: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid white; color: white; font-family: inherit;" onclick="window.parent.loadLesson('lessons/lesson22/index.html')">Next Lesson →</button>
                 `;
                 speak("Amazing! You finished the lesson!");
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-                setTimeout(() => {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
-                }, 2000);
+                window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
                 return;
             }
 
