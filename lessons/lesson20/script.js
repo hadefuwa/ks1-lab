@@ -178,8 +178,32 @@ function render() {
         <div id="feedback-area"></div>
       </div>
     `;
+  } else if (state.phase === "victory") {
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <h1 class="hero-title">🎉 You Did It!</h1>
+        <p class="hero-sub">Final Score: ${state.score}</p>
+        <button onclick="resetGame()">Play Again</button>
+      </div>
+    `;
+  } else if (state.phase === "gameover") {
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <h1 class="hero-title">😢 Oh no!</h1>
+        <p class="hero-sub">You ran out of lives.</p>
+        <button onclick="resetGame()">Try Again</button>
+      </div>
+    `;
+  }
 
-    // Populate word input
+  container.appendChild(content);
+  container.appendChild(sidebar);
+
+  app.appendChild(container);
+
+  // Populate word input AFTER DOM is ready
+  if (state.phase === "play") {
+    const currentWord = lessonData.challengeWords[state.currentIndex];
     const wordInput = document.getElementById("word-input");
     const letters = currentWord.split('');
     for (let i = 0; i < letters.length; i++) {
@@ -221,28 +245,7 @@ function render() {
 
     // Focus first editable
     if (editableInputs.length > 0) editableInputs[0].focus();
-  } else if (state.phase === "victory") {
-    content.innerHTML = `
-      <div style="text-align: center;">
-        <h1 class="hero-title">🎉 You Did It!</h1>
-        <p class="hero-sub">Final Score: ${state.score}</p>
-        <button onclick="resetGame()">Play Again</button>
-      </div>
-    `;
-  } else if (state.phase === "gameover") {
-    content.innerHTML = `
-      <div style="text-align: center;">
-        <h1 class="hero-title">😢 Oh no!</h1>
-        <p class="hero-sub">You ran out of lives.</p>
-        <button onclick="resetGame()">Try Again</button>
-      </div>
-    `;
   }
-
-  container.appendChild(content);
-  container.appendChild(sidebar);
-
-  app.appendChild(container);
 }
 
 // Logic Functions

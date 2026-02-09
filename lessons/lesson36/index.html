@@ -247,7 +247,7 @@
                 gameActive = false;
                 speak("Wonderful! You've collected so many blocks! Meadow mission complete!");
                 confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
-                window.parent.postMessage({ type: 'lessonCompleted', lessonId: 10 }, '*');
+                window.parent.postMessage({ type: 'lessonCompleted', lessonId: 36 }, '*');
             } else if (document.querySelectorAll('.item').length === 0) {
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 setTimeout(spawnItems, 1000);
