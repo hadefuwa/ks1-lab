@@ -225,10 +225,12 @@
 
         let currentLevelIdx = 0;
         let isAnswering = false;
+        let wrongAttempts = 0;
         const totalToWin = 5;
+        const MAX_ATTEMPTS = 3;
         levels.sort(() => Math.random() - 0.5);
 
-        const LESSON_ID = 35;
+        const LESSON_ID = 23;
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -249,6 +251,7 @@
                     <p>You are a Master Speller!</p>
                 `;
                 speak("Wonderful! You finished the lesson!");
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
                 setTimeout(() => {
                     window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
                 }, 2000);
@@ -257,6 +260,7 @@
 
             const lvl = levels[currentLevelIdx];
             isAnswering = false;
+            wrongAttempts = 0;
 
             document.getElementById('letter-slot').innerText = '_';
             document.getElementById('prefix').innerText = lvl.prefix;
@@ -294,9 +298,26 @@
                 currentLevelIdx++;
                 setTimeout(loadLevel, 2000);
             } else {
+                wrongAttempts++;
                 btn.classList.add('wrong');
-                speak("Try again.");
-                setTimeout(() => btn.classList.remove('wrong'), 500);
+                
+                if (wrongAttempts >= MAX_ATTEMPTS) {
+                    // Failed - show try again screen
+                    isAnswering = true;
+                    speak("Too many tries! Let's practice again.");
+                    setTimeout(() => {
+                        document.querySelector('.glass-card').innerHTML = `
+                            <h1>Oops! Let's Try Again</h1>
+                            <div style="font-size:3rem;">🔄</div>
+                            <p>Don't worry! Practice makes perfect.</p>
+                            <button style="margin-top: 20px; padding: 15px 30px; font-size: 1.5rem; cursor: pointer; border-radius: 15px; background: rgba(255,255,255,0.2); border: 2px solid white; color: white;" onclick="location.reload()">Try Again</button>
+                        `;
+                    }, 800);
+                } else {
+                    document.getElementById('message-area').innerText = `Try again! (${MAX_ATTEMPTS - wrongAttempts} tries left)`;
+                    speak("Try again.");
+                    setTimeout(() => btn.classList.remove('wrong'), 500);
+                }
             }
         }
 
