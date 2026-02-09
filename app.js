@@ -1,9 +1,24 @@
 const sidebar = document.getElementById("sidebar");
 
 let lessons = [];
-let completedLessons = JSON.parse(localStorage.getItem('completedLessons')) || [];
+let completedLessons = [];
+
+// Safely get stored data
+try {
+  const stored = localStorage.getItem('completedLessons');
+  if (stored) {
+    completedLessons = JSON.parse(stored);
+  }
+} catch (error) {
+  console.warn('localStorage not available:', error.message);
+  completedLessons = [];
+}
 
 async function init() {
+  if (!sidebar) {
+    console.error('Sidebar element not found');
+    return;
+  }
   await loadLessons();
   renderSidebar();
 }
@@ -47,7 +62,11 @@ window.loadLesson = loadLesson;
 function markCompleted(lessonId) {
   if (!completedLessons.includes(lessonId)) {
     completedLessons.push(lessonId);
-    localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    try {
+      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    } catch (error) {
+      console.warn('Could not save to localStorage:', error.message);
+    }
     renderSidebar();
   }
 }

@@ -15,6 +15,10 @@ const scoreEl = document.getElementById('score');
 const mascot = document.getElementById('mascot');
 
 function init() {
+  if (!leftNum || !rightNum || !feedbackEl || !scoreEl || !mascot) {
+    console.error('Required elements not found');
+    return;
+  }
   score = 0;
   lives = 3;
   updateScore();

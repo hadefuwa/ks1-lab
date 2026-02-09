@@ -49,6 +49,11 @@ function init() {
 
 // Main Render Loop
 function render() {
+  if (!app) {
+    console.error('App container not found');
+    return;
+  }
+  
   app.innerHTML = "";
 
   // Background layers
