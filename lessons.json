@@ -155,6 +155,11 @@
         "id": 31
     },
     {
+        "title": "Lesson: Reading Thousands",
+        "path": "lessons/lesson_thousands/index.html",
+        "id": 3100
+    },
+    {
         "title": "Lesson 32: Big Number Boost (Hard)",
         "path": "lessons/lesson28/index.html",
         "id": 32

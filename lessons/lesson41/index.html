@@ -178,6 +178,22 @@
         };
 
         const guid = document.getElementById('guidance');
+        let lastActionTime = Date.now();
+        const IDLE_DELAY = 15000; // 15 seconds
+
+        setInterval(checkIdle, 1000);
+
+        function checkIdle() {
+            if (Date.now() - lastActionTime > IDLE_DELAY) {
+                // Play hint
+                if (state.step === 0) {
+                    speak(`Remember, add the ones. ${state.digits.o1} plus ${state.digits.o2}.`);
+                } else if (state.step === 1) {
+                    speak(`Now add the tens. ${state.digits.t1} plus ${state.digits.t2 || 0}.`);
+                }
+                lastActionTime = Date.now(); // Reset timer so it doesn't spam
+            }
+        }
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -210,6 +226,7 @@
             state.step = 0;
             render();
             speak("Add the Ones first.");
+            lastActionTime = Date.now();
         }
 
         function render() {
@@ -240,6 +257,7 @@
         }
 
         function input(num) {
+            lastActionTime = Date.now();
             if (state.step === 0) {
                 const correct = state.digits.o1 + state.digits.o2;
                 if (num === correct) {

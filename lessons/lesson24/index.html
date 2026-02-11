@@ -155,64 +155,65 @@
         const lessonData = {
             title: "Fashion Spelling",
             items: [
-  {
-    "word": "necklace",
-    "icon": "📿",
-    "context": "Jewelry for your neck."
-  },
-  {
-    "word": "glasses",
-    "icon": "👓",
-    "context": "Help you see better."
-  },
-  {
-    "word": "mittens",
-    "icon": "🧤",
-    "context": "Warm hands in snow."
-  },
-  {
-    "word": "umbrella",
-    "icon": "☂️",
-    "context": "Blocks the rain."
-  },
-  {
-    "word": "wallet",
-    "icon": "👛",
-    "context": "Holds your money."
-  },
-  {
-    "word": "watch",
-    "icon": "⌚",
-    "context": "Tells the time."
-  },
-  {
-    "word": "crown",
-    "icon": "👑",
-    "context": "For a queen."
-  },
-  {
-    "word": "ring",
-    "icon": "💍",
-    "context": "Wear on your finger."
-  },
-  {
-    "word": "belt",
-    "icon": "a belt",
-    "context": "Holds up pants."
-  },
-  {
-    "word": "helmet",
-    "icon": "⛑️",
-    "context": "Protects your head."
-  }
-]
+                {
+                    "word": "necklace",
+                    "icon": "📿",
+                    "context": "Jewelry for your neck."
+                },
+                {
+                    "word": "glasses",
+                    "icon": "👓",
+                    "context": "Help you see better."
+                },
+                {
+                    "word": "mittens",
+                    "icon": "🧤",
+                    "context": "Warm hands in snow."
+                },
+                {
+                    "word": "umbrella",
+                    "icon": "☂️",
+                    "context": "Blocks the rain."
+                },
+                {
+                    "word": "wallet",
+                    "icon": "👛",
+                    "context": "Holds your money."
+                },
+                {
+                    "word": "watch",
+                    "icon": "⌚",
+                    "context": "Tells the time."
+                },
+                {
+                    "word": "crown",
+                    "icon": "👑",
+                    "context": "For a queen."
+                },
+                {
+                    "word": "ring",
+                    "icon": "💍",
+                    "context": "Wear on your finger."
+                },
+                {
+                    "word": "belt",
+                    "icon": "a belt",
+                    "context": "Holds up pants."
+                },
+                {
+                    "word": "helmet",
+                    "icon": "⛑️",
+                    "context": "Protects your head."
+                }
+            ]
         };
 
         let state = {
             phase: 'start', // start, teach, play, end
             idx: 0,
             score: 0,
-            streak: 0
+            streak: 0,
+            hints: 0 // Track hints used for current word
         };
 
         const LESSON_ID = 24;
@@ -253,13 +254,29 @@
             }
             else if (state.phase === 'play') {
                 const item = lessonData.items[state.idx];
+                const word = item.word;
+                const revealedCount = state.hints || 0;
+                let displayWord = '';
+
+                // Construct the placeholder string (e.g., "n _ c k _ _ _ _")
+                for (let i = 0; i < word.length; i++) {
+                    if (i < revealedCount) {
+                        displayWord += word[i] + ' ';
+                    } else {
+                        displayWord += '_ ';
+                    }
+                }
+
                 card.innerHTML = `
                     <div class="phase-label">Spelling Quiz ${state.idx + 1}/${lessonData.items.length}</div>
                     <div class="icon-display">${item.icon}</div>
-                    <input type="text" id="ansInput" class="input-box" placeholder="Type here..." autocomplete="off">
+                    <div style="font-size: 1.5rem; color: #666; margin-bottom: 5px; font-style: italic;">${item.context}</div>
+                    <div style="font-size: 3rem; letter-spacing: 0.5rem; margin: 10px 0; font-family: monospace; color: var(--secondary); font-weight: bold;">${displayWord}</div>
+                    <input type="text" id="ansInput" class="input-box" placeholder="Type the word here..." autocomplete="off">
                     <br>
                     <button class="btn" onclick="checkAnswer()">Check ✨</button>
-                    <button class="btn" style="background:var(--secondary); margin-left:10px;" onclick="speak('${item.word}')">🔊 Help</button>
+                    <button class="btn" style="background:var(--accent); margin-left:10px;" onclick="getHint()">💡 Hint</button>
+                    <button class="btn" style="background:var(--secondary); margin-left:10px;" onclick="speak('${item.word}')">🔊 Listen</button>
                     <div id="feedback" style="margin-top:15px; font-weight:bold; height:20px;"></div>
                 `;
 
@@ -298,11 +315,24 @@
             if (state.idx >= lessonData.items.length) {
                 state.phase = 'play';
                 state.idx = 0;
+                state.hints = 0; // Reset hints
                 speak("Now it's time to spell them yourself!");
                 render();
             } else {
                 render();
                 speak(lessonData.items[state.idx].word);
+            }
+        }
+
+        function getHint() {
+            const item = lessonData.items[state.idx];
+            if (!state.hints) state.hints = 0;
+            // Reveal up to word length - 1 (leave at least one letter hidden)
+            if (state.hints < item.word.length - 1) {
+                state.hints++;
+                render();
+            } else {
+                speak("Try to sound out the last letter!");
             }
         }
 
@@ -320,6 +350,7 @@
 
                 setTimeout(() => {
                     state.idx++;
+                    state.hints = 0; // Reset hints for next word
                     if (state.idx >= lessonData.items.length) {
                         state.phase = 'end';
                     }
