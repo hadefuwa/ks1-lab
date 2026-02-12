@@ -1,94 +1,283 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lesson 40: Greater Than - Equations</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 35: Keyboard Block Mission (Hard)</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --h-color: #ff0055;
+            --t-color: #00d4ff;
+            --o-color: #ffeb3b;
+        }
+
+        body {
+            margin: 0;
+            background: #0b0118;
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 4px solid #fff;
+            border-radius: 40px;
+            padding: 2rem;
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .instruction-bar {
+            font-size: 1.2rem;
+            background: #4361ee;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .target-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+        }
+
+        .column {
+            width: 150px;
+            padding: 15px;
+            border-radius: 20px;
+            border: 4px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .column.active {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #fff;
+        }
+
+        .block-display {
+            height: 120px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+            gap: 4px;
+        }
+
+        .block-100 {
+            width: 25px;
+            height: 25px;
+            background: var(--h-color);
+            border: 1px solid #fff;
+        }
+
+        .block-10 {
+            width: 6px;
+            height: 30px;
+            background: var(--t-color);
+            border: 1px solid #fff;
+        }
+
+        .block-1 {
+            width: 10px;
+            height: 10px;
+            background: var(--o-color);
+            border: 1px solid #fff;
+        }
+
+        .input-digit {
+            font-size: 4rem;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .submit-hint {
+            margin-top: 20px;
+            color: #4ade80;
+            font-size: 1.5rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        .big-start {
+            background: #ffeb3b;
+            color: #000;
+            padding: 30px 60px;
+            font-size: 2.5rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="app">
-        <div class="bg">
-            <div class="cloud c1"></div>
-            <div class="cloud c2"></div>
-            <div class="cloud c3"></div>
-            <div class="cloud c4"></div>
-            <div class="sparkle-field"></div>
-        </div>
 
-        <header>
-            <div class="logo">Primary App</div>
-            <button onclick="location.reload()" class="secondary">Restart</button>
-        </header>
-
-        <div class="layout">
-            <div class="card">
-                <div class="hero">
-                    <div>
-                        <h1 class="hero-title">Equation Compare</h1>
-                        <p class="hero-sub">Solve the sums and compare!</p>
-                    </div>
-                    <div class="cta-row">
-                        <span class="badge">Level 4</span>
-                        <span class="badge">Math</span>
-                    </div>
-                </div>
-
-                <h2 class="task-title" style="text-align: center; margin-top: 20px;">Which side is greater?</h2>
-
-                <div class="comparison-container">
-                    <div class="group">
-                        <span id="left-display" class="number-display">?</span>
-                    </div>
-
-                    <div style="font-size: 40px; font-weight: bold; color: var(--muted);">?</div>
-
-                    <div class="group">
-                        <span id="right-display" class="number-display">?</span>
-                    </div>
-                </div>
-
-                <div class="options">
-                    <button class="option-btn" onclick="checkAnswer('>')">&gt;</button>
-                    <button class="option-btn" onclick="checkAnswer('=')">=</button>
-                    <button class="option-btn" onclick="checkAnswer('<')">&lt;</button>
-                </div>
-
-                <div id="feedback" class="feedback" style="text-align: center; height: 30px; margin-top: 10px;"></div>
-
-            </div>
-
-            <div class="panel">
-                <div class="mascot" id="mascot">
-                    <div class="mascot-face">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                        <div class="smile"></div>
-                    </div>
-                    <div class="sparkle s1"></div>
-                    <div class="sparkle s2"></div>
-                </div>
-
-                <div class="stat-grid" style="margin-top: 20px;">
-                    <div class="stat">
-                        <div class="stat-label">Score</div>
-                        <div class="stat-value" id="score">0</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Goal</div>
-                        <div class="stat-value">10</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Lives</div>
-                        <div class="stat-value">❤️ <span id="lives">3</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="start-screen">
+        <button class="big-start" onclick="startGame()">⌨️ START KEYBOARD MISSION</button>
+        <p style="margin-top:20px;">Use Arrows to move and change numbers!<br>Press ENTER to finish!</p>
     </div>
-    <script src="script.js"></script>
+
+    <div id="game-box" style="display:none;">
+        <div class="instruction-bar">Use ⬅️ ➡️ to move | ⬆️ ⬇️ to change | ENTER to Submit</div>
+
+        <div class="target-container" id="target-blocks">
+            <div id="t-h" class="block-display"></div>
+            <div id="t-t" class="block-display"></div>
+            <div id="t-o" class="block-display"></div>
+        </div>
+
+        <div class="target-container">
+            <div class="column active" id="col-0">
+                <span style="color:var(--h-color)">Hundreds</span>
+                <span class="input-digit" id="digit-0">0</span>
+            </div>
+            <div class="column" id="col-1">
+                <span style="color:var(--t-color)">Tens</span>
+                <span class="input-digit" id="digit-1">0</span>
+            </div>
+            <div class="column" id="col-2">
+                <span style="color:var(--o-color)">Ones</span>
+                <span class="input-digit" id="digit-2">0</span>
+            </div>
+        </div>
+
+        <div class="submit-hint">Press ENTER when ready!</div>
+    </div>
+
+    <script>
+        let targetDigits = [0, 0, 0];
+        let currentDigits = [0, 0, 0];
+        let activeCol = 0;
+        let isAnswering = false;
+        let correctCount = 0;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-box').style.display = 'block';
+            generateLevel();
+        }
+
+        function generateLevel() {
+            isAnswering = false;
+            targetDigits = [
+                Math.floor(Math.random() * 50) + 1,
+                Math.floor(Math.random() * 90),
+                Math.floor(Math.random() * 90)
+            ];
+            currentDigits = [0, 0, 0];
+            updateDisplay();
+
+            drawBlocks('t-h', targetDigits[0], 'block-100');
+            drawBlocks('t-t', targetDigits[1], 'block-10');
+            drawBlocks('t-o', targetDigits[2], 'block-1');
+
+            speak("Look at the blocks! Use your keyboard to match the numbers.");
+        }
+
+        function drawBlocks(id, count, cls) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const b = document.createElement('div');
+                b.className = cls;
+                el.appendChild(b);
+            }
+        }
+
+        function updateDisplay() {
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`digit-${i}`).innerText = currentDigits[i];
+                document.getElementById(`col-${i}`).className = (i === activeCol) ? 'column active' : 'column';
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('game-box').style.display === 'none' || isAnswering) return;
+
+            const key = e.key.toLowerCase();
+
+            // Move Left/Right
+            if (key === 'arrowleft' || key === 'a') {
+                activeCol = Math.max(0, activeCol - 1);
+            }
+            if (key === 'arrowright' || key === 'd') {
+                activeCol = Math.min(2, activeCol + 1);
+            }
+
+            // Change Value
+            if (key === 'arrowup' || key === 'w') {
+                currentDigits[activeCol] = (currentDigits[activeCol] + 1) % 10;
+            }
+            if (key === 'arrowdown' || key === 's') {
+                currentDigits[activeCol] = (currentDigits[activeCol] - 1 + 10) % 10;
+            }
+
+            // Submit
+            if (key === 'enter') {
+                checkAnswer();
+            }
+
+            updateDisplay();
+        });
+
+        function checkAnswer() {
+            isAnswering = true;
+            const isCorrect = targetDigits.every((val, index) => val === currentDigits[index]);
+
+            if (isCorrect) {
+                correctCount++;
+                speak("Keyboard master! You matched the blocks perfectly!");
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+
+                if (correctCount >= 5) {
+                    speak("Mission accomplished! You are a keyboard hero!");
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 35 }, '*');
+                }
+
+                setTimeout(generateLevel, 3000);
+            } else {
+                speak("Not a match yet! Check the blocks one more time.");
+                setTimeout(() => { isAnswering = false; }, 1000);
+            }
+        }
+    </script>
 </body>
 
 </html>

@@ -4,252 +4,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 33: The 50s Nebula (Hard)</title>
+    <title>Lesson 28: Big Number Boost (Hard)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff00ff;
-            --gold: #ffeb3b;
-            --neon-green: #4ade80;
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
         }
 
         body {
-            margin: 0;
-            background: #0b0118;
-            color: white;
-            font-family: 'Fredoka One', cursive;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
             overflow: hidden;
         }
 
-        #game-box {
-            background: rgba(20, 0, 40, 0.9);
-            border: 5px solid var(--neon-pink);
-            border-radius: 40px;
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
             padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
-            box-shadow: 0 0 30px var(--neon-pink);
-            width: 90%;
-            max-width: 600px;
-            display: none;
-            /* Hidden until start */
+            max-width: 900px;
+            width: 95%;
+            transition: transform 0.3s ease;
         }
 
-        #start-screen {
-            text-align: center;
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #22c55e, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .big-start-btn {
-            background: linear-gradient(180deg, #00f3ff, #0066ff);
+        .columns-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            perspective: 1000px;
+        }
+
+        .column {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 0.5rem;
+            width: 80px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .col-label {
+            position: absolute;
+            top: -25px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        /* Block Styles */
+        .block-1000 {
+            width: 60px;
+            height: 60px;
+            background: #a855f7;
+            margin: 2px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+            animation: popIn 0.3s ease;
+            position: relative;
+        }
+
+        .block-1000::after {
+            content: "1k";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+        .block-100 {
+            width: 50px;
+            height: 50px;
+            background: #ef4444;
+            margin: 2px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
+        }
+
+        .block-10 {
+            width: 15px;
+            height: 50px;
+            background: #3b82f6;
+            margin: 2px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
+        }
+
+        .block-1 {
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            margin: 2px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
+        }
+
+        .regroup-btn {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
             border: none;
+            padding: 1rem 2rem;
             color: white;
-            padding: 50px 80px;
-            font-size: 3.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            font-family: 'Fredoka One', cursive;
-            box-shadow: 0 15px 0 #0044aa, 0 0 50px rgba(0, 243, 255, 0.5);
-            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            margin-top: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
         }
 
-        .big-start-btn:hover {
+        .regroup-btn:hover {
             transform: scale(1.05);
-        }
-
-        .big-start-btn:active {
-            transform: translateY(10px);
-            box-shadow: 0 5px 0 #0044aa;
-        }
-
-        .level-badge {
-            background: var(--neon-blue);
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            color: #0b0118;
-        }
-
-        .score-board {
-            font-size: 1.5rem;
-            color: var(--neon-green);
-            margin: 15px 0;
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
         }
 
         .equation {
-            font-size: 3.5rem;
-            margin: 20px 0;
-            text-shadow: 3px 3px var(--neon-blue);
-            letter-spacing: 2px;
-        }
-
-        .highlight {
-            color: var(--gold);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .answer-btn {
-            background: #7b00ff;
-            border: none;
-            padding: 20px;
             font-size: 2.5rem;
-            color: white;
-            border-radius: 20px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #4b0099;
-            font-family: inherit;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
         }
 
-        .answer-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #4b0099;
+        .number {
+            color: #fff;
         }
 
-        .teacher-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: var(--gold);
-            min-height: 60px;
-            border-left: 5px solid var(--gold);
+        .operator {
+            color: #ec4899;
+        }
+
+        #message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            margin-top: 1rem;
+            color: #a5b4fc;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div id="start-screen">
-        <button class="big-start-btn" onclick="startGame()">🚀 START<br>LESSON 7</button>
-    </div>
+    <div class="glass-panel">
+        <h1>Big Number Boost (Hard)</h1>
+        <div id="instruction">Add the small number to the big number. Watch out for the carry!</div>
 
-    <div id="game-box">
-        <span class="level-badge" id="level-display">Level 1: Nifty Fifties</span>
-        <div class="score-board">⭐ Stars: <span id="score">0</span></div>
-        <div class="equation" id="display">...</div>
-        <div class="grid" id="options"></div>
-        <div class="teacher-box" id="teacher-text">Loading...</div>
+        <div class="equation">
+            <span id="num1" class="number">209</span>
+            <span class="operator">+</span>
+            <span id="num2" class="number">2</span>
+            <span class="operator">=</span>
+            <span id="result" class="number">?</span>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="col-th">
+                <div class="col-label">Thousands</div>
+            </div>
+            <div class="column" id="col-h">
+                <div class="col-label">Hundreds</div>
+            </div>
+            <div class="column" id="col-t">
+                <div class="col-label">Tens</div>
+            </div>
+            <div class="column" id="col-o">
+                <div class="col-label">Ones</div>
+            </div>
+        </div>
+
+        <button id="regroupBtn" class="regroup-btn" onclick="regroup()">⚡ Carry the 1! ⚡</button>
+
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;"></div>
+
+        <div id="message"></div>
     </div>
 
     <script>
-        let score = 0;
-        let currentAns = 0;
-        let level = 1;
-        let isAnswering = false;
-        let lastAns = 0;
+        let currentProblem = {};
+        let counts = { th: 0, h: 0, t: 0, o: 0 };
+        let hasRegrouped = false;
         let correctCount = 0;
-
-        const levels = [
-            { name: "50s Beginner", maxH: 3 }, // e.g. 150 + 250
-            { name: "50s Explorer", maxH: 6 }, // up to 650
-            { name: "Nebula Knight", maxH: 9 }, // up to 950
-            { name: "Ultimate Fifty", maxH: 15 } // Very large
-        ];
+        const totalToWin = 8;
+        const LESSON_ID = 28;
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.9;
-            msg.pitch = 1.1;
+            msg.rate = 1.0;
             window.speechSynthesis.speak(msg);
         }
 
-        function startGame() {
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-box').style.display = 'block';
-            generate();
+        function init() {
+            generateProblem();
         }
 
-        function generate() {
-            isAnswering = false;
-            let config = levels[Math.min(level - 1, levels.length - 1)];
-            document.getElementById('level-display').innerText = `Level ${level}: ${config.name}`;
+        function generateProblem() {
+            hasRegrouped = false;
+            document.getElementById('regroupBtn').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('result').innerText = '?';
+            document.getElementById('message').innerText = '';
 
-            let n1, n2;
-            do {
-                // Generate numbers ending in 50
-                let h1 = Math.floor(Math.random() * config.maxH) + 1;
-                let h2 = Math.floor(Math.random() * config.maxH) + 1;
-                n1 = (h1 * 100) + 50;
-                n2 = (h2 * 100) + 50;
-                currentAns = n1 + n2;
-            } while (currentAns === lastAns);
+            // Generate 3 or 4 digit + 1 digit
+            const isFourDigit = Math.random() > 0.5;
+            let n1;
 
-            lastAns = currentAns;
+            // Create a number that will trigger a carry in ones place only
+            // Ones digit must be high (e.g. 5-9)
+            // Tens digit should NOT be 9 (to avoid double carry per user request "Simple carry")
 
-            document.getElementById('display').innerHTML = `${n1} + ${n2} = <span class="highlight">?</span>`;
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
+            const t1 = Math.floor(Math.random() * 9); // 0-8 (Avoid 9)
+            const h1 = Math.floor(Math.random() * 10); // 0-9
+            const th1 = isFourDigit ? Math.floor(Math.random() * 9) + 1 : 0; // 1-9 or 0
 
-            // Helpful tip logic
-            let tipText = "Tip: 50 + 50 = 100. Add that to the hundreds!";
-            document.getElementById('teacher-text').innerText = tipText;
-            speak(`${n1} plus ${n2}. ${tipText}`);
-
-            // Generate Choices
-            let choices = [currentAns];
-            while (choices.length < 4) {
-                // Mistakes: missing the hundred from 50+50, or general hundred error
-                let offsets = [-100, 100, -200, 200, -50, 50];
-                let offset = offsets[Math.floor(Math.random() * offsets.length)];
-                let wrong = currentAns + offset;
-
-                if (wrong > 0 && !choices.includes(wrong)) {
-                    choices.push(wrong);
-                }
+            // Ensure n1 is at least 100
+            if (!isFourDigit && h1 === 0) {
+                // Force h1 to be at least 1
+                n1 = (1 * 100) + (t1 * 10) + o1;
+                counts.h = 1;
+            } else {
+                n1 = (th1 * 1000) + (h1 * 100) + (t1 * 10) + o1;
             }
-            choices.sort(() => Math.random() - 0.5);
 
-            const grid = document.getElementById('options');
-            grid.innerHTML = '';
-            choices.forEach(val => {
-                const b = document.createElement('button');
-                b.className = 'answer-btn';
-                b.innerText = val;
-                b.onclick = () => check(val, b);
-                grid.appendChild(b);
+            // Calculate Addend
+            // Need n2 such that o1 + n2 >= 10
+            const minN2 = 10 - o1;
+            const n2 = Math.floor(Math.random() * (9 - minN2 + 1)) + minN2;
+
+            currentProblem = { n1, n2, sum: n1 + n2 };
+
+            document.getElementById('num1').innerText = n1.toLocaleString();
+            document.getElementById('num2').innerText = n2;
+
+            // Set Initial Counts
+            // n1 parts
+            counts.th = Math.floor(n1 / 1000);
+            counts.h = Math.floor((n1 % 1000) / 100);
+            counts.t = Math.floor((n1 % 100) / 10);
+            let onesStart = n1 % 10;
+
+            // Allow ones to overflow visually (n1 ones + n2 ones)
+            counts.o = onesStart + n2;
+
+            renderBlocks();
+            speak(`Add ${n2} to ${n1}. Look how many ones we have!`);
+
+            setTimeout(() => {
+                if (counts.o >= 10) {
+                    document.getElementById('regroupBtn').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function renderBlocks() {
+            // Check for too many blocks to render (limit 15 per col to fit)
+            const limit = 20;
+
+            const cols = {
+                th: document.getElementById('col-th'),
+                h: document.getElementById('col-h'),
+                t: document.getElementById('col-t'),
+                o: document.getElementById('col-o')
+            };
+
+            // Reset but keep labels
+            Object.values(cols).forEach(c => {
+                const label = c.querySelector('.col-label');
+                c.innerHTML = '';
+                c.appendChild(label);
+            });
+
+            // Fill
+            fillCol(cols.th, counts.th, 'block-1000', limit);
+            fillCol(cols.h, counts.h, 'block-100', limit);
+            fillCol(cols.t, counts.t, 'block-10', limit);
+            fillCol(cols.o, counts.o, 'block-1', limit);
+        }
+
+        function fillCol(container, count, className, limit) {
+            const displayCount = Math.min(count, limit);
+            for (let i = 0; i < displayCount; i++) {
+                const b = document.createElement('div');
+                b.className = className;
+                container.appendChild(b);
+            }
+            // If we have more than limit, maybe show a number?
+            // For this lesson, we should keep numbers reasonable so we don't need to obscure blocks
+        }
+
+        function regroup() {
+            if (counts.o >= 10 && !hasRegrouped) {
+                counts.o -= 10;
+                counts.t += 1;
+                renderBlocks();
+                hasRegrouped = true;
+                document.getElementById('regroupBtn').style.display = 'none';
+                speak("Ten ones jump over to become one ten!");
+                showOptions();
+            }
+        }
+
+        function showOptions() {
+            const correct = currentProblem.sum;
+            let opts = [correct];
+            while (opts.length < 3) {
+                // Distractors:
+                // 1. Didn't carry (sum - 10)
+                // 2. Added to wrong place (e.g. + 20 instead of + 2)
+                // 3. Random close number
+
+                let wrong;
+                const r = Math.random();
+                if (r < 0.33) wrong = correct - 10;
+                else if (r < 0.66) wrong = correct + 10;
+                else wrong = correct + (Math.floor(Math.random() * 50) + 1);
+
+                if (wrong !== correct && wrong > 0 && !opts.includes(wrong)) opts.push(wrong);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'regroup-btn';
+                btn.innerText = opt.toLocaleString();
+                btn.style.display = 'block';
+                btn.style.margin = '0';
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
             });
         }
 
-        function check(val, btn) {
-            if (isAnswering) return;
-            isAnswering = true;
-
-            if (val === currentAns) {
-                score++;
+        function checkAnswer(val, btn) {
+            if (val === currentProblem.sum) {
                 correctCount++;
-                document.getElementById('score').innerText = score;
-                if (score % 5 === 0) {
-                    level++;
-                    speak("Level Up! You are a master of fifty!");
+                btn.style.background = '#22c55e';
+                document.getElementById('result').innerText = val.toLocaleString();
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+                speak("That's right! You calculated the Big Number properly!");
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => {
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
                 } else {
-                    speak("Correct! Amazing!");
+                    setTimeout(generateProblem, 2500);
                 }
-
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                btn.style.background = "#4ade80"; // Success Green
-
-                if (correctCount >= 10) {
-                    speak("Nebula mastered! You are a fifty expert!");
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 33 }, '*');
-                }
-
-                setTimeout(generate, 2000);
             } else {
-                speak("Try again! Remember, two 50s make a hundred.");
-                btn.style.background = "#ff0055"; // Error Red
-                setTimeout(() => { isAnswering = false; }, 1000);
+                btn.style.background = '#ef4444';
+                speak("Oops, not quite. Double check your addition.");
             }
         }
+
+        init();
     </script>
 </body>
 

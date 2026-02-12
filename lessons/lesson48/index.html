@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson 43: Construction Crew</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #e0f2fe;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-area {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: #bae6fd;
+            border-bottom: 50px solid #64748b;
+            /* Ground */
+            overflow: hidden;
+            margin-top: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .crane {
+            position: absolute;
+            right: 50px;
+            top: 50px;
+            width: 10px;
+            height: 300px;
+            background: #f59e0b;
+            transform-origin: top center;
+            transition: all 1s ease;
+        }
+
+        .crane-arm {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 10px;
+            background: #f59e0b;
+        }
+
+        .crane-line {
+            position: absolute;
+            right: 280px;
+            /* target pos */
+            top: 10px;
+            width: 2px;
+            height: 50px;
+            background: #333;
+            transition: height 1s;
+        }
+
+        .claw {
+            position: absolute;
+            bottom: -20px;
+            left: -15px;
+            width: 30px;
+            height: 20px;
+            background: #333;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .building-site {
+            position: absolute;
+            bottom: 0;
+            left: 100px;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+        }
+
+        .column-base {
+            width: 120px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px 8px 0 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            /* Stack up */
+            min-height: 100px;
+            position: relative;
+        }
+
+        .col-label {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #334155;
+            font-size: 1.2rem;
+        }
+
+        .brick {
+            width: 100px;
+            height: 30px;
+            background: #ef4444;
+            border: 2px solid #b91c1c;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            position: relative;
+            transition: all 0.5s;
+        }
+
+        .beam {
+            width: 100px;
+            height: 80px;
+            /* Taller */
+            background: #3b82f6;
+            border: 2px solid #1d4ed8;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .beam::after {
+            content: "10";
+        }
+
+        .wobble {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(2deg);
+            }
+
+            75% {
+                transform: rotate(-2deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        .message-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            background: #f59e0b;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .input-panel {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+
+        input {
+            width: 100px;
+            font-size: 2rem;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Construction Crew</h1>
+    <div id="game-area">
+        <div class="message-box" id="msg">Welcome Foreman! We have too many bricks in the Ones pile.</div>
+
+        <div class="crane">
+            <div class="crane-arm"></div>
+            <div class="crane-line" id="crane-cable">
+                <div class="claw"></div>
+            </div>
+        </div>
+
+        <div class="building-site">
+            <div class="column-base" id="col-tens">
+                <div class="col-label">Tens Tower</div>
+            </div>
+            <div class="column-base" id="col-ones">
+                <div class="col-label">Ones Pile</div>
+            </div>
+        </div>
+
+        <div class="input-panel" id="input-panel">
+            <div id="input-prompt">How many loose bricks left?</div>
+            <input type="number" id="user-input">
+            <br>
+            <button class="btn" onclick="checkInput()">Check</button>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            tens: 1,
+            ones: 13, // Initial example: 1 ten, 13 ones
+            phase: 'start' // start, wobble, crane_picking, crane_moving, input_ones, input_tens, done
+        };
+
+        const msg = document.getElementById('msg');
+        const onesCol = document.getElementById('col-ones');
+        const tensCol = document.getElementById('col-tens');
+        const craneCable = document.getElementById('crane-cable');
+        const inputPanel = document.getElementById('input-panel');
+        const inputField = document.getElementById('user-input');
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        }
+
+        function init() {
+            // Randomize
+            state.tens = Math.floor(Math.random() * 3) + 1;
+            state.ones = Math.floor(Math.random() * 5) + 10; // 10-14 (guarantee overflow)
+
+            renderBricks();
+
+            msg.innerHTML = `We have <b style="color:blue">${state.tens}</b> beams and <b style="color:red">${state.ones}</b> bricks.<br>Calculate: ${state.tens * 10} + ${state.ones}? <br>Wait! The Ones pile is too high!`;
+            speak("Oh no! The ones pile is too high! It's wobbling!");
+
+            setTimeout(() => {
+                onesCol.classList.add('wobble');
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = "Call the Crane!";
+                btn.onclick = activateCrane;
+                msg.appendChild(btn);
+            }, 1500);
+        }
+
+        function renderBricks() {
+            onesCol.innerHTML = '<div class="col-label">Ones Pile</div>';
+            tensCol.innerHTML = '<div class="col-label">Tens Tower</div>';
+
+            for (let i = 0; i < state.ones; i++) {
+                const b = document.createElement('div');
+                b.className = 'brick';
+                if (i >= 10) b.style.opacity = '1'; // Top ones
+                onesCol.appendChild(b);
+            }
+
+            for (let i = 0; i < state.tens; i++) {
+                const b = document.createElement('div');
+                b.className = 'beam';
+                tensCol.appendChild(b);
+            }
+        }
+
+        function activateCrane() {
+            onesCol.classList.remove('wobble');
+            msg.innerHTML = "Crane is regrouping 10 bricks into 1 beam...";
+
+            // 1. Lower Crane
+            craneCable.style.height = '200px'; // Lower
+
+            setTimeout(() => {
+                // 2. Turn 10 bottom bricks transparent/remove visually
+                // In reality, we are taking 10.
+                // Let's visualize the grab.
+                // Remove 10 bricks from DOM
+                const bricks = Array.from(onesCol.querySelectorAll('.brick'));
+                for (let i = 0; i < 10; i++) {
+                    if (bricks[i]) bricks[i].style.visibility = 'hidden';
+                }
+
+                // Add a "beam" to the claw?
+                const beam = document.createElement('div');
+                beam.className = 'beam';
+                beam.style.position = 'absolute';
+                beam.style.bottom = '-80px';
+                beam.style.left = '-35px';
+                document.querySelector('.claw').appendChild(beam);
+
+                speak("Picking up ten bricks...");
+            }, 1000);
+
+            setTimeout(() => {
+                // 3. Raise Crane
+                craneCable.style.height = '50px';
+            }, 2000);
+
+            setTimeout(() => {
+                // 4. Move Crane Arm (by moving the cable left via `right` property?? No, move the whole crane or line)
+                // CSS `right` on line was 280px.
+                // Tens col is further left.
+                craneCable.style.right = '550px'; // Move left
+            }, 3000);
+
+            setTimeout(() => {
+                // 5. Drop
+                craneCable.style.height = '200px';
+            }, 4000);
+
+            setTimeout(() => {
+                // 6. Release
+                document.querySelector('.claw').innerHTML = ''; // Remove beam from claw
+
+                // Add beam to tens col
+                const b = document.createElement('div');
+                b.className = 'beam';
+                tensCol.appendChild(b);
+                state.tens++;
+                state.ones -= 10;
+
+                // Fix ones col (remove hidden bricks properly)
+                renderBricks(); // Re-render with new state
+
+                craneCable.style.height = '50px';
+                speak("Regrouping complete! Now count.");
+                startCounting();
+            }, 5000);
+        }
+
+        function startCounting() {
+            msg.innerText = "How many Ones are left?";
+            inputPanel.style.display = 'block';
+            inputField.value = '';
+            inputField.focus();
+            state.phase = 'input_ones';
+        }
+
+        function checkInput() {
+            const val = parseInt(inputField.value);
+            if (state.phase === 'input_ones') {
+                if (val === state.ones) {
+                    speak("Correct. Now, how many Tens beams do we have?");
+                    document.getElementById('input-prompt').innerText = "How many Tens beams?";
+                    inputField.value = '';
+                    inputField.focus();
+                    state.phase = 'input_tens';
+                } else {
+                    speak("Count the red bricks again.");
+                }
+            } else if (state.phase === 'input_tens') {
+                if (val === state.tens) {
+                    speak("Excellent work Foreman!");
+                    msg.innerText = `Total: ${state.tens}${state.ones} (${state.tens * 10 + state.ones})`;
+                    confetti();
+                    inputPanel.style.display = 'none';
+                    setTimeout(() => {
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: 43 }, '*');
+                    }, 3000);
+                } else {
+                    speak("Count the blue beams again.");
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

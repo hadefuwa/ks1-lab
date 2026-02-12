@@ -3,244 +3,129 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 31: Space Sums Academy (Hard)</title>
+    <title>Lesson: Type It</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff00ff;
-            --gold: #ffeb3b;
+            --primary: #059669;
+            --bg: #f0fdf4;
         }
 
         body {
             margin: 0;
-            background: #0b0118;
-            color: white;
-            font-family: 'Fredoka One', cursive;
+            background: var(--bg);
+            font-family: 'Outfit', sans-serif;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            overflow: hidden;
+            flex-direction: column;
         }
 
-        #game-box {
-            background: rgba(20, 0, 40, 0.9);
-            border: 5px solid var(--neon-blue);
-            border-radius: 40px;
+        .card {
+            background: white;
             padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
-            box-shadow: 0 0 30px var(--neon-blue);
+            max-width: 600px;
             width: 90%;
-            max-width: 500px;
-            display: none;
-            /* Hidden until start */
         }
 
-        #start-screen {
-            text-align: center;
+        h1 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 1rem 0;
         }
 
-        .big-start-btn {
-            background: linear-gradient(180deg, #ff00ff, #7b00ff);
-            border: none;
-            color: white;
-            padding: 50px 80px;
-            font-size: 3.5rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Fredoka One', cursive;
-            box-shadow: 0 15px 0 #4b0099, 0 0 50px rgba(255, 0, 255, 0.5);
-            transition: all 0.2s;
-        }
-
-        .big-start-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .big-start-btn:active {
-            transform: translateY(10px);
-            box-shadow: 0 5px 0 #4b0099;
-        }
-
-        .level-badge {
-            background: var(--neon-pink);
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-        }
-
-        .score-board {
-            font-size: 1.5rem;
-            color: #4ade80;
-            margin: 15px 0;
-        }
-
-        .equation {
+        .input-box {
             font-size: 4rem;
-            margin: 20px 0;
-            text-shadow: 3px 3px var(--neon-pink);
+            padding: 20px;
+            border: 4px solid #bbf7d0;
+            border-radius: 15px;
+            width: 80%;
+            text-align: center;
+            color: #333;
+            outline: none;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .input-box:focus {
+            border-color: var(--primary);
         }
 
-        .answer-btn {
-            background: #4361ee;
+        .btn {
+            padding: 15px 30px;
+            margin-top: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .play-btn {
+            background: #d1fae5;
+            color: #065f46;
             border: none;
             padding: 20px;
-            font-size: 2rem;
-            color: white;
-            border-radius: 20px;
+            border-radius: 50%;
+            font-size: 3rem;
             cursor: pointer;
-            box-shadow: 0 6px 0 #2a087a;
-            font-family: inherit;
-        }
-
-        .answer-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #2a087a;
-        }
-
-        .teacher-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: var(--gold);
-            min-height: 60px;
-            border-left: 5px solid var(--gold);
+            display: block;
+            margin: 0 auto 20px;
         }
     </style>
 </head>
 
 <body>
-
-    <div id="start-screen">
-        <button class="big-start-btn" onclick="startGame()">🚀 START<br>MISSION</button>
-    </div>
-
-    <div id="game-box">
-        <span class="level-badge" id="level-display">Level 1: Rookie</span>
-        <div class="score-board">⭐ Stars: <span id="score">0</span></div>
-        <div class="equation" id="display">...</div>
-        <div class="grid" id="options"></div>
-        <div class="teacher-box" id="teacher-text">Loading...</div>
-    </div>
-
+    <div class="card" id="app"></div>
     <script>
-        let score = 0;
-        let currentAns = 0;
-        let level = 1;
-        let isAnswering = false;
-        let lastN1 = 0; // To prevent repeat questions
-        let correctCount = 0;
-
-        const levels = [
-            { name: "Rookie", step: 100 },
-            { name: "Explorer", step: 10 },
-            { name: "Captain", step: 50 },
-            { name: "Galactic Hero", step: 10 }
+        const nums = [
+            { n: 2005, t: "Two thousand and five" },
+            { n: 1234, t: "One thousand, two hundred and thirty-four" },
+            { n: 4050, t: "Four thousand and fifty" },
+            { n: 7777, t: "Seven thousand, seven hundred and seventy-seven" },
+            { n: 6001, t: "Six thousand and one" }
         ];
+        let idx = 0;
 
-        function speak(text) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.9;
-            msg.pitch = 1.2;
-            window.speechSynthesis.speak(msg);
+        function r() {
+            if (idx >= nums.length) return end();
+            document.getElementById('app').innerHTML = `
+                <h2>Listen and Type! ⌨️</h2>
+                <button class="play-btn" onclick="speak('${nums[idx].t}')">🔊</button>
+                <input id="ans" type="number" class="input-box" placeholder="????" autocomplete="off">
+                <br>
+                <button class="btn" onclick="check()">Check ✨</button>
+            `;
+            setTimeout(() => {
+                speak(nums[idx].t);
+                document.getElementById('ans').focus();
+            }, 500);
         }
 
-        function getTeachingTip(n1, n2) {
-            if (n1 % 100 === 0 && n2 % 100 === 0) {
-                return `Trick: ${n1 / 100} + ${n2 / 100} is ${(n1 + n2) / 100}. Then add the zeros!`;
-            }
-            return `Add the hundreds first, then the rest!`;
-        }
-
-        function startGame() {
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('game-box').style.display = 'block';
-            generate();
-        }
-
-        function generate() {
-            isAnswering = false;
-            let config = levels[Math.min(level - 1, levels.length - 1)];
-            document.getElementById('level-display').innerText = `Level ${level}: ${config.name}`;
-
-            // Logic to prevent repeat questions
-            let n1, n2;
-            do {
-                n1 = (Math.floor(Math.random() * 8) + 1) * 100;
-                n2 = (Math.floor(Math.random() * 8) + 1) * config.step;
-            } while (n1 === lastN1); // Keep rolling if it's the same as last time
-
-            lastN1 = n1;
-            currentAns = n1 + n2;
-            document.getElementById('display').innerText = `${n1} + ${n2}`;
-
-            const tip = getTeachingTip(n1, n2);
-            document.getElementById('teacher-text').innerText = tip;
-
-            speak(`${n1} plus ${n2}. ${tip}`);
-
-            // Build choices
-            let choices = [currentAns];
-            while (choices.length < 4) {
-                let offset = (Math.floor(Math.random() * 3) + 1) * (Math.random() > 0.5 ? 100 : 10);
-                let wrong = Math.random() > 0.5 ? currentAns + offset : currentAns - offset;
-
-                if (wrong > 0 && !choices.includes(wrong)) {
-                    choices.push(wrong);
-                }
-            }
-            choices.sort(() => Math.random() - 0.5);
-
-            const grid = document.getElementById('options');
-            grid.innerHTML = '';
-            choices.forEach(val => {
-                const b = document.createElement('button');
-                b.className = 'answer-btn';
-                b.innerText = val;
-                b.onclick = () => check(val, b);
-                grid.appendChild(b);
-            });
-        }
-
-        function check(val, btn) {
-            if (isAnswering) return;
-            isAnswering = true;
-
-            if (val === currentAns) {
-                score++;
-                correctCount++;
-                document.getElementById('score').innerText = score;
-                if (score % 5 === 0) level++;
-
-                speak("Bingo! You are a star!");
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                btn.style.background = "#4ade80";
-
-                if (correctCount >= 10) {
-                    speak("Mission complete! You've mastered space sums!");
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 31 }, '*');
-                }
-
-                setTimeout(generate, 2000);
+        function check() {
+            const val = document.getElementById('ans').value;
+            if (parseInt(val) === nums[idx].n) {
+                confetti();
+                speak("You got it!");
+                setTimeout(() => { idx++; r(); }, 1500);
             } else {
-                speak("Try one more time!");
-                btn.style.background = "#ff0055";
-                setTimeout(() => { isAnswering = false; }, 800);
+                speak("Try again. Listen carefully.");
+                document.getElementById('ans').value = '';
+                document.getElementById('ans').focus();
             }
         }
+
+        function end() {
+            document.getElementById('app').innerHTML = `<h1>Typing Master! 🏆</h1><button class="btn" onclick="window.parent.postMessage({type:'lessonCompleted', lessonId:3104}, '*')">Finish</button>`;
+            speak("You are a typing master!");
+        }
+
+        function speak(t) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); }
+        r();
     </script>
 </body>
 
