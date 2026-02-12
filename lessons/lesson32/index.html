@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 27: Double Digit Dash (Hard)</title>
+    <title>Lesson 32: Double Digit Dash (Hard)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -41,6 +41,15 @@
             max-width: 800px;
             width: 90%;
             transition: transform 0.3s ease;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 600px) {
+            .glass-panel {
+                padding: 1rem;
+                width: 95%;
+            }
         }
 
         h1 {
@@ -51,25 +60,44 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
 
         .columns-container {
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
         }
 
         .column {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 16px;
-            padding: 1rem;
-            width: 120px;
-            min-height: 350px;
+            padding: 0.5rem;
+            width: 100px;
+            min-height: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column-reverse;
             align-items: center;
             position: relative;
             border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 600px) {
+            .column {
+                width: 80px;
+                min-height: 220px;
+                max-height: 320px;
+                padding: 0.4rem;
+            }
         }
 
         .col-label {
@@ -90,6 +118,13 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
             animation: popIn 0.3s ease;
         }
+        
+        @media (max-width: 600px) {
+            .block-ten {
+                width: 24px;
+                height: 60px;
+            }
+        }
 
         .block-one {
             width: 30px;
@@ -101,6 +136,13 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
             transition: all 0.3s ease;
             animation: popIn 0.3s ease;
+        }
+        
+        @media (max-width: 600px) {
+            .block-one {
+                width: 24px;
+                height: 24px;
+            }
         }
 
         .regroup-btn {
@@ -117,6 +159,13 @@
             transition: transform 0.2s, box-shadow 0.2s;
             display: none;
         }
+        
+        @media (max-width: 600px) {
+            .regroup-btn {
+                font-size: 1.1rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
 
         .regroup-btn:hover {
             transform: scale(1.05);
@@ -131,6 +180,14 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 600px) {
+            .equation {
+                font-size: 2rem;
+                gap: 0.5rem;
+            }
         }
 
         .number {
@@ -146,6 +203,24 @@
             min-height: 2rem;
             margin-top: 1rem;
             color: #a5b4fc;
+        }
+        
+        @media (max-width: 600px) {
+            #message {
+                font-size: 1.1rem;
+            }
+        }
+        
+        #instruction {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            #instruction {
+                font-size: 1rem;
+            }
         }
 
         @keyframes popIn {
@@ -187,7 +262,7 @@
 
         <button id="regroupBtn" class="regroup-btn" onclick="regroup()">🔥 Power Up the Ten! 🔥</button>
 
-        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;"></div>
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;"></div>
 
         <div id="message"></div>
     </div>
@@ -220,17 +295,16 @@
             document.getElementById('message').innerText = '';
 
             // Generate Double + Double with Carry
-            // n1 = 15..35
-            // n2 = 15..35
-            // Ensure ones sum > 10
+            // n1 = 10..39
+            // n2 = 10..39
+            // Ensure ones sum >= 10 for regrouping
 
             const t1 = Math.floor(Math.random() * 3) + 1; // 1-3 tens
-            const o1 = Math.floor(Math.random() * 50) + 5; // 5-9 ones
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9 ones
             const n1 = (t1 * 10) + o1;
 
-            const t2 = Math.floor(Math.random() * 2) + 1; // 1-2 tens
-            const minO2 = (11 - o1);
-            const o2 = Math.floor(Math.random() * (9 - minO2 + 1)) + minO2;
+            const t2 = Math.floor(Math.random() * 3) + 1; // 1-3 tens
+            const o2 = Math.floor(Math.random() * 5) + 5; // 5-9 ones (ensures sum >= 10)
             const n2 = (t2 * 10) + o2;
 
             currentProblem = { n1, n2, sum: n1 + n2 };
