@@ -130,138 +130,118 @@
         "id": 26
     },
     {
-        "title": "Lesson 27: Construction Crew (Carry)",
+        "title": "Lesson 27: Reading Thousands (Intro)",
         "path": "lessons/lesson27/index.html",
         "id": 27
     },
     {
-        "title": "Lesson 28: Rocket Launch Math",
+        "title": "Lesson 28: Reading Thousands (Match Words)",
         "path": "lessons/lesson28/index.html",
         "id": 28
     },
     {
-        "title": "Lesson 29: Making Ten Magic (Hard)",
-        "path": "lessons/lesson25/index.html",
+        "title": "Lesson 29: Reading Thousands (Build It)",
+        "path": "lessons/lesson29/index.html",
         "id": 29
     },
     {
-        "title": "Lesson 30: Tens and Singles (Hard)",
-        "path": "lessons/lesson26/index.html",
+        "title": "Lesson 30: Reading Thousands (Which is Bigger?)",
+        "path": "lessons/lesson30/index.html",
         "id": 30
     },
     {
-        "title": "Lesson 31: Double Digit Dash (Hard)",
-        "path": "lessons/lesson27/index.html",
+        "title": "Lesson 31: Reading Thousands (Dictation)",
+        "path": "lessons/lesson31/index.html",
         "id": 31
     },
     {
-        "title": "Lesson: Reading Thousands (Intro)",
-        "path": "lessons/lesson27a/index.html",
-        "id": 3100
-    },
-    {
-        "title": "Lesson: Reading Thousands (Match Words)",
-        "path": "lessons/lesson27b/index.html",
-        "id": 3101
-    },
-    {
-        "title": "Lesson: Reading Thousands (Build It)",
-        "path": "lessons/lesson27c/index.html",
-        "id": 3102
-    },
-    {
-        "title": "Lesson: Reading Thousands (Which is Bigger?)",
-        "path": "lessons/lesson27d/index.html",
-        "id": 3103
-    },
-    {
-        "title": "Lesson: Reading Thousands (Dictation)",
-        "path": "lessons/lesson27e/index.html",
-        "id": 3104
-    },
-    {
-        "title": "Lesson 32: Big Number Boost (Hard)",
-        "path": "lessons/lesson28/index.html",
+        "title": "Lesson 32: Double Digit Dash (Hard)",
+        "path": "lessons/lesson32/index.html",
         "id": 32
     },
     {
-        "title": "Lesson 33: Base-10 Block Party (Hard)",
-        "path": "lessons/lesson29/index.html",
+        "title": "Lesson 33: Big Number Boost (Hard)",
+        "path": "lessons/lesson33/index.html",
         "id": 33
     },
     {
-        "title": "Lesson 34: Space Block Adder (Hard)",
-        "path": "lessons/lesson30/index.html",
+        "title": "Lesson 34: Base-10 Block Party (Hard)",
+        "path": "lessons/lesson34/index.html",
         "id": 34
     },
     {
-        "title": "Lesson 35: Space Sums Academy (Hard)",
-        "path": "lessons/lesson31/index.html",
+        "title": "Lesson 35: Space Block Adder (Hard)",
+        "path": "lessons/lesson35/index.html",
         "id": 35
     },
     {
-        "title": "Lesson 36: Whole Hundreds Addition (Hard)",
-        "path": "lessons/lesson32/index.html",
+        "title": "Lesson 36: Space Sums Academy (Hard)",
+        "path": "lessons/lesson36/index.html",
         "id": 36
     },
     {
-        "title": "Lesson 37: The 50s Nebula (Hard)",
-        "path": "lessons/lesson33/index.html",
+        "title": "Lesson 37: Whole Hundreds Addition (Hard)",
+        "path": "lessons/lesson37/index.html",
         "id": 37
     },
     {
-        "title": "Lesson 38: 3-Digit Addition Mastery (Hard)",
-        "path": "lessons/lesson34/index.html",
+        "title": "Lesson 38: The 50s Nebula (Hard)",
+        "path": "lessons/lesson38/index.html",
         "id": 38
     },
     {
-        "title": "Lesson 39: Keyboard Block Mission (Hard)",
-        "path": "lessons/lesson35/index.html",
+        "title": "Lesson 39: 3-Digit Addition Mastery (Hard)",
+        "path": "lessons/lesson39/index.html",
         "id": 39
     },
     {
-        "title": "Lesson 40: Lily's Math Meadow (Hard)",
-        "path": "lessons/lesson36/index.html",
+        "title": "Lesson 40: Keyboard Block Mission (Hard)",
+        "path": "lessons/lesson40/index.html",
         "id": 40
     },
     {
-        "title": "Lesson 41: Tower Power (Simple)",
+        "title": "Lesson 41: Lily's Math Meadow (Hard)",
         "path": "lessons/lesson41/index.html",
         "id": 41
     },
     {
-        "title": "Lesson 42: The Magic Carrier",
+        "title": "Lesson 42: Tower Power (Simple)",
         "path": "lessons/lesson42/index.html",
         "id": 42
     },
     {
-        "title": "Lesson 43: Construction Crew",
+        "title": "Lesson 43: The Magic Carrier",
         "path": "lessons/lesson43/index.html",
         "id": 43
     },
     {
-        "title": "Lesson 44: Rocket Math",
+        "title": "Lesson 44: Construction Crew",
         "path": "lessons/lesson44/index.html",
         "id": 44
     },
     {
-        "title": "Lesson 41: Tower Power (Simple)",
-        "path": "lessons/lesson41/index.html",
-        "id": 41
+        "title": "Lesson 45: Rocket Math",
+        "path": "lessons/lesson45/index.html",
+        "id": 45
     },
     {
-        "title": "Lesson 42: The Magic Carrier",
-        "path": "lessons/lesson42/index.html",
-        "id": 42
+        "title": "Lesson 46: Tower Power (Simple)",
+        "path": "lessons/lesson46/index.html",
+        "id": 46
     },
     {
-        "title": "Lesson 43: Construction Crew",
-        "path": "lessons/lesson43/index.html",
-        "id": 43
+        "title": "Lesson 47: The Magic Carrier",
+        "path": "lessons/lesson47/index.html",
+        "id": 47
     },
     {
-        "title": "Lesson 44: Rocket Math",
-        "path": "lessons/lesson44/index.html",
-        "id": 44
+        "title": "Lesson 48: Construction Crew",
+        "path": "lessons/lesson48/index.html",
+        "id": 48
+    },
+    {
+        "title": "Lesson 49: Rocket Math",
+        "path": "lessons/lesson49/index.html",
+        "id": 49
     }
 ]
