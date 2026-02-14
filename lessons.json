@@ -268,5 +268,25 @@
         "title": "Lesson 54: Balloon Pop (3-Digits)",
         "path": "lessons/lesson54/index.html",
         "id": 54
+    },
+    {
+        "title": "Lesson 55: Double Digits",
+        "path": "lessons/lesson55/index.html",
+        "id": 55
+    },
+    {
+        "title": "Lesson 56: Triple Tower",
+        "path": "lessons/lesson56/index.html",
+        "id": 56
+    },
+    {
+        "title": "Lesson 57: Big Number Carry",
+        "path": "lessons/lesson57/index.html",
+        "id": 57
+    },
+    {
+        "title": "Lesson 58: Double Carry Challenge",
+        "path": "lessons/lesson58/index.html",
+        "id": 58
     }
 ]

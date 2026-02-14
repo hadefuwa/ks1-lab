@@ -3,307 +3,280 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 49: Double Digits</title>
+    <title>Lesson 44: Rocket Math</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --background: #0f172a;
-            --surface: rgba(255, 255, 255, 0.1);
-            --text: #f8fafc;
-            --highlight: #ec4899;
-        }
-
         body {
-            background: var(--background);
-            color: var(--text);
-            font-family: 'Outfit', sans-serif;
+            background: #000;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            user-select: none;
             overflow: hidden;
         }
 
-        .game-container {
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .terminal {
+            width: 700px;
+            border: 4px solid #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #0f0;
+            background: rgba(0, 20, 0, 0.9);
+            position: relative;
+        }
+
+        h1 {
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 400px;
+            border-bottom: 2px dashed #0f0;
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px #0f0;
         }
 
-        h2 {
-            color: #a5b4fc;
-            margin-top: 0;
-        }
-
-        .vertical-math {
+        .screen {
             display: flex;
-            justify-content: center;
-            font-size: 4rem;
-            font-family: monospace;
-            line-height: 1.2;
-            margin: 3rem 0;
-            position: relative;
+            justify-content: space-around;
+            margin: 40px 0;
         }
 
-        .column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 0.5rem;
-            padding: 0.5rem;
-            border-radius: 8px;
-            position: relative;
+        .module {
+            border: 1px solid #0f0;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
         }
 
-        .column.active {
-            background: rgba(236, 72, 153, 0.15);
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
-            border: 1px dashed rgba(236, 72, 153, 0.5);
+        .label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            text-decoration: underline;
         }
 
-        .carry-box {
-            position: absolute;
-            top: -40px;
-            width: 30px;
-            height: 30px;
-            font-size: 1.5rem;
-            color: #facc15;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: all 0.5s ease;
+        .value {
+            font-size: 3rem;
+            margin: 10px 0;
         }
 
-        .carry-box.show {
-            opacity: 1;
-            top: 0;
+        .input-area {
+            text-align: center;
+            margin-top: 20px;
         }
 
         input {
-            width: 60px;
-            height: 70px;
-            font-size: 3rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            color: white;
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-size: 2rem;
+            padding: 10px;
+            font-family: inherit;
+            width: 100px;
             text-align: center;
-            font-family: monospace;
-          margin-top: 10px;
             outline: none;
         }
 
-        .numpad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+        input:focus {
+            box-shadow: 0 0 10px #0f0;
         }
 
-        .btn {
-            padding: 15px;
-            font-size: 1.5rem;
-            background: #334155;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
+        .log {
+            height: 100px;
+            overflow-y: auto;
+            border-top: 1px solid #050;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #0c0;
+            text-align: left;
+            padding: 5px;
         }
 
-        .btn:active {
-            transform: scale(0.95);
+        .rocket-container {
+            position: absolute;
+            right: -150px;
+            bottom: 0;
+            width: 100px;
+            height: 200px;
+            transition: transform 3s ease-in;
         }
 
-        .flying-ten {
-            position: fixed;
-            font-size: 2rem;
-            color: #facc15;
+        .rocket {
+            font-size: 5rem;
+            transform: rotate(-45deg);
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        .alert {
+            color: red;
             font-weight: bold;
-            pointer-events: none;
-            z-index: 100;
-            transition: all 1s ease-in-out;
+            animation: blink 0.5s infinite;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="game-container">
-        <h2>Double Digits</h2>
-        <div id="guidance" style="color: #a5b4fc; min-height: 1.5em; margin-bottom: 20px;">Add two 2-digit numbers!</div>
+    <div class="terminal">
+        <h1>LAUNCH CONTROL SYSTEM</h1>
 
-        <div class="vertical-math" id="board">
-            <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
-
-            <div class="column" id="col-tens">
-                <div class="carry-box" id="carry-indicator">1</div>
-                <div id="val-t1">2</div>
-                <div id="val-t2">3</div>
-                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
-                <input id="in-tens" readonly placeholder="?">
+        <div class="screen">
+            <div class="module" id="mod-tens">
+                <div class="label">SECTOR TENS</div>
+                <div class="value" id="val-tens">0</div>
             </div>
-
-            <div class="column active" id="col-ones">
-                <div id="val-o1">7</div>
-                <div id="val-o2">8</div>
-                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
-                <input id="in-ones" readonly placeholder="?">
+            <div class="module" id="mod-ones">
+                <div class="label">SECTOR ONES</div>
+                <div class="value" id="val-ones">0</div>
             </div>
         </div>
 
-        <div class="numpad" id="numpad"></div>
+        <div class="input-area" id="input-area">
+            <div id="prompt">CALCULATING ONES FLUX... (8 + 5)</div>
+            <input type="number" id="cmd-input" autofocus>
+        </div>
+
+        <div class="log" id="sys-log">
+            > SYSTEM INITIALIZED<br>
+            > WAITING FOR INPUT...
+        </div>
     </div>
 
     <script>
-        let state = { t1: 2, t2: 3, o1: 7, o2: 8, step: 0, score: 0 };
-        let currentInput = "";
+        const log = document.getElementById('sys-log');
+        const input = document.getElementById('cmd-input');
+        const prompt = document.getElementById('prompt');
 
-        function init() {
-            const pad = document.getElementById('numpad');
-            [7, 8, 9, 4, 5, 6, 1, 2, 3, 0].forEach(n => {
-                const b = document.createElement('button');
-                b.className = 'btn';
-                b.innerText = n;
-                if (n === 0) b.style.gridColumn = 'span 3';
-                b.onclick = () => input(n);
-                pad.appendChild(b);
-            });
-            nextProblem();
-        }
+        let state = {
+            n1: 0,
+            n2: 0,
+            stage: 0 // 0: input ones sum, 1: overflow handling, 2: input final tens
+        };
 
-        function nextProblem() {
-            // Generate: both numbers 2-digit, ones sum >= 10
-            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // ensure sum >= 10, <= 18
-            const t1 = Math.floor(Math.random() * 5) + 1; // 1-5
-            const t2 = Math.floor(Math.random() * 4) + 1; // 1-4
-
-            state = { t1, t2, o1, o2, step: 0, score: state.score };
-            currentInput = "";
-            renderBoard();
-            speak(`Add ${t1}${o1} plus ${t2}${o2}. Start with the ones: ${o1} plus ${o2}.`);
-
-            document.getElementById('col-tens').classList.remove('active');
-            document.getElementById('col-ones').classList.add('active');
-            document.getElementById('carry-indicator').style.opacity = '0';
-            document.getElementById('in-ones').value = '';
-            document.getElementById('in-tens').value = '';
-            document.getElementById('guidance').innerText = `What is ${o1} + ${o2}?`;
-        }
-
-        function renderBoard() {
-            document.getElementById('val-t1').innerText = state.t1;
-            document.getElementById('val-t2').innerText = state.t2;
-            document.getElementById('val-o1').innerText = state.o1;
-            document.getElementById('val-o2').innerText = state.o2;
-        }
-
-        function input(n) {
-            if (state.step === 0) {
-                currentInput += n;
-                const target = state.o1 + state.o2;
-                const targetStr = target.toString();
-
-                if (currentInput === targetStr) {
-                    document.getElementById('in-ones').value = currentInput;
-                    currentInput = "";
-                    speak("Perfect! Now watch the carry!");
-                    setTimeout(() => doCarryAnimation(target), 1000);
-                    state.step = 1;
-                } else if (currentInput.length >= targetStr.length) {
-                    speak("Try again.");
-                    currentInput = "";
-                    shake(document.getElementById('in-ones'));
-                } else {
-                    document.getElementById('in-ones').value = currentInput;
-                }
-            } else if (state.step === 2) {
-                const target = state.t1 + state.t2 + 1;
-                if (n === target) {
-                    document.getElementById('in-tens').value = n;
-                    complete();
-                } else {
-                    shake(document.getElementById('in-tens'));
-                    speak(`Count again: ${state.t1} plus ${state.t2} plus the carried 1.`);
-                }
-            }
-        }
-
-        function doCarryAnimation(sumVal) {
-            const onesVal = sumVal % 10;
-            const inputRect = document.getElementById('in-ones').getBoundingClientRect();
-
-            const flyer = document.createElement('div');
-            flyer.className = 'flying-ten';
-            flyer.innerText = '1';
-            flyer.style.left = (inputRect.left + 5) + 'px';
-            flyer.style.top = (inputRect.top + 5) + 'px';
-            document.body.appendChild(flyer);
-
-            document.getElementById('in-ones').value = onesVal;
-            speak("The ten flies to the top!");
-
-            const targetRect = document.getElementById('carry-indicator').getBoundingClientRect();
-            setTimeout(() => {
-                flyer.style.left = targetRect.left + 'px';
-                flyer.style.top = targetRect.top + 'px';
-            }, 100);
-
-            setTimeout(() => {
-                flyer.remove();
-                document.getElementById('carry-indicator').style.opacity = '1';
-                document.getElementById('col-ones').classList.remove('active');
-                document.getElementById('col-tens').classList.add('active');
-                document.getElementById('guidance').innerText = `Now the tens: ${state.t1} + ${state.t2} + 1`;
-                speak(`Add the tens: ${state.t1} plus ${state.t2} plus 1.`);
-                state.step = 2;
-            }, 1100);
-        }
-
-        function shake(el) {
-            el.animate([
-                { transform: 'translateX(0)' },
-                { transform: 'translateX(-10px)' },
-                { transform: 'translateX(10px)' },
-                { transform: 'translateX(0)' }
-            ], { duration: 300 });
-        }
-
-        function complete() {
-            speak("Excellent work!");
-            confetti();
-            state.score++;
-            setTimeout(() => {
-                if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 49 }, '*');
-                    speak("Lesson Complete!");
-                } else {
-                    nextProblem();
-                }
-            }, 2000);
+        function logMsg(msg) {
+            log.innerHTML += `> ${msg}<br>`;
+            log.scrollTop = log.scrollHeight;
         }
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
+            msg.pitch = 0.8; // Robo voice
+            msg.rate = 1.1;
             window.speechSynthesis.speak(msg);
+        }
+
+        function init() {
+            // Problem: 38 + 5 for example
+            const t1 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const o1 = Math.floor(Math.random() * 4) + 6; // 6-9
+            const o2 = Math.floor(Math.random() * 4) + 5; // 5-8
+            // sum ones >= 11
+
+            state.t_display = t1;
+            state.o_sum_target = o1 + o2;
+            state.o1 = o1;
+            state.o2 = o2;
+
+            document.getElementById('val-tens').innerText = t1;
+            document.getElementById('val-ones').innerText = `${o1} + ${o2}`;
+
+            prompt.innerText = `ENTER SUM OF SECTOR ONES (${o1} + ${o2}):`;
+            speak("System Ready. Enter sum of ones sector.");
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') processInput();
+            });
+        }
+
+        function processInput() {
+            const val = parseInt(input.value);
+            input.value = '';
+
+            if (state.stage === 0) {
+                if (val === state.o_sum_target) {
+                    logMsg(`ONES SUM CONFIRMED: ${val}`);
+                    speak("Sum confirmed.");
+
+                    // Overflow animation
+                    document.getElementById('val-ones').innerText = val; // Show 13
+                    document.getElementById('val-ones').style.color = 'red';
+
+                    logMsg("WARNING: SECTOR ONES OVERLOAD > 9");
+                    logMsg("INITIATING CARRY SEQUENCE...");
+                    speak("Warning. Overload. Carrying to Tens Sector.");
+
+                    // Animate
+                    setTimeout(() => {
+                        const tenPart = Math.floor(val / 10);
+                        const onePart = val % 10;
+
+                        document.getElementById('val-ones').innerText = onePart;
+                        document.getElementById('val-ones').style.color = '#0f0';
+
+                        // Route to tens
+                        document.getElementById('val-tens').innerText = `${state.t_display} + ${tenPart}`;
+                        document.getElementById('mod-tens').style.borderColor = 'yellow';
+
+                        state.final_tens_target = state.t_display + tenPart;
+                        state.stage = 1;
+
+                        prompt.innerText = `CALCULATE NEW TENS TOTAL (${state.t_display} + ${tenPart}):`;
+                        speak("Enter new Tens total.");
+                    }, 2000);
+
+                } else {
+                    logMsg("ERROR: INCORRECT SUM. RETRY.");
+                    speak("Incorrect. Retry.");
+                }
+            } else if (state.stage === 1) {
+                if (val === state.final_tens_target) {
+                    document.getElementById('val-tens').innerText = val;
+                    document.getElementById('mod-tens').style.borderColor = '#0f0';
+
+                    logMsg("CALCULATIONS COMPLETE.");
+                    logMsg("TRAJECTORY SET.");
+                    logMsg("LAUNCHING...");
+                    speak("Calculations correct. Launching!");
+
+                    setTimeout(() => {
+                        confetti();
+                        logMsg("MISSION SUCCESS.");
+                        setTimeout(() => {
+                            window.parent.postMessage({ type: 'lessonCompleted', lessonId: 49 }, '*');
+                        }, 2000);
+                    }, 1000);
+                } else {
+                    logMsg("ERROR: INCORRECT TENS. CHECK CARRY.");
+                    speak("Incorrect. Check the carried one.");
+                }
+            }
         }
 
         init();
     </script>
 </body>
-
-</html>
 
 </html>

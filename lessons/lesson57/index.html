@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 57: Big Number Carry</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --background: #78350f;
+            --surface: rgba(245, 158, 11, 0.1);
+            --text: #fef3c7;
+            --highlight: #fb923c;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background), #451a03);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            width: 500px;
+        }
+
+        h2 {
+            color: #fcd34d;
+            margin-top: 0;
+        }
+
+        .vertical-math {
+            display: flex;
+            justify-content: center;
+            font-size: 4rem;
+            font-family: monospace;
+            line-height: 1.2;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .column.active {
+            background: rgba(251, 146, 60, 0.2);
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.3);
+            border: 1px dashed rgba(251, 146, 60, 0.6);
+        }
+
+        .carry-box {
+            position: absolute;
+            top: -40px;
+            width: 30px;
+            height: 30px;
+            font-size: 1.5rem;
+            color: #facc15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .carry-box.show {
+            opacity: 1;
+            top: 0;
+        }
+
+        input {
+            width: 60px;
+            height: 70px;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.5rem;
+            background: #92400e;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .flying-ten {
+            position: fixed;
+            font-size: 2rem;
+            color: #facc15;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 100;
+            transition: all 1s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <h2>Big Number Carry</h2>
+        <div id="guidance" style="color: #fcd34d; min-height: 1.5em; margin-bottom: 20px;">Carry in 3-digit numbers!</div>
+
+        <div class="vertical-math" id="board">
+            <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
+
+            <div class="column" id="col-hundreds">
+                <div id="val-h1">2</div>
+                <div id="val-h2">1</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-hundreds" readonly placeholder="?">
+            </div>
+
+            <div class="column" id="col-tens">
+                <div class="carry-box" id="carry-tens">1</div>
+                <div id="val-t1">3</div>
+                <div id="val-t2">4</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-tens" readonly placeholder="?">
+            </div>
+
+            <div class="column active" id="col-ones">
+                <div id="val-o1">7</div>
+                <div id="val-o2">6</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-ones" readonly placeholder="?">
+            </div>
+        </div>
+
+        <div class="numpad" id="numpad"></div>
+    </div>
+
+    <script>
+        let state = { h1: 2, h2: 1, t1: 3, t2: 4, o1: 7, o2: 6, step: 0, score: 0 };
+        let currentInput = "";
+
+        function init() {
+            const pad = document.getElementById('numpad');
+            [7, 8, 9, 4, 5, 6, 1, 2, 3, 0].forEach(n => {
+                const b = document.createElement('button');
+                b.className = 'btn';
+                b.innerText = n;
+                if (n === 0) b.style.gridColumn = 'span 3';
+                b.onclick = () => input(n);
+                pad.appendChild(b);
+            });
+            nextProblem();
+        }
+
+        function nextProblem() {
+            // Generate: 3-digit, ones sum >= 10, tens sum < 10 (no tens carry)
+            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
+            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // sum >= 10
+            const t1 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const t2 = Math.floor(Math.random() * (8 - t1)) + 1; // t1+t2+1 < 10
+            const h1 = Math.floor(Math.random() * 3) + 1; // 1-3
+            const h2 = Math.floor(Math.random() * 3) + 1; // 1-3
+
+            state = { h1, h2, t1, t2, o1, o2, step: 0, score: state.score };
+            currentInput = "";
+            renderBoard();
+            speak(`Add ${h1}${t1}${o1} plus ${h2}${t2}${o2}. Start with ones: ${o1} plus ${o2}.`);
+
+            document.getElementById('col-hundreds').classList.remove('active');
+            document.getElementById('col-tens').classList.remove('active');
+            document.getElementById('col-ones').classList.add('active');
+            document.getElementById('carry-tens').style.opacity = '0';
+            document.getElementById('in-ones').value = '';
+            document.getElementById('in-tens').value = '';
+            document.getElementById('in-hundreds').value = '';
+            document.getElementById('guidance').innerText = `What is ${o1} + ${o2}?`;
+        }
+
+        function renderBoard() {
+            document.getElementById('val-h1').innerText = state.h1;
+            document.getElementById('val-h2').innerText = state.h2;
+            document.getElementById('val-t1').innerText = state.t1;
+            document.getElementById('val-t2').innerText = state.t2;
+            document.getElementById('val-o1').innerText = state.o1;
+            document.getElementById('val-o2').innerText = state.o2;
+        }
+
+        function input(n) {
+            if (state.step === 0) {
+                currentInput += n;
+                const target = state.o1 + state.o2;
+                const targetStr = target.toString();
+
+                if (currentInput === targetStr) {
+                    document.getElementById('in-ones').value = currentInput;
+                    currentInput = "";
+                    speak("Perfect! Watch the carry!");
+                    setTimeout(() => doCarryAnimation(target), 1000);
+                    state.step = 1;
+                } else if (currentInput.length >= targetStr.length) {
+                    speak("Try again.");
+                    currentInput = "";
+                    shake(document.getElementById('in-ones'));
+                } else {
+                    document.getElementById('in-ones').value = currentInput;
+                }
+            } else if (state.step === 2) {
+                const target = state.t1 + state.t2 + 1;
+                if (n === target) {
+                    document.getElementById('in-tens').value = n;
+                    speak("Great! Now the hundreds.");
+                    state.step = 3;
+                    document.getElementById('col-tens').classList.remove('active');
+                    document.getElementById('col-hundreds').classList.add('active');
+                    document.getElementById('guidance').innerText = `What is ${state.h1} + ${state.h2}?`;
+                } else {
+                    shake(document.getElementById('in-tens'));
+                    speak(`Try again: ${state.t1} plus ${state.t2} plus 1.`);
+                }
+            } else if (state.step === 3) {
+                const target = state.h1 + state.h2;
+                if (n === target) {
+                    document.getElementById('in-hundreds').value = n;
+                    complete();
+                } else {
+                    shake(document.getElementById('in-hundreds'));
+                    speak("Try again.");
+                }
+            }
+        }
+
+        function doCarryAnimation(sumVal) {
+            const onesVal = sumVal % 10;
+            const inputRect = document.getElementById('in-ones').getBoundingClientRect();
+
+            const flyer = document.createElement('div');
+            flyer.className = 'flying-ten';
+            flyer.innerText = '1';
+            flyer.style.left = (inputRect.left + 5) + 'px';
+            flyer.style.top = (inputRect.top + 5) + 'px';
+            document.body.appendChild(flyer);
+
+            document.getElementById('in-ones').value = onesVal;
+            speak("The ten flies to the tens place!");
+
+            const targetRect = document.getElementById('carry-tens').getBoundingClientRect();
+            setTimeout(() => {
+                flyer.style.left = targetRect.left + 'px';
+                flyer.style.top = targetRect.top + 'px';
+            }, 100);
+
+            setTimeout(() => {
+                flyer.remove();
+                document.getElementById('carry-tens').style.opacity = '1';
+                document.getElementById('col-ones').classList.remove('active');
+                document.getElementById('col-tens').classList.add('active');
+                document.getElementById('guidance').innerText = `Now tens: ${state.t1} + ${state.t2} + 1`;
+                speak(`Add the tens: ${state.t1} plus ${state.t2} plus 1.`);
+                state.step = 2;
+            }, 1100);
+        }
+
+        function shake(el) {
+            el.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-10px)' },
+                { transform: 'translateX(10px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+        }
+
+        function complete() {
+            speak("Excellent work!");
+            confetti();
+            state.score++;
+            setTimeout(() => {
+                if (state.score >= 5) {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 57 }, '*');
+                    speak("Lesson Complete!");
+                } else {
+                    nextProblem();
+                }
+            }, 2000);
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

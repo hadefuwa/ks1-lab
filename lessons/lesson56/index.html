@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 56: Triple Tower</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --background: #064e3b;
+            --surface: rgba(16, 185, 129, 0.1);
+            --text: #f0fdf4;
+            --highlight: #fbbf24;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background), #052e1f);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            width: 500px;
+        }
+
+        h2 {
+            color: #6ee7b7;
+            margin-top: 0;
+        }
+
+        .vertical-math {
+            display: flex;
+            justify-content: center;
+            font-size: 4rem;
+            font-family: monospace;
+            line-height: 1.2;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .column.active {
+            background: rgba(251, 191, 36, 0.2);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            border: 1px dashed rgba(251, 191, 36, 0.6);
+        }
+
+        input {
+            width: 60px;
+            height: 70px;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.5rem;
+            background: #047857;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <h2>Triple Tower</h2>
+        <div id="guidance" style="color: #6ee7b7; min-height: 1.5em; margin-bottom: 20px;">Add big 3-digit numbers!</div>
+
+        <div class="vertical-math" id="board">
+            <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
+
+            <div class="column" id="col-hundreds">
+                <div id="val-h1">1</div>
+                <div id="val-h2">2</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-hundreds" readonly placeholder="?">
+            </div>
+
+            <div class="column" id="col-tens">
+                <div id="val-t1">3</div>
+                <div id="val-t2">4</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-tens" readonly placeholder="?">
+            </div>
+
+            <div class="column active" id="col-ones">
+                <div id="val-o1">5</div>
+                <div id="val-o2">3</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-ones" readonly placeholder="?">
+            </div>
+        </div>
+
+        <div class="numpad" id="numpad"></div>
+    </div>
+
+    <script>
+        let state = { h1: 1, h2: 2, t1: 3, t2: 4, o1: 5, o2: 3, step: 0, score: 0 };
+
+        function init() {
+            const pad = document.getElementById('numpad');
+            [7, 8, 9, 4, 5, 6, 1, 2, 3, 0].forEach(n => {
+                const b = document.createElement('button');
+                b.className = 'btn';
+                b.innerText = n;
+                if (n === 0) b.style.gridColumn = 'span 3';
+                b.onclick = () => input(n);
+                pad.appendChild(b);
+            });
+            nextProblem();
+        }
+
+        function nextProblem() {
+            // Generate 3-digit + 3-digit, NO CARRY (all sums <= 9)
+            const o1 = Math.floor(Math.random() * 5) + 1; // 1-5
+            const o2 = Math.floor(Math.random() * (9 - o1 + 1)); // sum <= 9
+            const t1 = Math.floor(Math.random() * 5) + 1; // 1-5
+            const t2 = Math.floor(Math.random() * (9 - t1 + 1));
+            const h1 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const h2 = Math.floor(Math.random() * (9 - h1 + 1));
+
+            state = { h1, h2, t1, t2, o1, o2, step: 0, score: state.score };
+            renderBoard();
+            speak(`Add ${h1}${t1}${o1} plus ${h2}${t2}${o2}. Start with the ones: ${o1} plus ${o2}.`);
+
+            document.getElementById('col-hundreds').classList.remove('active');
+            document.getElementById('col-tens').classList.remove('active');
+            document.getElementById('col-ones').classList.add('active');
+            document.getElementById('in-ones').value = '';
+            document.getElementById('in-tens').value = '';
+            document.getElementById('in-hundreds').value = '';
+            document.getElementById('guidance').innerText = `What is ${o1} + ${o2}?`;
+        }
+
+        function renderBoard() {
+            document.getElementById('val-h1').innerText = state.h1;
+            document.getElementById('val-h2').innerText = state.h2;
+            document.getElementById('val-t1').innerText = state.t1;
+            document.getElementById('val-t2').innerText = state.t2;
+            document.getElementById('val-o1').innerText = state.o1;
+            document.getElementById('val-o2').innerText = state.o2;
+        }
+
+        function input(n) {
+            if (state.step === 0) {
+                const target = state.o1 + state.o2;
+                if (n === target) {
+                    document.getElementById('in-ones').value = n;
+                    speak("Great! Now the tens.");
+                    state.step = 1;
+                    document.getElementById('col-ones').classList.remove('active');
+                    document.getElementById('col-tens').classList.add('active');
+                    document.getElementById('guidance').innerText = `What is ${state.t1} + ${state.t2}?`;
+                } else {
+                    shake(document.getElementById('in-ones'));
+                    speak("Try again.");
+                }
+            } else if (state.step === 1) {
+                const target = state.t1 + state.t2;
+                if (n === target) {
+                    document.getElementById('in-tens').value = n;
+                    speak("Awesome! Now the hundreds.");
+                    state.step = 2;
+                    document.getElementById('col-tens').classList.remove('active');
+                    document.getElementById('col-hundreds').classList.add('active');
+                    document.getElementById('guidance').innerText = `What is ${state.h1} + ${state.h2}?`;
+                } else {
+                    shake(document.getElementById('in-tens'));
+                    speak("Try again.");
+                }
+            } else if (state.step === 2) {
+                const target = state.h1 + state.h2;
+                if (n === target) {
+                    document.getElementById('in-hundreds').value = n;
+                    complete();
+                } else {
+                    shake(document.getElementById('in-hundreds'));
+                    speak("Try again.");
+                }
+            }
+        }
+
+        function shake(el) {
+            el.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-10px)' },
+                { transform: 'translateX(10px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+        }
+
+        function complete() {
+            speak("Perfect work!");
+            confetti();
+            state.score++;
+            setTimeout(() => {
+                if (state.score >= 5) {
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 56 }, '*');
+                    speak("Lesson Complete!");
+                } else {
+                    nextProblem();
+                }
+            }, 2000);
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
