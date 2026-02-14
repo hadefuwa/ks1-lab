@@ -5,7 +5,7 @@ let lives = 3;
 let currentAttempts = 0;
 let buttonsDisabled = false;
 const goal = 10;
-const lessonId = 40;
+const lessonId = 45;
 
 // DOM elements
 const leftDisplay = document.getElementById('left-display');

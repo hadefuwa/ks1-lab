@@ -296,7 +296,7 @@
             state.score++;
             setTimeout(() => {
                 if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 41 }, '*');
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 46 }, '*');
                     speak("Lesson Complete!");
                 } else {
                     nextProblem();

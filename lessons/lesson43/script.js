@@ -5,7 +5,7 @@ let lives = 3;
 let currentAttempts = 0;
 let buttonsDisabled = false;
 const goal = 10;
-const lessonId = 38;
+const lessonId = 43;
 
 // DOM elements
 const leftNum = document.getElementById('left-num');
