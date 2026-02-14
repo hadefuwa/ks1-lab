@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 49: Double Digits</title>
+    <title>Lesson 52: Double Carry Challenge</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5;
-            --background: #0f172a;
-            --surface: rgba(255, 255, 255, 0.1);
-            --text: #f8fafc;
-            --highlight: #ec4899;
+            --primary: #dc2626;
+            --background: #7f1d1d;
+            --surface: rgba(220, 38, 38, 0.1);
+            --text: #fef2f2;
+            --highlight: #f97316;
         }
 
         body {
-            background: var(--background);
+            background: linear-gradient(135deg, var(--background), #450a0a);
             color: var(--text);
             font-family: 'Outfit', sans-serif;
             display: flex;
@@ -35,14 +35,14 @@
             backdrop-filter: blur(12px);
             padding: 2rem;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(220, 38, 38, 0.3);
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            width: 500px;
         }
 
         h2 {
-            color: #a5b4fc;
+            color: #fca5a5;
             margin-top: 0;
         }
 
@@ -67,9 +67,9 @@
         }
 
         .column.active {
-            background: rgba(236, 72, 153, 0.15);
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
-            border: 1px dashed rgba(236, 72, 153, 0.5);
+            background: rgba(249, 115, 22, 0.2);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+            border: 1px dashed rgba(249, 115, 22, 0.6);
         }
 
         .carry-box {
@@ -95,13 +95,13 @@
             width: 60px;
             height: 70px;
             font-size: 3rem;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             color: white;
             text-align: center;
             font-family: monospace;
-          margin-top: 10px;
+            margin-top: 10px;
             outline: none;
         }
 
@@ -114,7 +114,7 @@
         .btn {
             padding: 15px;
             font-size: 1.5rem;
-            background: #334155;
+            background: #991b1b;
             color: white;
             border: none;
             border-radius: 12px;
@@ -140,23 +140,31 @@
 <body>
 
     <div class="game-container">
-        <h2>Double Digits</h2>
-        <div id="guidance" style="color: #a5b4fc; min-height: 1.5em; margin-bottom: 20px;">Add two 2-digit numbers!</div>
+        <h2>Double Carry Challenge</h2>
+        <div id="guidance" style="color: #fca5a5; min-height: 1.5em; margin-bottom: 20px;">Carry twice in one problem!</div>
 
         <div class="vertical-math" id="board">
             <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
 
+            <div class="column" id="col-hundreds">
+                <div class="carry-box" id="carry-hundreds">1</div>
+                <div id="val-h1">2</div>
+                <div id="val-h2">1</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-hundreds" readonly placeholder="?">
+            </div>
+
             <div class="column" id="col-tens">
-                <div class="carry-box" id="carry-indicator">1</div>
-                <div id="val-t1">2</div>
-                <div id="val-t2">3</div>
+                <div class="carry-box" id="carry-tens">1</div>
+                <div id="val-t1">6</div>
+                <div id="val-t2">7</div>
                 <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
                 <input id="in-tens" readonly placeholder="?">
             </div>
 
             <div class="column active" id="col-ones">
-                <div id="val-o1">7</div>
-                <div id="val-o2">8</div>
+                <div id="val-o1">8</div>
+                <div id="val-o2">5</div>
                 <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
                 <input id="in-ones" readonly placeholder="?">
             </div>
@@ -166,7 +174,7 @@
     </div>
 
     <script>
-        let state = { t1: 2, t2: 3, o1: 7, o2: 8, step: 0, score: 0 };
+        let state = { h1: 2, h2: 1, t1: 6, t2: 7, o1: 8, o2: 5, step: 0, score: 0 };
         let currentInput = "";
 
         function init() {
@@ -183,26 +191,33 @@
         }
 
         function nextProblem() {
-            // Generate: both numbers 2-digit, ones sum >= 10
+            // Generate: 3-digit, ones sum >= 10, tens+carry >= 10 (double carry)
             const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // ensure sum >= 10, <= 18
-            const t1 = Math.floor(Math.random() * 5) + 1; // 1-5
-            const t2 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // sum >= 10
+            const t1 = Math.floor(Math.random() * 4) + 5; // 5-8
+            const t2 = Math.floor(Math.random() * (17 - t1)) + Math.max(1, 10 - t1); // t1+t2+1 >= 10
+            const h1 = Math.floor(Math.random() * 3) + 1; // 1-3
+            const h2 = Math.floor(Math.random() * 3) + 1; // 1-3
 
-            state = { t1, t2, o1, o2, step: 0, score: state.score };
+            state = { h1, h2, t1, t2, o1, o2, step: 0, score: state.score };
             currentInput = "";
             renderBoard();
-            speak(`Add ${t1}${o1} plus ${t2}${o2}. Start with the ones: ${o1} plus ${o2}.`);
+            speak(`Add ${h1}${t1}${o1} plus ${h2}${t2}${o2}. Start with ones: ${o1} plus ${o2}.`);
 
+            document.getElementById('col-hundreds').classList.remove('active');
             document.getElementById('col-tens').classList.remove('active');
             document.getElementById('col-ones').classList.add('active');
-            document.getElementById('carry-indicator').style.opacity = '0';
+            document.getElementById('carry-tens').style.opacity = '0';
+            document.getElementById('carry-hundreds').style.opacity = '0';
             document.getElementById('in-ones').value = '';
             document.getElementById('in-tens').value = '';
+            document.getElementById('in-hundreds').value = '';
             document.getElementById('guidance').innerText = `What is ${o1} + ${o2}?`;
         }
 
         function renderBoard() {
+            document.getElementById('val-h1').innerText = state.h1;
+            document.getElementById('val-h2').innerText = state.h2;
             document.getElementById('val-t1').innerText = state.t1;
             document.getElementById('val-t2').innerText = state.t2;
             document.getElementById('val-o1').innerText = state.o1;
@@ -218,8 +233,8 @@
                 if (currentInput === targetStr) {
                     document.getElementById('in-ones').value = currentInput;
                     currentInput = "";
-                    speak("Perfect! Now watch the carry!");
-                    setTimeout(() => doCarryAnimation(target), 1000);
+                    speak("Excellent! Watch the first carry!");
+                    setTimeout(() => doCarryAnimation(target, 'ones'), 1000);
                     state.step = 1;
                 } else if (currentInput.length >= targetStr.length) {
                     speak("Try again.");
@@ -229,20 +244,40 @@
                     document.getElementById('in-ones').value = currentInput;
                 }
             } else if (state.step === 2) {
+                currentInput += n;
                 const target = state.t1 + state.t2 + 1;
+                const targetStr = target.toString();
+
+                if (currentInput === targetStr) {
+                    document.getElementById('in-tens').value = currentInput;
+                    currentInput = "";
+                    speak("Amazing! Watch the second carry!");
+                    setTimeout(() => doCarryAnimation(target, 'tens'), 1000);
+                    state.step = 3;
+                } else if (currentInput.length >= targetStr.length) {
+                    speak(`Try again: ${state.t1} plus ${state.t2} plus 1.`);
+                    currentInput = "";
+                    shake(document.getElementById('in-tens'));
+                } else {
+                    document.getElementById('in-tens').value = currentInput;
+                }
+            } else if (state.step === 4) {
+                const target = state.h1 + state.h2 + 1;
                 if (n === target) {
-                    document.getElementById('in-tens').value = n;
+                    document.getElementById('in-hundreds').value = n;
                     complete();
                 } else {
-                    shake(document.getElementById('in-tens'));
-                    speak(`Count again: ${state.t1} plus ${state.t2} plus the carried 1.`);
+                    shake(document.getElementById('in-hundreds'));
+                    speak(`Try again: ${state.h1} plus ${state.h2} plus 1.`);
                 }
             }
         }
 
-        function doCarryAnimation(sumVal) {
+        function doCarryAnimation(sumVal, from) {
             const onesVal = sumVal % 10;
-            const inputRect = document.getElementById('in-ones').getBoundingClientRect();
+            const inputId = from === 'ones' ? 'in-ones' : 'in-tens';
+            const carryId = from === 'ones' ? 'carry-tens' : 'carry-hundreds';
+            const inputRect = document.getElementById(inputId).getBoundingClientRect();
 
             const flyer = document.createElement('div');
             flyer.className = 'flying-ten';
@@ -251,10 +286,10 @@
             flyer.style.top = (inputRect.top + 5) + 'px';
             document.body.appendChild(flyer);
 
-            document.getElementById('in-ones').value = onesVal;
-            speak("The ten flies to the top!");
+            document.getElementById(inputId).value = onesVal;
+            speak(`The ten carries to ${from === 'ones' ? 'tens' : 'hundreds'}!`);
 
-            const targetRect = document.getElementById('carry-indicator').getBoundingClientRect();
+            const targetRect = document.getElementById(carryId).getBoundingClientRect();
             setTimeout(() => {
                 flyer.style.left = targetRect.left + 'px';
                 flyer.style.top = targetRect.top + 'px';
@@ -262,12 +297,21 @@
 
             setTimeout(() => {
                 flyer.remove();
-                document.getElementById('carry-indicator').style.opacity = '1';
-                document.getElementById('col-ones').classList.remove('active');
-                document.getElementById('col-tens').classList.add('active');
-                document.getElementById('guidance').innerText = `Now the tens: ${state.t1} + ${state.t2} + 1`;
-                speak(`Add the tens: ${state.t1} plus ${state.t2} plus 1.`);
-                state.step = 2;
+                document.getElementById(carryId).style.opacity = '1';
+
+                if (from === 'ones') {
+                    document.getElementById('col-ones').classList.remove('active');
+                    document.getElementById('col-tens').classList.add('active');
+                    document.getElementById('guidance').innerText = `Tens: ${state.t1} + ${state.t2} + 1`;
+                    speak(`Add the tens: ${state.t1} plus ${state.t2} plus 1.`);
+                    state.step = 2;
+                } else {
+                    document.getElementById('col-tens').classList.remove('active');
+                    document.getElementById('col-hundreds').classList.add('active');
+                    document.getElementById('guidance').innerText = `Hundreds: ${state.h1} + ${state.h2} + 1`;
+                    speak(`Finally, add hundreds: ${state.h1} plus ${state.h2} plus 1.`);
+                    state.step = 4;
+                }
             }, 1100);
         }
 
@@ -281,12 +325,12 @@
         }
 
         function complete() {
-            speak("Excellent work!");
+            speak("You did it! Double carry mastered!");
             confetti();
             state.score++;
             setTimeout(() => {
                 if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 49 }, '*');
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 52 }, '*');
                     speak("Lesson Complete!");
                 } else {
                     nextProblem();
@@ -303,7 +347,5 @@
         init();
     </script>
 </body>
-
-</html>
 
 </html>

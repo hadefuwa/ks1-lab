@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 49: Double Digits</title>
+    <title>Lesson 50: Triple Tower</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5;
-            --background: #0f172a;
-            --surface: rgba(255, 255, 255, 0.1);
-            --text: #f8fafc;
-            --highlight: #ec4899;
+            --primary: #10b981;
+            --background: #064e3b;
+            --surface: rgba(16, 185, 129, 0.1);
+            --text: #f0fdf4;
+            --highlight: #fbbf24;
         }
 
         body {
-            background: var(--background);
+            background: linear-gradient(135deg, var(--background), #052e1f);
             color: var(--text);
             font-family: 'Outfit', sans-serif;
             display: flex;
@@ -35,14 +35,14 @@
             backdrop-filter: blur(12px);
             padding: 2rem;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(16, 185, 129, 0.3);
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            width: 500px;
         }
 
         h2 {
-            color: #a5b4fc;
+            color: #6ee7b7;
             margin-top: 0;
         }
 
@@ -67,41 +67,22 @@
         }
 
         .column.active {
-            background: rgba(236, 72, 153, 0.15);
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
-            border: 1px dashed rgba(236, 72, 153, 0.5);
-        }
-
-        .carry-box {
-            position: absolute;
-            top: -40px;
-            width: 30px;
-            height: 30px;
-            font-size: 1.5rem;
-            color: #facc15;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: all 0.5s ease;
-        }
-
-        .carry-box.show {
-            opacity: 1;
-            top: 0;
+            background: rgba(251, 191, 36, 0.2);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            border: 1px dashed rgba(251, 191, 36, 0.6);
         }
 
         input {
             width: 60px;
             height: 70px;
             font-size: 3rem;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             color: white;
             text-align: center;
             font-family: monospace;
-          margin-top: 10px;
+            margin-top: 10px;
             outline: none;
         }
 
@@ -114,7 +95,7 @@
         .btn {
             padding: 15px;
             font-size: 1.5rem;
-            background: #334155;
+            background: #047857;
             color: white;
             border: none;
             border-radius: 12px;
@@ -124,39 +105,35 @@
         .btn:active {
             transform: scale(0.95);
         }
-
-        .flying-ten {
-            position: fixed;
-            font-size: 2rem;
-            color: #facc15;
-            font-weight: bold;
-            pointer-events: none;
-            z-index: 100;
-            transition: all 1s ease-in-out;
-        }
     </style>
 </head>
 
 <body>
 
     <div class="game-container">
-        <h2>Double Digits</h2>
-        <div id="guidance" style="color: #a5b4fc; min-height: 1.5em; margin-bottom: 20px;">Add two 2-digit numbers!</div>
+        <h2>Triple Tower</h2>
+        <div id="guidance" style="color: #6ee7b7; min-height: 1.5em; margin-bottom: 20px;">Add big 3-digit numbers!</div>
 
         <div class="vertical-math" id="board">
             <div style="font-size:3rem; margin-right:10px; align-self:center;">+</div>
 
+            <div class="column" id="col-hundreds">
+                <div id="val-h1">1</div>
+                <div id="val-h2">2</div>
+                <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
+                <input id="in-hundreds" readonly placeholder="?">
+            </div>
+
             <div class="column" id="col-tens">
-                <div class="carry-box" id="carry-indicator">1</div>
-                <div id="val-t1">2</div>
-                <div id="val-t2">3</div>
+                <div id="val-t1">3</div>
+                <div id="val-t2">4</div>
                 <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
                 <input id="in-tens" readonly placeholder="?">
             </div>
 
             <div class="column active" id="col-ones">
-                <div id="val-o1">7</div>
-                <div id="val-o2">8</div>
+                <div id="val-o1">5</div>
+                <div id="val-o2">3</div>
                 <div style="height:4px;width:100%;background:white;margin:5px 0;"></div>
                 <input id="in-ones" readonly placeholder="?">
             </div>
@@ -166,8 +143,7 @@
     </div>
 
     <script>
-        let state = { t1: 2, t2: 3, o1: 7, o2: 8, step: 0, score: 0 };
-        let currentInput = "";
+        let state = { h1: 1, h2: 2, t1: 3, t2: 4, o1: 5, o2: 3, step: 0, score: 0 };
 
         function init() {
             const pad = document.getElementById('numpad');
@@ -183,26 +159,30 @@
         }
 
         function nextProblem() {
-            // Generate: both numbers 2-digit, ones sum >= 10
-            const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // ensure sum >= 10, <= 18
+            // Generate 3-digit + 3-digit, NO CARRY (all sums <= 9)
+            const o1 = Math.floor(Math.random() * 5) + 1; // 1-5
+            const o2 = Math.floor(Math.random() * (9 - o1 + 1)); // sum <= 9
             const t1 = Math.floor(Math.random() * 5) + 1; // 1-5
-            const t2 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const t2 = Math.floor(Math.random() * (9 - t1 + 1));
+            const h1 = Math.floor(Math.random() * 4) + 1; // 1-4
+            const h2 = Math.floor(Math.random() * (9 - h1 + 1));
 
-            state = { t1, t2, o1, o2, step: 0, score: state.score };
-            currentInput = "";
+            state = { h1, h2, t1, t2, o1, o2, step: 0, score: state.score };
             renderBoard();
-            speak(`Add ${t1}${o1} plus ${t2}${o2}. Start with the ones: ${o1} plus ${o2}.`);
+            speak(`Add ${h1}${t1}${o1} plus ${h2}${t2}${o2}. Start with the ones: ${o1} plus ${o2}.`);
 
+            document.getElementById('col-hundreds').classList.remove('active');
             document.getElementById('col-tens').classList.remove('active');
             document.getElementById('col-ones').classList.add('active');
-            document.getElementById('carry-indicator').style.opacity = '0';
             document.getElementById('in-ones').value = '';
             document.getElementById('in-tens').value = '';
+            document.getElementById('in-hundreds').value = '';
             document.getElementById('guidance').innerText = `What is ${o1} + ${o2}?`;
         }
 
         function renderBoard() {
+            document.getElementById('val-h1').innerText = state.h1;
+            document.getElementById('val-h2').innerText = state.h2;
             document.getElementById('val-t1').innerText = state.t1;
             document.getElementById('val-t2').innerText = state.t2;
             document.getElementById('val-o1').innerText = state.o1;
@@ -211,64 +191,41 @@
 
         function input(n) {
             if (state.step === 0) {
-                currentInput += n;
                 const target = state.o1 + state.o2;
-                const targetStr = target.toString();
-
-                if (currentInput === targetStr) {
-                    document.getElementById('in-ones').value = currentInput;
-                    currentInput = "";
-                    speak("Perfect! Now watch the carry!");
-                    setTimeout(() => doCarryAnimation(target), 1000);
+                if (n === target) {
+                    document.getElementById('in-ones').value = n;
+                    speak("Great! Now the tens.");
                     state.step = 1;
-                } else if (currentInput.length >= targetStr.length) {
-                    speak("Try again.");
-                    currentInput = "";
-                    shake(document.getElementById('in-ones'));
+                    document.getElementById('col-ones').classList.remove('active');
+                    document.getElementById('col-tens').classList.add('active');
+                    document.getElementById('guidance').innerText = `What is ${state.t1} + ${state.t2}?`;
                 } else {
-                    document.getElementById('in-ones').value = currentInput;
+                    shake(document.getElementById('in-ones'));
+                    speak("Try again.");
                 }
-            } else if (state.step === 2) {
-                const target = state.t1 + state.t2 + 1;
+            } else if (state.step === 1) {
+                const target = state.t1 + state.t2;
                 if (n === target) {
                     document.getElementById('in-tens').value = n;
-                    complete();
+                    speak("Awesome! Now the hundreds.");
+                    state.step = 2;
+                    document.getElementById('col-tens').classList.remove('active');
+                    document.getElementById('col-hundreds').classList.add('active');
+                    document.getElementById('guidance').innerText = `What is ${state.h1} + ${state.h2}?`;
                 } else {
                     shake(document.getElementById('in-tens'));
-                    speak(`Count again: ${state.t1} plus ${state.t2} plus the carried 1.`);
+                    speak("Try again.");
+                }
+            } else if (state.step === 2) {
+                const target = state.h1 + state.h2;
+                if (n === target) {
+                    document.getElementById('in-hundreds').value = n;
+                    complete();
+                } else {
+                    shake(document.getElementById('in-hundreds'));
+                    speak("Try again.");
                 }
             }
-        }
-
-        function doCarryAnimation(sumVal) {
-            const onesVal = sumVal % 10;
-            const inputRect = document.getElementById('in-ones').getBoundingClientRect();
-
-            const flyer = document.createElement('div');
-            flyer.className = 'flying-ten';
-            flyer.innerText = '1';
-            flyer.style.left = (inputRect.left + 5) + 'px';
-            flyer.style.top = (inputRect.top + 5) + 'px';
-            document.body.appendChild(flyer);
-
-            document.getElementById('in-ones').value = onesVal;
-            speak("The ten flies to the top!");
-
-            const targetRect = document.getElementById('carry-indicator').getBoundingClientRect();
-            setTimeout(() => {
-                flyer.style.left = targetRect.left + 'px';
-                flyer.style.top = targetRect.top + 'px';
-            }, 100);
-
-            setTimeout(() => {
-                flyer.remove();
-                document.getElementById('carry-indicator').style.opacity = '1';
-                document.getElementById('col-ones').classList.remove('active');
-                document.getElementById('col-tens').classList.add('active');
-                document.getElementById('guidance').innerText = `Now the tens: ${state.t1} + ${state.t2} + 1`;
-                speak(`Add the tens: ${state.t1} plus ${state.t2} plus 1.`);
-                state.step = 2;
-            }, 1100);
         }
 
         function shake(el) {
@@ -281,12 +238,12 @@
         }
 
         function complete() {
-            speak("Excellent work!");
+            speak("Perfect work!");
             confetti();
             state.score++;
             setTimeout(() => {
                 if (state.score >= 5) {
-                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 49 }, '*');
+                    window.parent.postMessage({ type: 'lessonCompleted', lessonId: 50 }, '*');
                     speak("Lesson Complete!");
                 } else {
                     nextProblem();
@@ -303,7 +260,5 @@
         init();
     </script>
 </body>
-
-</html>
 
 </html>
