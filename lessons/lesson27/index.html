@@ -4,305 +4,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson: Reading Thousands</title>
+    <title>Lesson 27: Double Digit Dash (Hard)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
-            --purple: #9333ea;
-            --pink: #db2777;
-            --orange: #ea580c;
-            --bg: #f0fdf4;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
         }
 
         body {
+            background: var(--background);
+            color: var(--text);
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
-            height: 100vh;
-            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.9);
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 800px;
             width: 90%;
-            border: 4px solid #fff;
+            transition: transform 0.3s ease;
         }
 
         h1 {
-            color: var(--primary);
+            font-size: 2.5rem;
             margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #facc15, #f43f5e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .number-display {
-            font-size: 5rem;
-            font-weight: 800;
+        .columns-container {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            gap: 2rem;
             margin: 2rem 0;
         }
 
-        .digit-box {
+        .column {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            width: 120px;
+            min-height: 350px;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             align-items: center;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 10px;
-            transition: all 0.3s;
             position: relative;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
         }
 
-        .digit-box:hover {
-            transform: scale(1.1);
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .digit-box.selected {
-            background: #fef08a;
-            /* yellow-200 */
-            box-shadow: 0 0 0 4px #eab308;
-        }
-
-        .digit {
-            color: #1e293b;
-        }
-
-        .label {
-            font-size: 1rem;
-            color: #64748b;
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .col-label {
+            position: absolute;
+            top: -30px;
             font-weight: bold;
+            font-size: 1.2rem;
+            color: #94a3b8;
         }
 
-        .color-th {
-            color: var(--purple);
+        .block-ten {
+            width: 30px;
+            height: 80px;
+            background: #3b82f6;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: popIn 0.3s ease;
         }
 
-        .color-h {
-            color: var(--pink);
+        .block-one {
+            width: 30px;
+            height: 30px;
+            background: #fbbf24;
+            margin: 2px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            animation: popIn 0.3s ease;
         }
 
-        .color-t {
-            color: var(--primary);
-        }
-
-        .color-o {
-            color: var(--orange);
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
+        .regroup-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
             border: none;
             padding: 1rem 2rem;
+            color: white;
             font-size: 1.5rem;
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
             margin-top: 2rem;
-            font-family: inherit;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .instruction {
-            font-size: 1.5rem;
-            color: #334155;
-            min-height: 3rem;
-        }
-
-        .hidden {
+            transition: transform 0.2s, box-shadow 0.2s;
             display: none;
+        }
+
+        .regroup-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .equation {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .number {
+            color: #fff;
+        }
+
+        .operator {
+            color: #ec4899;
+        }
+
+        #message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            margin-top: 1rem;
+            color: #a5b4fc;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="card" id="game-card">
-        <!-- Injected -->
+    <div class="glass-panel">
+        <h1>Double Digit Dash (Hard)</h1>
+        <div id="instruction">Add big numbers! Watch the Ones column overflow!</div>
+
+        <div class="equation">
+            <span id="num1" class="number">18</span>
+            <span class="operator">+</span>
+            <span id="num2" class="number">15</span>
+            <span class="operator">=</span>
+            <span id="result" class="number">?</span>
+        </div>
+
+        <div class="columns-container">
+            <div class="column" id="col-tens">
+                <div class="col-label">Tens</div>
+            </div>
+            <div class="column" id="col-ones">
+                <div class="col-label">Ones</div>
+            </div>
+        </div>
+
+        <button id="regroupBtn" class="regroup-btn" onclick="regroup()">🔥 Power Up the Ten! 🔥</button>
+
+        <div id="options-container" style="display:flex; gap:10px; justify-content:center; margin-top:20px;"></div>
+
+        <div id="message"></div>
     </div>
 
     <script>
-        const LESSON_ID = 'reading-thousands'; // Special ID or mapped later
-        let state = {
-            phase: 'teach', // teach, identify, end
-            step: 0,
-            score: 0
-        };
-
-        const NUMBERS = [
-            { val: 1234, text: "One thousand, two hundred and thirty-four" },
-            { val: 4050, text: "Four thousand and fifty" },
-            { val: 7602, text: "Seven thousand, six hundred and two" },
-            { val: 9999, text: "Nine thousand, nine hundred and ninety-nine" },
-            { val: 2005, text: "Two thousand and five" }
-        ];
-
-        let currentNumber = NUMBERS[0];
-        let targetPlace = ''; // 'th', 'h', 't', 'o'
+        let currentProblem = {};
+        let tensCount = 0;
+        let onesCount = 0;
+        let hasRegrouped = false;
+        let correctCount = 0;
+        const totalToWin = 8;
+        const LESSON_ID = 27;
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
             window.speechSynthesis.speak(msg);
         }
 
-        function getDigits(num) {
-            const s = num.toString().padStart(4, '0');
-            return {
-                th: s[0],
-                h: s[1],
-                t: s[2],
-                o: s[3]
-            };
+        function init() {
+            generateProblem();
         }
 
-        function render() {
-            const container = document.getElementById('game-card');
-            container.innerHTML = '';
+        function generateProblem() {
+            hasRegrouped = false;
+            document.getElementById('regroupBtn').style.display = 'none';
+            document.getElementById('options-container').innerHTML = '';
+            document.getElementById('result').innerText = '?';
+            document.getElementById('message').innerText = '';
 
-            const d = getDigits(currentNumber.val);
+            // Generate Double + Double with Carry
+            // n1 = 15..35
+            // n2 = 15..35
+            // Ensure ones sum > 10
 
-            if (state.phase === 'teach') {
-                container.innerHTML = `
-                    <h1>Let's Read Thousands!</h1>
-                    <div class="instruction">This number is <b>${currentNumber.text}</b></div>
-                    
-                    <div class="number-display">
-                        <div class="digit-box" onclick="speak('Thousands place. ${d.th} thousand.')">
-                            <span class="digit color-th">${d.th}</span>
-                            <span class="label" style="color:var(--purple)">Th</span>
-                        </div>
-                        <div class="digit-box" onclick="speak('Hundreds place. ${d.h} hundred.')">
-                            <span class="digit color-h">${d.h}</span>
-                            <span class="label" style="color:var(--pink)">H</span>
-                        </div>
-                        <div class="digit-box" onclick="speak('Tens place. ${d.t} tens.')">
-                            <span class="digit color-t">${d.t}</span>
-                            <span class="label" style="color:var(--primary)">T</span>
-                        </div>
-                        <div class="digit-box" onclick="speak('Ones place. ${d.o} ones.')">
-                            <span class="digit color-o">${d.o}</span>
-                            <span class="label" style="color:var(--orange)">O</span>
-                        </div>
-                    </div>
+            const t1 = Math.floor(Math.random() * 3) + 1; // 1-3 tens
+            const o1 = Math.floor(Math.random() * 50) + 5; // 5-9 ones
+            const n1 = (t1 * 10) + o1;
 
-                    <button class="btn" onclick="startQuiz()">I'm ready to play! 🚀</button>
-                    <button class="btn" style="background:#64748b; margin-left:10px" onclick="speak('${currentNumber.text}')">🔊 Listen</button>
-                `;
-                if (state.step === 0) {
-                    setTimeout(() => speak(`Look at this big number! It has four digits. The first one is the thousands place. ${currentNumber.text}`), 500);
-                    state.step = 1; // prevent auto speak overlap
+            const t2 = Math.floor(Math.random() * 2) + 1; // 1-2 tens
+            const minO2 = (11 - o1);
+            const o2 = Math.floor(Math.random() * (9 - minO2 + 1)) + minO2;
+            const n2 = (t2 * 10) + o2;
+
+            currentProblem = { n1, n2, sum: n1 + n2 };
+
+            document.getElementById('num1').innerText = n1;
+            document.getElementById('num2').innerText = n2;
+
+            // Initial State
+            tensCount = t1 + t2;
+            onesCount = o1 + o2;
+
+            renderBlocks();
+            speak(`Add ${n1} plus ${n2}. Whoa, that's a lot of ones!`);
+
+            setTimeout(() => {
+                if (onesCount >= 10) {
+                    document.getElementById('regroupBtn').style.display = 'block';
                 }
-            } else if (state.phase === 'identify') {
-                container.innerHTML = `
-                    <h1>Find the Place!</h1>
-                    <div class="instruction">Click the <b>${getPlaceName(targetPlace)}</b> digit!</div>
-                    
-                    <div class="number-display">
-                        <div class="digit-box" id="box-th" onclick="checkAnswer('th')">
-                            <span class="digit color-th">${d.th}</span>
-                            <span class="label">Th</span>
-                        </div>
-                        <div class="digit-box" id="box-h" onclick="checkAnswer('h')">
-                            <span class="digit color-h">${d.h}</span>
-                            <span class="label">H</span>
-                        </div>
-                        <div class="digit-box" id="box-t" onclick="checkAnswer('t')">
-                            <span class="digit color-t">${d.t}</span>
-                            <span class="label">T</span>
-                        </div>
-                        <div class="digit-box" id="box-o" onclick="checkAnswer('o')">
-                            <span class="digit color-o">${d.o}</span>
-                            <span class="label">O</span>
-                        </div>
-                    </div>
-                     <div id="feedback" style="height:30px; font-weight:bold; font-size:1.2rem;"></div>
-                `;
-            } else if (state.phase === 'end') {
-                container.innerHTML = `
-                    <h1>Great Job! 🌟</h1>
-                    <div style="font-size: 5rem; margin: 2rem;">🏆</div>
-                    <div class="instruction">You can read huge numbers now!</div>
-                    <button class="btn" onclick="window.parent.postMessage({ type: 'lessonCompleted', lessonId: 3100 }, '*')">Finish Lesson</button>
-                `;
-                speak("Great job! You are a master of thousands!");
-                confetti();
+            }, 1000);
+        }
+
+        function renderBlocks() {
+            const tCol = document.getElementById('col-tens');
+            const oCol = document.getElementById('col-ones');
+            tCol.innerHTML = '<div class="col-label">Tens</div>';
+            oCol.innerHTML = '<div class="col-label">Ones</div>';
+
+            for (let i = 0; i < tensCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-ten';
+                tCol.appendChild(b);
+            }
+            for (let i = 0; i < onesCount; i++) {
+                const b = document.createElement('div');
+                b.className = 'block-one';
+                oCol.appendChild(b);
             }
         }
 
-        function getPlaceName(p) {
-            if (p === 'th') return 'THOUSANDS';
-            if (p === 'h') return 'HUNDREDS';
-            if (p === 't') return 'TENS';
-            if (p === 'o') return 'ONES';
-            return '';
+        function regroup() {
+            if (onesCount >= 10 && !hasRegrouped) {
+                onesCount -= 10;
+                tensCount += 1;
+                renderBlocks();
+                hasRegrouped = true;
+                document.getElementById('regroupBtn').style.display = 'none';
+                speak("Ten ones transform into a Super Ten!");
+                showOptions();
+            }
         }
 
-        function startQuiz() {
-            state.phase = 'identify';
-            nextQuestion();
+        function showOptions() {
+            const correct = currentProblem.sum;
+            let opts = [correct];
+            while (opts.length < 3) {
+                let w = correct + Math.floor(Math.random() * 10 - 5) * 10; // Variate by tens mostly?
+                if (Math.random() > 0.5) w = correct + Math.floor(Math.random() * 50) * (Math.random() > .5 ? 1 : -1);
+
+                if (w !== correct && w > 20 && !opts.includes(w)) opts.push(w);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'regroup-btn';
+                btn.innerText = opt;
+                btn.style.display = 'block';
+                btn.style.margin = '0';
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
+            });
         }
 
-        function nextQuestion() {
-            // Pick a random number
-            currentNumber = NUMBERS[Math.floor(Math.random() * NUMBERS.length)];
-            // Pick a random place
-            const places = ['th', 'h', 't', 'o'];
-            targetPlace = places[Math.floor(Math.random() * places.length)];
-
-            render();
-            speak(`Click the digit in the ${getPlaceName(targetPlace)} place.`);
-        }
-
-        function checkAnswer(selectedPlace) {
-            if (selectedPlace === targetPlace) {
-                document.getElementById('feedback').innerText = "Correct! 🌟";
-                document.getElementById('feedback').style.color = "green";
-                document.getElementById(`box-${selectedPlace}`).classList.add('selected');
-                speak("Correct!");
+        function checkAnswer(val, btn) {
+            if (val === currentProblem.sum) {
+                correctCount++;
+                btn.style.background = '#22c55e';
+                document.getElementById('result').innerText = val;
                 confetti({
-                    particleCount: 50,
-                    spread: 60,
+                    particleCount: 150,
+                    spread: 80,
                     origin: { y: 0.6 }
                 });
-                state.score++;
-                if (state.score >= 5) {
+                speak("Awesome! You are a Math Wizard!");
+
+                if (correctCount >= totalToWin) {
                     setTimeout(() => {
-                        state.phase = 'end';
-                        render();
-                    }, 1500);
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
                 } else {
-                    setTimeout(nextQuestion, 1500);
+                    setTimeout(generateProblem, 2000);
                 }
             } else {
-                document.getElementById('feedback').innerText = "Try again!";
-                document.getElementById('feedback').style.color = "red";
-                speak(`That is the ${getPlaceName(selectedPlace)} place. Try again.`);
+                btn.style.background = '#ef4444';
+                speak("Check the blocks again.");
             }
         }
 
-        // Init
-        render();
-
+        init();
     </script>
 </body>
 
