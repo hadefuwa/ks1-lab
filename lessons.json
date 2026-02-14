@@ -288,5 +288,30 @@
         "title": "Lesson 58: Double Carry Challenge",
         "path": "lessons/lesson58/index.html",
         "id": 58
+    },
+    {
+        "title": "Lesson 59: Challenge Mode (Subtraction)",
+        "path": "lessons/lesson59/index.html",
+        "id": 59
+    },
+    {
+        "title": "Lesson 60: Challenge Mode (Multiplication)",
+        "path": "lessons/lesson60/index.html",
+        "id": 60
+    },
+    {
+        "title": "Lesson 61: Challenge Mode (Division)",
+        "path": "lessons/lesson61/index.html",
+        "id": 61
+    },
+    {
+        "title": "Lesson 62: Challenge Mode (Mixed)",
+        "path": "lessons/lesson62/index.html",
+        "id": 62
+    },
+    {
+        "title": "Lesson 63: Challenge Mode (Survival)",
+        "path": "lessons/lesson63/index.html",
+        "id": 63
     }
 ]
