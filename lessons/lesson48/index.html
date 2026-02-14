@@ -3,392 +3,336 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Lesson 43: Construction Crew</title>
+    <title>Lesson 48: Trading Game</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #e0f2fe;
-            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Fredoka One', cursive;
             overflow: hidden;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
         #game-area {
             position: relative;
-            width: 800px;
-            height: 600px;
-            background: #bae6fd;
-            border-bottom: 50px solid #64748b;
-            /* Ground */
+            width: 900px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.95);
             overflow: hidden;
-            margin-top: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
         }
 
-        .crane {
-            position: absolute;
-            right: 50px;
-            top: 50px;
-            width: 10px;
-            height: 300px;
-            background: #f59e0b;
-            transform-origin: top center;
-            transition: all 1s ease;
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin: 0 0 20px 0;
         }
 
-        .crane-arm {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 10px;
-            background: #f59e0b;
-        }
-
-        .crane-line {
-            position: absolute;
-            right: 280px;
-            /* target pos */
-            top: 10px;
-            width: 2px;
-            height: 50px;
-            background: #333;
-            transition: height 1s;
-        }
-
-        .claw {
-            position: absolute;
-            bottom: -20px;
-            left: -15px;
-            width: 30px;
-            height: 20px;
-            background: #333;
-            border-radius: 0 0 10px 10px;
-        }
-
-        .building-site {
-            position: absolute;
-            bottom: 0;
-            left: 100px;
+        .pile-container {
             display: flex;
+            justify-content: space-around;
             align-items: flex-end;
-            gap: 20px;
+            margin: 30px 0;
+            height: 280px;
         }
 
-        .column-base {
-            width: 120px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 8px 8px 0 0;
-            padding: 10px;
+        .pile {
             display: flex;
             flex-direction: column-reverse;
-            /* Stack up */
-            min-height: 100px;
+            align-items: center;
+            min-height: 200px;
             position: relative;
         }
 
-        .col-label {
+        .pile-label {
             position: absolute;
-            bottom: -40px;
-            width: 100%;
-            text-align: center;
+            bottom: -35px;
+            font-size: 1.8rem;
+            color: #333;
             font-weight: bold;
-            color: #334155;
-            font-size: 1.2rem;
+        }
+
+        .ones-pile {
+            color: #ef4444;
+        }
+
+        .tens-pile {
+            color: #3b82f6;
         }
 
         .brick {
-            width: 100px;
-            height: 30px;
+            width: 60px;
+            height: 25px;
             background: #ef4444;
-            border: 2px solid #b91c1c;
-            margin-bottom: 2px;
-            border-radius: 4px;
-            box-sizing: border-box;
-            position: relative;
-            transition: all 0.5s;
+            border: 3px solid #dc2626;
+            margin-bottom: 3px;
+            border-radius: 5px;
+            animation: popIn 0.3s ease;
         }
 
         .beam {
-            width: 100px;
-            height: 80px;
-            /* Taller */
+            width: 80px;
+            height: 100px;
             background: #3b82f6;
-            border: 2px solid #1d4ed8;
-            margin-bottom: 2px;
-            border-radius: 4px;
+            border: 3px solid #2563eb;
+            margin-bottom: 5px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 2rem;
+            animation: popIn 0.5s ease;
         }
 
-        .beam::after {
-            content: "10";
-        }
-
-        .wobble {
-            animation: shake 0.5s infinite;
-        }
-
-        @keyframes shake {
+        @keyframes popIn {
             0% {
-                transform: rotate(0deg);
+                transform: scale(0);
+                opacity: 0;
             }
-
-            25% {
-                transform: rotate(2deg);
-            }
-
-            75% {
-                transform: rotate(-2deg);
-            }
-
             100% {
-                transform: rotate(0deg);
+                transform: scale(1);
+                opacity: 1;
             }
         }
 
         .message-box {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            max-width: 400px;
+            text-align: center;
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.8rem;
+            color: #78350f;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .btn {
-            background: #f59e0b;
-            color: black;
+            background: linear-gradient(135deg, #f59e0b, #dc2626);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 20px 50px;
+            border-radius: 15px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            margin-top: 10px;
+            font-size: 2rem;
+            margin-top: 20px;
+            box-shadow: 0 8px 0 #991b1b;
+            transition: all 0.1s;
+            font-family: 'Fredoka One', cursive;
         }
 
-        .input-panel {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #991b1b;
+        }
+
+        .input-area {
             text-align: center;
-            display: none;
+            margin-top: 20px;
         }
 
         input {
-            width: 100px;
-            font-size: 2rem;
+            width: 150px;
+            font-size: 3rem;
             text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            border: 4px solid #facc15;
+            border-radius: 15px;
+            padding: 10px;
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .wobble {
+            animation: wobble 0.3s infinite;
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Construction Crew</h1>
     <div id="game-area">
-        <div class="message-box" id="msg">Welcome Foreman! We have too many bricks in the Ones pile.</div>
+        <h1>🏗️ Trading Game 🏗️</h1>
+        
+        <div class="message-box" id="msg">
+            <div id="msg-text">Let's trade 10 ones for 1 ten!</div>
+            <button class="btn" id="action-btn" onclick="nextStep()" style="display:none;">Start!</button>
+        </div>
 
-        <div class="crane">
-            <div class="crane-arm"></div>
-            <div class="crane-line" id="crane-cable">
-                <div class="claw"></div>
+        <div class="pile-container">
+            <div class="pile">
+                <div class="pile-label tens-pile">Tens</div>
+                <div id="col-tens"></div>
+            </div>
+            <div class="pile">
+                <div class="pile-label ones-pile">Ones</div>
+                <div id="col-ones"></div>
             </div>
         </div>
 
-        <div class="building-site">
-            <div class="column-base" id="col-tens">
-                <div class="col-label">Tens Tower</div>
-            </div>
-            <div class="column-base" id="col-ones">
-                <div class="col-label">Ones Pile</div>
-            </div>
-        </div>
-
-        <div class="input-panel" id="input-panel">
-            <div id="input-prompt">How many loose bricks left?</div>
-            <input type="number" id="user-input">
-            <br>
-            <button class="btn" onclick="checkInput()">Check</button>
+        <div class="input-area" id="input-area" style="display:none;">
+            <input type="number" id="user-input" min="0" max="99">
         </div>
     </div>
 
     <script>
         let state = {
-            tens: 1,
-            ones: 13, // Initial example: 1 ten, 13 ones
-            phase: 'start' // start, wobble, crane_picking, crane_moving, input_ones, input_tens, done
+            tens: 0,
+            ones: 0,
+            step: 0,
+            round: 0
         };
 
-        const msg = document.getElementById('msg');
+        const msg = document.getElementById('msg-text');
+        const btn = document.getElementById('action-btn');
         const onesCol = document.getElementById('col-ones');
         const tensCol = document.getElementById('col-tens');
-        const craneCable = document.getElementById('crane-cable');
-        const inputPanel = document.getElementById('input-panel');
+        const inputArea = document.getElementById('input-area');
         const inputField = document.getElementById('user-input');
 
-        function speak(text) {
+        function speak(text, rate = 0.9) {
             window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = rate;
+            window.speechSynthesis.speak(utterance);
         }
 
         function init() {
-            // Randomize
-            state.tens = Math.floor(Math.random() * 3) + 1;
-            state.ones = Math.floor(Math.random() * 5) + 10; // 10-14 (guarantee overflow)
-
-            renderBricks();
-
-            msg.innerHTML = `We have <b style="color:blue">${state.tens}</b> beams and <b style="color:red">${state.ones}</b> bricks.<br>Calculate: ${state.tens * 10} + ${state.ones}? <br>Wait! The Ones pile is too high!`;
-            speak("Oh no! The ones pile is too high! It's wobbling!");
-
+            state.tens = 0;
+            state.ones = Math.floor(Math.random() * 5) + 12; // 12-16 ones (needs trading)
+            state.step = 0;
+            state.round = 0;
+            
+            renderPiles();
+            
             setTimeout(() => {
-                onesCol.classList.add('wobble');
-                const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.innerText = "Call the Crane!";
-                btn.onclick = activateCrane;
-                msg.appendChild(btn);
-            }, 1500);
+                speak(`Look! We have ${state.ones} ones. That's too many! We need to trade 10 ones for 1 ten. Let's start!`);
+                msg.textContent = `We have ${state.ones} ones. Too many!`;
+                btn.style.display = 'inline-block';
+                btn.textContent = 'Trade 10!';
+            }, 500);
         }
 
-        function renderBricks() {
-            onesCol.innerHTML = '<div class="col-label">Ones Pile</div>';
-            tensCol.innerHTML = '<div class="col-label">Tens Tower</div>';
+        function renderPiles() {
+            onesCol.innerHTML = '';
+            tensCol.innerHTML = '';
 
             for (let i = 0; i < state.ones; i++) {
-                const b = document.createElement('div');
-                b.className = 'brick';
-                if (i >= 10) b.style.opacity = '1'; // Top ones
-                onesCol.appendChild(b);
+                const brick = document.createElement('div');
+                brick.className = 'brick';
+                if (i >= 10) brick.classList.add('wobble'); // Top ones wobble
+                onesCol.appendChild(brick);
             }
 
             for (let i = 0; i < state.tens; i++) {
-                const b = document.createElement('div');
-                b.className = 'beam';
-                tensCol.appendChild(b);
-            }
-        }
-
-        function activateCrane() {
-            onesCol.classList.remove('wobble');
-            msg.innerHTML = "Crane is regrouping 10 bricks into 1 beam...";
-
-            // 1. Lower Crane
-            craneCable.style.height = '200px'; // Lower
-
-            setTimeout(() => {
-                // 2. Turn 10 bottom bricks transparent/remove visually
-                // In reality, we are taking 10.
-                // Let's visualize the grab.
-                // Remove 10 bricks from DOM
-                const bricks = Array.from(onesCol.querySelectorAll('.brick'));
-                for (let i = 0; i < 10; i++) {
-                    if (bricks[i]) bricks[i].style.visibility = 'hidden';
-                }
-
-                // Add a "beam" to the claw?
                 const beam = document.createElement('div');
                 beam.className = 'beam';
-                beam.style.position = 'absolute';
-                beam.style.bottom = '-80px';
-                beam.style.left = '-35px';
-                document.querySelector('.claw').appendChild(beam);
-
-                speak("Picking up ten bricks...");
-            }, 1000);
-
-            setTimeout(() => {
-                // 3. Raise Crane
-                craneCable.style.height = '50px';
-            }, 2000);
-
-            setTimeout(() => {
-                // 4. Move Crane Arm (by moving the cable left via `right` property?? No, move the whole crane or line)
-                // CSS `right` on line was 280px.
-                // Tens col is further left.
-                craneCable.style.right = '550px'; // Move left
-            }, 3000);
-
-            setTimeout(() => {
-                // 5. Drop
-                craneCable.style.height = '200px';
-            }, 4000);
-
-            setTimeout(() => {
-                // 6. Release
-                document.querySelector('.claw').innerHTML = ''; // Remove beam from claw
-
-                // Add beam to tens col
-                const b = document.createElement('div');
-                b.className = 'beam';
-                tensCol.appendChild(b);
-                state.tens++;
-                state.ones -= 10;
-
-                // Fix ones col (remove hidden bricks properly)
-                renderBricks(); // Re-render with new state
-
-                craneCable.style.height = '50px';
-                speak("Regrouping complete! Now count.");
-                startCounting();
-            }, 5000);
+                beam.textContent = '10';
+                tensCol.appendChild(beam);
+            }
         }
 
-        function startCounting() {
-            msg.innerText = "How many Ones are left?";
-            inputPanel.style.display = 'block';
-            inputField.value = '';
-            inputField.focus();
-            state.phase = 'input_ones';
-        }
-
-        function checkInput() {
-            const val = parseInt(inputField.value);
-            if (state.phase === 'input_ones') {
-                if (val === state.ones) {
-                    speak("Correct. Now, how many Tens beams do we have?");
-                    document.getElementById('input-prompt').innerText = "How many Tens beams?";
-                    inputField.value = '';
-                    inputField.focus();
-                    state.phase = 'input_tens';
-                } else {
-                    speak("Count the red bricks again.");
-                }
-            } else if (state.phase === 'input_tens') {
-                if (val === state.tens) {
-                    speak("Excellent work Foreman!");
-                    msg.innerText = `Total: ${state.tens}${state.ones} (${state.tens * 10 + state.ones})`;
-                    confetti();
-                    inputPanel.style.display = 'none';
+        function nextStep() {
+            if (state.step === 0) {
+                // Trade 10 ones for 1 ten
+                speak('Watch! Ten ones disappear and become one ten!');
+                msg.textContent = '✨ Trading 10 ones for 1 ten ✨';
+                btn.style.display = 'none';
+                
+                setTimeout(() => {
+                    state.ones -= 10;
+                    state.tens += 1;
+                    renderPiles();
+                    confetti({ particleCount: 50, spread: 60 });
+                    
                     setTimeout(() => {
-                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: 43 }, '*');
-                    }, 3000);
+                        state.step = 1;
+                        speak(`Great! Now we have ${state.tens} ten and ${state.ones} ones. How many ones are left? Tell me!`);
+                        msg.textContent = 'How many ones are left?';
+                        inputArea.style.display = 'block';
+                        inputField.value = '';
+                        inputField.focus();
+                    }, 800);
+                }, 1000);
+                
+            } else if (state.step === 1) {
+                // Check ones answer
+                const val = parseInt(inputField.value);
+                if (val === state.ones) {
+                    speak('Yes! Correct!');
+                    confetti({ particleCount: 80, spread: 70 });
+                    state.step = 2;
+                    
+                    setTimeout(() => {
+                        speak(`Perfect! Now, how many tens do we have? Look at the blue blocks!`);
+                        msg.textContent = 'How many tens?';
+                        inputField.value = '';
+                        inputField.focus();
+                    }, 1000);
                 } else {
-                    speak("Count the blue beams again.");
+                    speak(`Not quite. Count the red ones again. How many red ones?`);
+                    inputField.value = '';
+                    inputField.classList.add('wobble');
+                    setTimeout(() => inputField.classList.remove('wobble'), 500);
+                }
+                
+            } else if (state.step === 2) {
+                // Check tens answer
+                const val = parseInt(inputField.value);
+                if (val === state.tens) {
+                    speak('Amazing! You got it!');
+                    confetti({ particleCount: 150, spread: 90 });
+                    state.round++;
+                    
+                    if (state.round >= 3) {
+                        setTimeout(() => {
+                            speak('You finished the trading game! You are a place value champion!');
+                            msg.textContent = '🎉 You Win! 🎉';
+                            inputArea.style.display = 'none';
+                            window.parent.postMessage({ type: 'lessonCompleted', lessonId: 48 }, '*');
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            speak('Great job! Let\'s try another one!');
+                            msg.textContent = 'Ready for another?';
+                            inputArea.style.display = 'none';
+                            btn.textContent = 'Next One!';
+                            btn.style.display = 'inline-block';
+                            state.step = 0;
+                            state.tens = 0;
+                            state.ones = Math.floor(Math.random() * 5) + 12;
+                            renderPiles();
+                        }, 1500);
+                    }
+                } else {
+                    speak(`Not quite. Count the blue tens again. How many tens?`);
+                    inputField.value = '';
+                    inputField.classList.add('wobble');
+                    setTimeout(() => inputField.classList.remove('wobble'), 500);
                 }
             }
         }
+
+        // Allow Enter key to submit
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && state.step > 0) {
+                nextStep();
+            }
+        });
 
         init();
     </script>
