@@ -243,5 +243,30 @@
         "title": "Lesson 49: Rocket Math",
         "path": "lessons/lesson49/index.html",
         "id": 49
+    },
+    {
+        "title": "Lesson 50: Balloon Pop (Sum to 5)",
+        "path": "lessons/lesson50/index.html",
+        "id": 50
+    },
+    {
+        "title": "Lesson 51: Balloon Pop (Sum to 10)",
+        "path": "lessons/lesson51/index.html",
+        "id": 51
+    },
+    {
+        "title": "Lesson 52: Balloon Pop (Sum to 20)",
+        "path": "lessons/lesson52/index.html",
+        "id": 52
+    },
+    {
+        "title": "Lesson 53: Balloon Pop (Sum to 100)",
+        "path": "lessons/lesson53/index.html",
+        "id": 53
+    },
+    {
+        "title": "Lesson 54: Balloon Pop (3-Digits)",
+        "path": "lessons/lesson54/index.html",
+        "id": 54
     }
 ]
