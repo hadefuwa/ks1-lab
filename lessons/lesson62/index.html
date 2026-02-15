@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 62: Challenge Mode (Mixed)</title>
+    <title>Lesson 62: Challenge Mode (Mixed +/-)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -324,7 +324,7 @@
         function generateQuestion() {
             let a, b, text, ans;
             const type = CONFIG.type === 'mixed' ?
-                ['addition', 'subtraction', 'multiplication', 'division'][Math.floor(Math.random() * 4)] :
+                ['addition', 'subtraction'][Math.floor(Math.random() * 2)] :
                 CONFIG.type;
 
             switch (type) {
