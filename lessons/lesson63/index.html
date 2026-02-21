@@ -4,593 +4,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson 63: Challenge Mode (Survival +/-)</title>
+    <title>Lesson 63: Add to 20 Balloons</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #dc2626;
-            /* Red for challenge */
-            --secondary: #991b1b;
-            --accent: #f87171;
-            --bg-color: #fef2f2;
-            --text-color: #450a0a;
-        }
+        :root { --primary: #7c3aed; --secondary: #4c1d95; }
 
         body {
             margin: 0;
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            color: var(--text-color);
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            color: #2e1065;
             font-family: 'Fredoka', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden; user-select: none;
         }
 
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        #game-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 
-        /* HUD */
         #hud {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 40px;
-            box-sizing: border-box;
-            z-index: 10;
-            pointer-events: none;
+            position: absolute; top: 20px; left: 0; width: 100%;
+            display: flex; justify-content: space-between;
+            padding: 0 40px; box-sizing: border-box; z-index: 10; pointer-events: none;
         }
 
         .hud-item {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 25px;
-            border-radius: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--secondary);
-            border: 3px solid #fff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: rgba(255,255,255,0.9); padding: 10px 25px; border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-size: 1.5rem; font-weight: 600;
+            color: var(--secondary); border: 3px solid #fff; display: flex; align-items: center; gap: 10px;
         }
 
-        .heart {
-            color: #ef4444;
-            font-size: 1.8rem;
-        }
-
-        /* Question Display */
         #question-display {
-            margin-top: 100px;
-            font-size: 5rem;
-            font-weight: 700;
-            color: var(--secondary);
-            text-shadow: 2px 2px 0px #fff, 0 10px 20px rgba(220, 38, 38, 0.2);
-            z-index: 5;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px 50px;
-            border-radius: 50px;
-            border: 4px solid #fff;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 100px; font-size: 5rem; font-weight: 700; color: var(--secondary);
+            text-shadow: 2px 2px 0px #fff; z-index: 5;
+            background: rgba(255,255,255,0.8); padding: 15px 50px; border-radius: 50px;
+            border: 4px solid #fff; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes popIn {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
+        @keyframes popIn { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
 
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Balloons */
         .balloon-container {
-            position: absolute;
-            bottom: -200px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            will-change: transform;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: absolute; bottom: -200px; cursor: pointer;
+            transition: transform 0.1s; will-change: transform;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        .balloon-container:active {
-            transform: scale(0.95);
-        }
+        .balloon-container:active { transform: scale(0.95); }
 
         .balloon {
-            width: 110px;
-            height: 140px;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 20%),
-                var(--balloon-color, #ff5e57);
+            width: 110px; height: 140px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0) 20%), var(--balloon-color, #7c3aed);
             border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.1), 5px 10px 15px rgba(0, 0, 0, 0.15);
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.1), 5px 10px 15px rgba(0,0,0,0.15);
+            position: relative; display: flex; justify-content: center; align-items: center;
         }
-
         .balloon::before {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 15px solid var(--balloon-color, #ff5e57);
+            content:''; position:absolute; bottom:-12px; left:50%; transform:translateX(-50%);
+            width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent;
+            border-top:15px solid var(--balloon-color, #7c3aed);
         }
-
         .balloon::after {
-            content: '';
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 30px;
-            background: rgba(0, 0, 0, 0.3);
+            content:''; position:absolute; bottom:-40px; left:50%; transform:translateX(-50%);
+            width:2px; height:30px; background:rgba(0,0,0,0.3);
         }
+        .balloon-text { font-size:2.2rem; color:white; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:2; }
 
-        .balloon-text {
-            font-size: 2.2rem;
-            color: white;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 2;
-        }
-
-        /* Screens */
         .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 100;
+            position:absolute; top:0; left:0; width:100%; height:100%;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); z-index:100;
         }
+        .hidden { display:none; }
 
-        .hidden {
-            display: none;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        p {
-            font-size: 1.6rem;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-            text-align: center;
-            max-width: 600px;
-            line-height: 1.4;
-        }
+        h1 { font-size:3.5rem; color:var(--primary); text-align:center; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:2px; }
+        p { font-size:1.6rem; color:#2e1065; margin-bottom:2rem; text-align:center; max-width:600px; line-height:1.4; }
 
         .btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            padding: 18px 60px;
-            font-size: 2rem;
-            color: white;
-            border-radius: 60px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
-            transition: all 0.2s;
-            font-family: inherit;
-            font-weight: bold;
-            text-transform: uppercase;
+            border:none; padding:18px 60px; font-size:2rem; color:white; border-radius:60px;
+            cursor:pointer; box-shadow:0 10px 25px rgba(124,58,237,0.4);
+            transition:all 0.2s; font-family:inherit; font-weight:bold; text-transform:uppercase;
         }
-
-        .btn:hover {
-            transform: scale(1.05) translateY(-3px);
-            box-shadow: 0 15px 30px rgba(220, 38, 38, 0.5);
-        }
-
-        .danger-flash {
-            animation: flashRed 0.5s;
-        }
-
-        @keyframes flashRed {
-
-            0%,
-            100% {
-                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            }
-
-            50% {
-                background: #fee2e2;
-                box-shadow: inset 0 0 100px red;
-            }
-        }
-
-        /* Game Over Specifics */
-        .game-over-title {
-            color: #dc2626;
-            animation: shake 0.5s;
-        }
+        .btn:hover { transform:scale(1.05) translateY(-3px); box-shadow:0 15px 30px rgba(124,58,237,0.5); }
     </style>
 </head>
 
 <body>
-
     <div id="game-container">
         <div id="hud">
-            <div class="hud-item">Level: <span id="level-display">1/10</span></div>
-            <div class="hud-item"><span id="lives-display">❤️❤️❤️</span></div>
-            <div class="hud-item">Score: <span id="score-display">0</span></div>
+            <div class="hud-item">Question: <span id="level-display">1/10</span></div>
+            <div class="hud-item">⭐ Score: <span id="score-display">0</span></div>
         </div>
-        <div id="question-display">? - ? = ?</div>
+        <div id="question-display">? + ? = ?</div>
     </div>
 
-    <!-- Start Screen -->
     <div id="start-screen" class="screen">
-        <h1>Challenge Mode! 🔥</h1>
-        <p>Pop the correct balloon before it flies away!<br>You possess 3 lives. Don't lose them!</p>
-        <button class="btn" onclick="startGame()">I'm Ready!</button>
+        <h1>Add to 20 Balloons! 🎈</h1>
+        <p>Answers go up to 20 now!<br>Pop the balloon with the right answer.<br>Balloons are a bit faster — stay focused!</p>
+        <button class="btn" onclick="startGame()">Let's Go!</button>
     </div>
 
-    <!-- Game Over Screen -->
-    <div id="game-over-screen" class="screen hidden">
-        <h1 class="game-over-title">Game Over! 💔</h1>
-        <p>The balloons were too fast this time!</p>
-        <div style="font-size: 2rem; margin-bottom: 30px; font-weight: bold;">Score: <span id="fail-score">0</span>
-        </div>
-        <button class="btn" onclick="location.reload()">Try Again</button>
-    </div>
-
-    <!-- Success Screen -->
     <div id="end-screen" class="screen hidden">
-        <h1>Victory! 🏆</h1>
-        <p id="final-message">You survived the challenge!</p>
-        <div style="font-size: 2.5rem; margin-bottom: 30px; font-weight: bold; color: var(--primary);">Final Score:
-            <span id="final-score">0</span>
+        <h1>Superstar! 🏆</h1>
+        <p>You popped all the right balloons!</p>
+        <div style="font-size:2.5rem;margin-bottom:30px;font-weight:bold;color:var(--primary);">
+            Final Score: <span id="final-score">0</span>
         </div>
-        <button class="btn" onclick="finishLesson()">Complete</button>
+        <button class="btn" onclick="finishLesson()">Complete!</button>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const CONFIG = {
-            lessonId: 63,
-            type: 'mixed', // 'addition', 'subtraction', 'multiplication', 'division', 'mixed'
-            maxNum: 20, // Used for operand generation
-            minNum: 1,
-            questionCount: 25, // Longer
-            speed: 4.0, // Very fast balloons
-            lives: 1 // Sudden death
-        };
+        const CONFIG = { lessonId: 63, maxNum: 10, questionCount: 10, speed: 1.6, spawnMs: 1800 };
 
-        // --- STATE ---
-        let state = {
-            score: 0,
-            lives: CONFIG.lives,
-            currentQuestionIndex: 0,
-            isActive: false,
-            balloons: [],
-            currentQuestion: null,
-            spawnInterval: null,
-            correctBalloonSpawned: false
-        };
+        let state = { score: 0, currentQuestionIndex: 0, isActive: false, balloons: [], currentQuestion: null, spawnInterval: null, correctBalloonSpawned: false };
 
-        const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef'];
+        const COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#d946ef'];
 
         function startGame() {
             document.getElementById('start-screen').classList.add('hidden');
-            state.score = 0;
-            state.lives = CONFIG.lives;
-            state.currentQuestionIndex = 0;
-            state.isActive = true;
-            updateHUD();
-            nextQuestion();
-            gameLoop();
-
-            // Spawn balloons frequently
-            state.spawnInterval = setInterval(spawnBalloon, 1200);
+            state.score = 0; state.currentQuestionIndex = 0; state.isActive = true;
+            updateHUD(); nextQuestion(); gameLoop();
+            state.spawnInterval = setInterval(spawnBalloon, CONFIG.spawnMs);
         }
 
         function generateQuestion() {
-            let a, b, text, ans;
-            const type = CONFIG.type === 'mixed' ?
-                ['addition', 'subtraction'][Math.floor(Math.random() * 2)] :
-                CONFIG.type;
-
-            switch (type) {
-                case 'subtraction':
-                    a = Math.floor(Math.random() * CONFIG.maxNum) + CONFIG.minNum; // Minuend
-                    b = Math.floor(Math.random() * a); // Subtrahend (smaller than a)
-                    text = `${a} - ${b} = ?`;
-                    ans = a - b;
-                    break;
-                case 'multiplication':
-                    a = Math.floor(Math.random() * 12) + 1; // 1-12
-                    // Table specific or random? Let's do random small numbers
-                    b = Math.floor(Math.random() * 10) + 1;
-                    if (CONFIG.maxNum <= 12) { // Restrict if config says so (e.g. 2x table)
-                        b = Math.floor(Math.random() * CONFIG.maxNum) + 1;
-                    }
-                    text = `${a} × ${b} = ?`;
-                    ans = a * b;
-                    break;
-                case 'division':
-                    // Generate multiplication first to ensure integer division
-                    b = Math.floor(Math.random() * 10) + 2; // Divisor (2-11)
-                    ans = Math.floor(Math.random() * 10) + 1; // Quotient
-                    a = b * ans;
-                    text = `${a} ÷ ${b} = ?`;
-                    break;
-                case 'addition':
-                default:
-                    a = Math.floor(Math.random() * CONFIG.maxNum);
-                    b = Math.floor(Math.random() * CONFIG.maxNum);
-                    text = `${a} + ${b} = ?`;
-                    ans = a + b;
-                    break;
-            }
-
-            return { text, answer: ans };
+            const a = Math.floor(Math.random() * CONFIG.maxNum) + 1;
+            const b = Math.floor(Math.random() * CONFIG.maxNum) + 1;
+            return { text: `${a} + ${b} = ?`, answer: a + b };
         }
 
         function nextQuestion() {
-            if (state.currentQuestionIndex >= CONFIG.questionCount) {
-                endGame(true);
-                return;
-            }
+            if (state.currentQuestionIndex >= CONFIG.questionCount) { endGame(); return; }
             state.currentQuestionIndex++;
             state.currentQuestion = generateQuestion();
             document.getElementById('question-display').innerText = state.currentQuestion.text;
-
-            // Clear existing balloons to focus
-            clearBalloons();
-            state.correctBalloonSpawned = false;
-
-            // Spawn correct answer soon
-            setTimeout(() => { if (state.isActive) spawnBalloon(true); }, 200);
-
+            clearBalloons(); state.correctBalloonSpawned = false;
+            setTimeout(() => { if (state.isActive) spawnBalloon(true); }, 300);
             updateHUD();
         }
 
         function spawnBalloon(forceCorrect = false) {
             if (!state.isActive) return;
-
             const container = document.getElementById('game-container');
             const balloonEl = document.createElement('div');
             balloonEl.className = 'balloon-container';
-
             let value;
-            // Ensure at least one correct balloon appears per question cycle if forced or random chance
-            if (forceCorrect || (!state.correctBalloonSpawned && Math.random() < 0.3)) {
-                value = state.currentQuestion.answer;
-                balloonEl.classList.add('is-correct'); // Marker
-                state.correctBalloonSpawned = true;
+            if (forceCorrect || (!state.correctBalloonSpawned && Math.random() < 0.35)) {
+                value = state.currentQuestion.answer; balloonEl.classList.add('is-correct'); state.correctBalloonSpawned = true;
             } else {
-                // Distractor
-                do {
-                    let range = 10;
-                    if (CONFIG.type === 'multiplication') range = 20;
-                    let offset = Math.floor(Math.random() * (range * 2)) - range;
-                    value = state.currentQuestion.answer + offset;
-                } while (value === state.currentQuestion.answer || value < 0);
+                do { const offset = Math.floor(Math.random() * 12) - 6; value = state.currentQuestion.answer + offset; }
+                while (value === state.currentQuestion.answer || value < 0);
             }
-
             const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-
-            balloonEl.innerHTML = `
-                <div class="balloon" style="--balloon-color: ${color}">
-                    <span class="balloon-text">${value}</span>
-                </div>
-            `;
-
-            // Position (Random X, Start at bottom -200)
-            const startX = Math.random() * (window.innerWidth - 120);
-            balloonEl.style.left = `${startX}px`;
+            balloonEl.innerHTML = `<div class="balloon" style="--balloon-color:${color}"><span class="balloon-text">${value}</span></div>`;
+            balloonEl.style.left = `${Math.random() * (window.innerWidth - 130)}px`;
             balloonEl.style.bottom = '-200px';
-
             balloonEl.onmousedown = () => popBalloon(balloonEl, value);
-
             container.appendChild(balloonEl);
-
-            // Physics
-            balloonEl._speed = (Math.random() * 2 + 2) * CONFIG.speed; // Faster!
+            balloonEl._speed = (Math.random() * 0.5 + 0.7) * CONFIG.speed;
             balloonEl._wobble = Math.random() * Math.PI * 2;
-
             state.balloons.push(balloonEl);
         }
 
         function popBalloon(el, value) {
             if (!state.isActive) return;
-
-            if (value === state.currentQuestion.answer) {
-                handleCorrect(el);
-            } else {
-                handleWrong(el);
-            }
+            if (value === state.currentQuestion.answer) handleCorrect(el); else handleWrong(el);
         }
 
         function handleCorrect(el) {
-            speak("Correct");
-
-            // Visual pop
-            el.style.transform = "scale(1.5)";
-            el.style.opacity = "0";
+            speak("Great job!");
+            el.style.transform = "scale(1.5)"; el.style.opacity = "0";
             setTimeout(() => { if (el.parentNode) el.remove(); }, 200);
-
-            // Confetti
             const rect = el.getBoundingClientRect();
-            confetti({
-                particleCount: 30,
-                spread: 50,
-                origin: {
-                    x: (rect.left + rect.width / 2) / window.innerWidth,
-                    y: (rect.top + rect.height / 2) / window.innerHeight
-                }
-            });
-
-            state.score += 50; // Higher score for challenge
-            updateHUD();
-
-            // Next question after short delay
+            confetti({ particleCount: 40, spread: 60, origin: { x: (rect.left + rect.width/2)/window.innerWidth, y: (rect.top + rect.height/2)/window.innerHeight } });
+            state.score += 10; updateHUD();
             setTimeout(nextQuestion, 800);
         }
 
         function handleWrong(el) {
-            loseLife("Wrong balloon!");
-            el.querySelector('.balloon').style.background = '#555';
-            el.classList.add('popped');
+            speak("Not that one!");
+            el.querySelector('.balloon').style.background = '#9ca3af';
             el.style.animation = "shake 0.5s";
-            setTimeout(() => {
-                if (el.parentNode) el.remove();
-                state.balloons = state.balloons.filter(b => b !== el);
-            }, 500);
-        }
-
-        function loseLife(reason) {
-            state.lives--;
-            speak("Oh no!");
-            updateHUD();
-            document.body.classList.add('danger-flash');
-            setTimeout(() => document.body.classList.remove('danger-flash'), 500);
-
-            if (state.lives <= 0) {
-                endGame(false);
-            }
+            setTimeout(() => { if (el.parentNode) el.remove(); state.balloons = state.balloons.filter(b => b !== el); }, 500);
         }
 
         function gameLoop() {
-            if (!state.isActive) return requestAnimationFrame(gameLoop);
-
-            const containerHeight = window.innerHeight;
-
+            if (!state.isActive) { requestAnimationFrame(gameLoop); return; }
+            const H = window.innerHeight;
             for (let i = state.balloons.length - 1; i >= 0; i--) {
                 const el = state.balloons[i];
-                if (el.classList.contains('popped')) continue;
-
-                // Move up
-                const currentBottom = parseFloat(el.style.bottom || -200);
-                const newBottom = currentBottom + el._speed;
-
-                // Wobble
-                el._wobble += 0.08;
-                const wobbleX = Math.sin(el._wobble) * 3;
-
-                el.style.bottom = `${newBottom}px`;
-                el.style.transform = `translateX(${wobbleX}px)`;
-
-                // Off Screen Check
-                if (newBottom > containerHeight + 50) {
-                    el.remove();
-                    state.balloons.splice(i, 1);
-
-                    // If correct answer escaped -> Penalty!
-                    if (el.classList.contains('is-correct')) {
-                        // Wait, don't punish immediately if another correct one is on screen? 
-                        // No, let's be strict. If you miss it, you lose a life.
-                        // But need to ensure we don't spawn multiple correct ones?
-                        // Actually, I control spawns.
-
-                        // To be fair: Only penalize if it was "THE" correct balloon?
-                        // Let's just say "Missed it!"
-                        loseLife("Missed it!");
-
-                        // If still alive, respawn it? Or just wait for next interval?
-                        // Next interval might spawn it.
-                        state.correctBalloonSpawned = false;
-                    }
+                const nb = parseFloat(el.style.bottom || -200) + el._speed;
+                el._wobble += 0.07;
+                el.style.bottom = `${nb}px`;
+                el.style.transform = `translateX(${Math.sin(el._wobble) * 4}px)`;
+                if (nb > H + 50) {
+                    if (el.classList.contains('is-correct')) state.correctBalloonSpawned = false;
+                    el.remove(); state.balloons.splice(i, 1);
                 }
             }
-
             requestAnimationFrame(gameLoop);
         }
 
-        function clearBalloons() {
-            state.balloons.forEach(el => el.remove());
-            state.balloons = [];
-        }
+        function clearBalloons() { state.balloons.forEach(el => el.remove()); state.balloons = []; }
 
         function updateHUD() {
             document.getElementById('score-display').innerText = state.score;
             document.getElementById('level-display').innerText = `${state.currentQuestionIndex}/${CONFIG.questionCount}`;
-
-            // Hearts
-            let hearts = "";
-            for (let i = 0; i < state.lives; i++) hearts += "❤️";
-            for (let i = state.lives; i < CONFIG.lives; i++) hearts += "🖤";
-            document.getElementById('lives-display').innerText = hearts;
         }
 
-        function endGame(victory) {
-            state.isActive = false;
-            clearInterval(state.spawnInterval);
-            clearBalloons();
-
-            if (victory) {
-                document.getElementById('end-screen').classList.remove('hidden');
-                document.getElementById('final-score').innerText = state.score;
-                speak("Challenge complete! You are amazing!");
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-            } else {
-                document.getElementById('game-over-screen').classList.remove('hidden');
-                document.getElementById('fail-score').innerText = state.score;
-                speak("Game Over. Try again!");
-            }
+        function endGame() {
+            state.isActive = false; clearInterval(state.spawnInterval); clearBalloons();
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = state.score;
+            speak("You are a superstar!"); confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
         }
 
-        function finishLesson() {
-            window.parent.postMessage({ type: 'lessonCompleted', lessonId: CONFIG.lessonId }, '*');
-        }
+        function finishLesson() { window.parent.postMessage({ type: 'lessonCompleted', lessonId: CONFIG.lessonId }, '*'); }
 
         function speak(text) {
             if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(msg);
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
         }
 
-        // Add shake animation style dynamically
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = `
-            @keyframes shake {
-                0% { transform: translateX(0); }
-                25% { transform: translateX(-10px); }
-                50% { transform: translateX(10px); }
-                75% { transform: translateX(-10px); }
-                100% { transform: translateX(0); }
-            }
-        `;
-        document.head.appendChild(styleSheet);
-
+        const s = document.createElement("style");
+        s.innerText = `@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-10px)}100%{transform:translateX(0)}}`;
+        document.head.appendChild(s);
     </script>
 </body>
-
 </html>

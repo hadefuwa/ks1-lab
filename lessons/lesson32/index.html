@@ -361,7 +361,7 @@
             let opts = [correct];
             while (opts.length < 3) {
                 let w = correct + Math.floor(Math.random() * 10 - 5) * 10; // Variate by tens mostly?
-                if (Math.random() > 0.5) w = correct + Math.floor(Math.random() * 50) * (Math.random() > .5 ? 1 : -1);
+                if (Math.random() > 0.5) w = correct + Math.floor(Math.random() * 5) * (Math.random() > .5 ? 1 : -1);
 
                 if (w !== correct && w > 20 && !opts.includes(w)) opts.push(w);
             }
