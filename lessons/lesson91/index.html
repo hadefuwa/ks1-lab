@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 91: Make the Amount</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#15803d 0%,#14532d 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:auto;padding-bottom:20px;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(21,83,61,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#16a34a,#15803d);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(22,163,74,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:16px;width:100%;max-width:540px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.25);border-radius:10px;margin:10px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #target-display{font-size:2.4rem;font-weight:700;background:rgba(0,0,0,0.3);border-radius:16px;padding:10px 28px;margin:8px 0;color:#bbf7d0;}
+        #total-display{font-size:1.6rem;font-weight:600;background:rgba(255,255,255,0.15);border-radius:12px;padding:8px 20px;margin:6px 0;min-width:200px;text-align:center;}
+        #coin-bank{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;background:rgba(255,255,255,0.08);border-radius:16px;padding:14px;width:100%;margin:8px 0;}
+        .bank-coin{cursor:pointer;transition:transform 0.15s;}
+        .bank-coin:hover{transform:scale(1.14);}
+        #tray-label{font-size:1rem;color:#bbf7d0;margin-top:8px;}
+        #tray{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;border:2px dashed rgba(255,255,255,0.4);border-radius:16px;min-height:70px;padding:10px;width:100%;margin-top:4px;}
+        .tray-coin{cursor:pointer;}
+        .tray-coin:hover{opacity:0.7;}
+        #check-btn{background:white;color:#15803d;border:none;border-radius:60px;padding:10px 36px;font-size:1.5rem;font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;}
+        #check-btn:hover{background:#f0fdf4;}
+        #feedback{font-size:1.4rem;margin:8px;min-height:1.8rem;}
+        #score-label{font-size:1.1rem;color:#bbf7d0;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🛒 Make the Amount</h1>
+    <p style="color:#bbf7d0;font-size:1.2rem;margin-bottom:1rem">Click coins from the bank to fill the tray.<br>Make exactly the right amount!</p>
+    <p style="color:#86efac;font-size:1rem">Tap a tray coin to remove it.</p>
+    <button class="big-btn" onclick="startGame()">Shop! 🪙</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Great Shopper!</h1>
+    <p style="color:#bbf7d0;font-size:1.2rem;margin:0.8rem 0">You made exact amounts perfectly!</p>
+    <div style="font-size:2rem;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div>Make: <span id="target-display">0p</span></div>
+    <div id="total-display">Tray total: 0p</div>
+    <p style="font-size:1rem;color:#86efac;margin:2px 0">Click a coin to add it to your tray:</p>
+    <div id="coin-bank"></div>
+    <div id="tray-label">Your tray (tap coin to remove):</div>
+    <div id="tray"></div>
+    <button id="check-btn" onclick="checkTray()">Check ✓</button>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID=91; const TOTAL_Q=10;
+let score=0,qNum=0,targetAmount=0,trayCoins=[];
+
+const COIN_DATA=[
+    {label:'1p',val:1,bg:'#b97333',text:'white',border:'#7c4f22'},
+    {label:'2p',val:2,bg:'#8B4513',text:'white',border:'#5c2f0e'},
+    {label:'5p',val:5,bg:'#c0c0c0',text:'#222',border:'#888'},
+    {label:'10p',val:10,bg:'#a8a8a8',text:'#222',border:'#666'},
+    {label:'20p',val:20,bg:'#b0b0b0',text:'#222',border:'#777'},
+    {label:'50p',val:50,bg:'#d4d4d4',text:'#222',border:'#888'}
+];
+
+function makeCoinEl(cd,size,onclick){
+    const el=document.createElement('div');
+    el.style.cssText=`width:${size}px;height:${size}px;border-radius:50%;background:${cd.bg};border:3px solid ${cd.border};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.22)}px;font-weight:700;color:${cd.text};box-shadow:0 2px 8px rgba(0,0,0,0.4);flex-shrink:0;`;
+    el.innerText=cd.label; if(onclick)el.onclick=onclick; return el;
+}
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');buildBank();nextQ();}
+
+function buildBank(){
+    const bank=document.getElementById('coin-bank'); bank.innerHTML='';
+    COIN_DATA.forEach(cd=>{
+        const coin=makeCoinEl(cd,60,()=>addToTray(cd));
+        coin.className='bank-coin'; bank.appendChild(coin);
+    });
+}
+
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;trayCoins=[];
+    document.getElementById('qnum').innerText=qNum; document.getElementById('feedback').innerText='';
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    document.getElementById('tray').innerHTML='';
+    // generate target: use achievable amounts 5-50p in steps of 5
+    const targets=[5,10,15,20,25,30,35,40,45,50];
+    targetAmount=targets[Math.floor(Math.random()*targets.length)];
+    document.getElementById('target-display').innerText=`${targetAmount}p`;
+    updateTotal();
+}
+
+function addToTray(cd){
+    trayCoins.push(cd); renderTray(); updateTotal();
+}
+function removeFromTray(idx){
+    trayCoins.splice(idx,1); renderTray(); updateTotal();
+}
+function renderTray(){
+    const tray=document.getElementById('tray'); tray.innerHTML='';
+    trayCoins.forEach((cd,i)=>{
+        const coin=makeCoinEl(cd,48,()=>removeFromTray(i));
+        coin.className='tray-coin'; tray.appendChild(coin);
+    });
+}
+function updateTotal(){
+    const t=trayCoins.reduce((s,c)=>s+c.val,0);
+    document.getElementById('total-display').innerText=`Tray total: ${t}p`;
+    return t;
+}
+function checkTray(){
+    const t=trayCoins.reduce((s,c)=>s+c.val,0);
+    document.getElementById('feedback').innerText='';
+    if(t===targetAmount){
+        score+=10; document.getElementById('score').innerText=score;
+        document.getElementById('feedback').innerText='✅ Exactly right!';
+        confetti({particleCount:50,spread:70,origin:{y:0.5}});
+        setTimeout(nextQ,1200);
+    }else if(t<targetAmount){
+        document.getElementById('feedback').innerText=`You need ${targetAmount-t}p more!`;
+    }else{
+        document.getElementById('feedback').innerText=`That's ${t-targetAmount}p too much!`;
+    }
+}
+function endGame(){document.getElementById('game').classList.add('hidden');document.getElementById('end-screen').classList.remove('hidden');document.getElementById('final-score').innerText=score;confetti({particleCount:200,spread:120,origin:{y:0.5}});}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

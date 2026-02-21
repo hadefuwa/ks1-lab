@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 78: Column Subtraction</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Fredoka', sans-serif; background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; user-select: none; overflow: hidden; }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 0.3rem; }
+        #subtitle { color: #bae6fd; font-size: 1.1rem; margin-bottom: 1.5rem; }
+        #progress-bar-wrap { width: 320px; height: 10px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-bottom: 1.8rem; overflow: hidden; }
+        #progress-bar { height: 100%; background: #38bdf8; border-radius: 99px; transition: width 0.5s; width: 0%; }
+        .column-box { background: rgba(255,255,255,0.08); border-radius: 20px; padding: 28px 36px; display: inline-grid; grid-template-columns: 1fr 1fr; gap: 0 6px; align-items: center; border: 2px solid rgba(255,255,255,0.15); margin-bottom: 1.8rem; }
+        .col-label { font-size: 0.9rem; color: #7dd3fc; text-align: center; padding-bottom: 8px; grid-column: span 1; }
+        .col-num { font-size: 3.2rem; font-weight: 700; text-align: center; color: white; min-width: 64px; line-height: 1.1; }
+        .minus-row { font-size: 2.4rem; color: #f87171; font-weight: 700; text-align: right; padding-right: 8px; grid-column: span 2; border-top: 3px solid rgba(255,255,255,0.3); padding-top: 8px; margin-top: 4px; }
+        .answer-row { display: flex; gap: 6px; grid-column: span 2; justify-content: flex-end; margin-top: 8px; }
+        .digit-input { width: 64px; height: 68px; font-size: 3rem; font-weight: 700; text-align: center; background: rgba(255,255,255,0.12); border: 3px solid rgba(255,255,255,0.25); border-radius: 12px; color: white; font-family: 'Fredoka', sans-serif; outline: none; }
+        .digit-input:focus { border-color: #38bdf8; background: rgba(56,189,248,0.15); }
+        .digit-input.correct { border-color: #4ade80; background: rgba(74,222,128,0.15); }
+        .digit-input.wrong { border-color: #f87171; animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+        #check-btn { background: linear-gradient(135deg, #0284c7, #0369a1); border: none; padding: 14px 52px; font-size: 1.7rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 6px 18px rgba(2,132,199,0.4); font-family: inherit; font-weight: 600; transition: transform 0.2s; }
+        #check-btn:hover { transform: scale(1.05); }
+        #message { font-size: 1.4rem; font-weight: 600; min-height: 2rem; text-align: center; margin: 1rem 0 0.5rem; }
+        .msg-correct { color: #4ade80; }
+        .msg-wrong { color: #f87171; }
+        #score-display { font-size: 1.1rem; color: #bae6fd; }
+        .screen { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(12,74,110,0.97); z-index:50; padding:20px; }
+        .hidden { display: none !important; }
+        .big-btn { background: linear-gradient(135deg, #0284c7, #0369a1); border: none; padding: 14px 52px; font-size: 1.7rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 20px rgba(2,132,199,0.5); font-family: inherit; font-weight: 600; transition: transform 0.2s; margin-top: 1.2rem; }
+        .big-btn:hover { transform: scale(1.05) translateY(-2px); }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1>➖ Column Subtraction</h1>
+    <p style="color:#bae6fd;font-size:1.2rem;text-align:center;margin:0.8rem 0">Subtract the tens and ones separately,<br>then type each digit in the answer boxes!</p>
+    <div style="font-size:3.5rem;margin:1rem 0">📐</div>
+    <button class="big-btn" onclick="startGame()">Let's Go!</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1>🎉 Brilliant!</h1>
+    <p style="color:#bae6fd;font-size:1.2rem;margin:0.8rem 0">You finished Column Subtraction!</p>
+    <div style="font-size:1.8rem;color:#fde68a;margin:0.5rem 0">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Complete! ✅</button>
+</div>
+
+<h1>➖ Column Subtraction</h1>
+<div id="subtitle">Type each digit in the answer box</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div class="column-box" id="col-box">
+    <div class="col-label">Tens</div><div class="col-label">Ones</div>
+    <div class="col-num" id="a-tens">0</div><div class="col-num" id="a-ones">0</div>
+    <div class="minus-row">−&nbsp;<span id="b-tens">0</span>&nbsp;<span id="b-ones">0</span></div>
+    <div class="answer-row">
+        <input class="digit-input" id="ans-tens" type="number" min="0" max="9" maxlength="1" placeholder="?" onkeydown="handleKey(event,'ans-tens')" oninput="limitOne(this)">
+        <input class="digit-input" id="ans-ones" type="number" min="0" max="9" maxlength="1" placeholder="?" onkeydown="handleKey(event,'ans-ones')" oninput="limitOne(this)">
+    </div>
+</div>
+
+<button id="check-btn" onclick="checkAnswer()">Check ✓</button>
+<div id="message"></div>
+<div id="score-display">Score: <span id="score">0</span></div>
+
+<script>
+const LESSON_ID = 78;
+const TOTAL_Q = 10;
+let score = 0, qNum = 0, current = null;
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function startGame() {
+    document.getElementById('start-screen').classList.add('hidden');
+    nextQuestion();
+}
+
+function nextQuestion() {
+    if (qNum >= TOTAL_Q) { endGame(); return; }
+    qNum++;
+    // No borrowing: ones of a >= ones of b, tens of a >= tens of b
+    let a, b;
+    do {
+        const aT = rnd(1, 9), aO = rnd(0, 9);
+        const bT = rnd(0, aT - 1), bO = rnd(0, aO);
+        a = aT * 10 + aO;
+        b = bT * 10 + bO;
+    } while (a <= b || b === 0);
+    current = { a, b, answer: a - b, aTens: Math.floor(a/10), aOnes: a%10, bTens: Math.floor(b/10), bOnes: b%10 };
+
+    document.getElementById('a-tens').innerText = current.aTens;
+    document.getElementById('a-ones').innerText = current.aOnes;
+    document.getElementById('b-tens').innerText = current.bTens;
+    document.getElementById('b-ones').innerText = current.bOnes;
+    ['ans-tens','ans-ones'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = ''; el.className = 'digit-input'; el.disabled = false;
+    });
+    setMessage('', '');
+    updateProgress();
+    document.getElementById('ans-tens').focus();
+    speak(`${current.a} minus ${current.b} equals question mark`);
+}
+
+function limitOne(el) { if (el.value.length > 1) el.value = el.value.slice(-1); }
+
+function handleKey(e, id) {
+    if (e.key === 'Enter') { if (id === 'ans-tens') document.getElementById('ans-ones').focus(); else checkAnswer(); }
+}
+
+function checkAnswer() {
+    const tVal = parseInt(document.getElementById('ans-tens').value);
+    const oVal = parseInt(document.getElementById('ans-ones').value);
+    if (isNaN(tVal) || isNaN(oVal)) return;
+    const correctTens = Math.floor(current.answer / 10);
+    const correctOnes = current.answer % 10;
+    const tOk = tVal === correctTens;
+    const oOk = oVal === correctOnes;
+    document.getElementById('ans-tens').className = 'digit-input ' + (tOk ? 'correct' : 'wrong');
+    document.getElementById('ans-ones').className = 'digit-input ' + (oOk ? 'correct' : 'wrong');
+
+    if (tOk && oOk) {
+        score += 10; document.getElementById('score').innerText = score;
+        setMessage('✅ Correct! ' + current.a + ' − ' + current.b + ' = ' + current.answer, 'msg-correct');
+        ['ans-tens','ans-ones'].forEach(id => document.getElementById(id).disabled = true);
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        speak('Correct! Well done!');
+        setTimeout(() => nextQuestion(), 1400);
+    } else {
+        setMessage('❌ Not quite — try again!', 'msg-wrong');
+        speak('Not quite. Try again.');
+        setTimeout(() => {
+            ['ans-tens','ans-ones'].forEach(id => { const el = document.getElementById(id); el.value = ''; el.className = 'digit-input'; });
+            setMessage('', '');
+            document.getElementById('ans-tens').focus();
+        }, 900);
+    }
+}
+
+function setMessage(text, cls) { const el = document.getElementById('message'); el.innerText = text; el.className = cls; }
+function updateProgress() { document.getElementById('progress-bar').style.width = `${((qNum-1)/TOTAL_Q)*100}%`; }
+
+function endGame() {
+    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = score;
+    confetti({ particleCount: 180, spread: 100, origin: { y: 0.5 } });
+    speak('Amazing! You finished column subtraction!');
+}
+function finishLesson() { window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*'); }
+function speak(text) { if (window.speechSynthesis.speaking) window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+</script>
+</body>
+</html>

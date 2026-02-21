@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 83: O'Clock Times</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#0ea5e9 0%,#0369a1 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:hidden;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,105,161,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(14,165,233,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:20px;width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.25);border-radius:10px;margin:14px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #clock-container svg{border-radius:50%;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.3));}
+        #prompt{font-size:1.6rem;font-weight:600;margin:18px 0 10px;text-align:center;}
+        #choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:380px;margin-top:8px;}
+        .choice-btn{background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);border-radius:14px;padding:14px;font-size:1.5rem;color:white;font-family:inherit;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .choice-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.04);}
+        .choice-btn.correct{background:#16a34a;border-color:#16a34a;}
+        .choice-btn.wrong{background:#dc2626;border-color:#dc2626;}
+        #feedback{font-size:1.4rem;margin:10px;min-height:1.8rem;}
+        #score-label{font-size:1.1rem;color:#bae6fd;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🕐 O'Clock Times</h1>
+    <p style="color:#bae6fd;font-size:1.2rem;margin-bottom:1rem">Look at the clock and choose the right time.<br>All clocks will show <strong>o'clock</strong> times!</p>
+    <button class="big-btn" onclick="startGame()">Let's Go! ⏰</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Well Done!</h1>
+    <p style="color:#bae6fd;font-size:1.2rem;margin:0.8rem 0">You're great at reading o'clock times!</p>
+    <div style="font-size:2rem;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="clock-container">
+        <svg id="clock-svg" width="240" height="240" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div id="prompt">What time does the clock show?</div>
+    <div id="choices"></div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID = 83; const TOTAL_Q = 10;
+let score=0,qNum=0,answered=false;
+
+function buildClock(hour, minute) {
+    const svg = document.getElementById('clock-svg');
+    svg.innerHTML='';
+    const ns='http://www.w3.org/2000/svg';
+    const cx=150,cy=150,r=140;
+    const c=e('circle',{cx,cy,r,fill:'white',stroke:'#1e3a5f','stroke-width':'6'});
+    svg.appendChild(c);
+    // centre
+    svg.appendChild(e('circle',{cx,cy,r:8,fill:'#1e3a5f'}));
+    // hour markers
+    for(let i=1;i<=12;i++){
+        const a=(i/12)*Math.PI*2-Math.PI/2;
+        const xm=cx+Math.cos(a)*118,ym=cy+Math.sin(a)*118;
+        const t=e('text',{x:xm,y:ym,'text-anchor':'middle','dominant-baseline':'central','font-size':'20','font-weight':'700','font-family':'Fredoka',fill:'#1e3a5f'});
+        t.textContent=i;svg.appendChild(t);
+        const tick=e('line',{x1:cx+Math.cos(a)*128,y1:cy+Math.sin(a)*128,x2:cx+Math.cos(a)*138,y2:cy+Math.sin(a)*138,'stroke':'#94a3b8','stroke-width':'4','stroke-linecap':'round'});
+        svg.appendChild(tick);
+    }
+    // minute hand (minute=0 always for o'clock)
+    const mAngle=(minute/60)*360+(hour/12)*30-90;
+    const mRad=mAngle*Math.PI/180;
+    svg.appendChild(e('line',{x1:cx,y1:cy,x2:cx+Math.cos(mRad)*115,y2:cy+Math.sin(mRad)*115,stroke:'#475569','stroke-width':'5','stroke-linecap':'round'}));
+    // hour hand
+    const hA=((hour%12)/12)*360+(minute/60)*30-90;
+    const hR=hA*Math.PI/180;
+    svg.appendChild(e('line',{x1:cx,y1:cy,x2:cx+Math.cos(hR)*80,y2:cy+Math.sin(hR)*80,stroke:'#1e3a5f','stroke-width':'8','stroke-linecap':'round'}));
+    svg.appendChild(e('circle',{cx,cy,r:5,fill:'#e2e8f0'}));
+}
+function e(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v] of Object.entries(attrs))el.setAttribute(k,v);return el;}
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');nextQ();}
+
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;answered=false;
+    document.getElementById('qnum').innerText=qNum;
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    document.getElementById('feedback').innerText='';
+    const hour=Math.floor(Math.random()*12)+1;
+    buildClock(hour,0);
+    document.getElementById('prompt').innerText='What time does the clock show?';
+    const correct=`${hour} o'clock`;
+    const opts=genOpts(hour);
+    const choicesEl=document.getElementById('choices');
+    choicesEl.innerHTML='';
+    opts.forEach(h=>{
+        const label=`${h} o'clock`;
+        const btn=document.createElement('button');
+        btn.className='choice-btn'; btn.innerText=label;
+        btn.onclick=()=>pick(btn,label,correct);
+        choicesEl.appendChild(btn);
+    });
+}
+
+function genOpts(correct){
+    const s=new Set([correct]);
+    while(s.size<4){s.add(Math.floor(Math.random()*12)+1);}
+    return [...s].sort(()=>Math.random()-0.5);
+}
+
+function pick(btn,val,correct){
+    if(answered)return; answered=true;
+    if(val===correct){
+        btn.classList.add('correct');
+        score+=10; document.getElementById('score').innerText=score;
+        document.getElementById('feedback').innerText='✅ Correct!';
+        confetti({particleCount:30,spread:60,origin:{y:0.5}});
+    } else {
+        btn.classList.add('wrong');
+        document.getElementById('feedback').innerText=`❌ It was ${correct}`;
+        document.querySelectorAll('.choice-btn').forEach(b=>{if(b.innerText===correct)b.classList.add('correct');});
+    }
+    setTimeout(nextQ,1100);
+}
+
+function endGame(){
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText=score;
+    confetti({particleCount:200,spread:120,origin:{y:0.5}});
+}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

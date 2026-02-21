@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 89: Coin Recognition</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#b45309 0%,#78350f 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:hidden;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(120,53,15,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#d97706,#b45309);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(217,119,6,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:20px;width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.25);border-radius:10px;margin:14px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #coin-show{margin:10px 0;}
+        #prompt{font-size:1.5rem;font-weight:600;margin:12px 0 8px;text-align:center;}
+        #choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:380px;}
+        .choice-btn{background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);border-radius:14px;padding:14px;font-size:1.4rem;color:white;font-family:inherit;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .choice-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.04);}
+        .choice-btn.correct{background:#16a34a;border-color:#16a34a;}
+        .choice-btn.wrong{background:#dc2626;border-color:#dc2626;}
+        #feedback{font-size:1.4rem;margin:10px;min-height:1.8rem;}
+        #score-label{font-size:1.1rem;color:#fde68a;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">💰 Coin Recognition</h1>
+    <p style="color:#fde68a;font-size:1.2rem;margin-bottom:1rem">Can you name UK coins?<br>Look at each coin and choose its value!</p>
+    <div style="font-size:2rem">🪙 1p 2p 5p 10p 20p 50p £1 £2</div>
+    <button class="big-btn" onclick="startGame()">Start! 💪</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Coin Expert!</h1>
+    <p style="color:#fde68a;font-size:1.2rem;margin:0.8rem 0">You know your UK coins!</p>
+    <div style="font-size:2rem;color:#fef3c7">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="coin-show"></div>
+    <div id="prompt">What coin is this?</div>
+    <div id="choices"></div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID=89; const TOTAL_Q=10;
+let score=0,qNum=0,answered=false;
+
+const COINS=[
+    {label:'1p',bg:'#b97333',text:'white',border:'#7c4f22',size:80},
+    {label:'2p',bg:'#8B4513',text:'white',border:'#5c2f0e',size:86},
+    {label:'5p',bg:'#c0c0c0',text:'#222',border:'#888',size:82},
+    {label:'10p',bg:'#a8a8a8',text:'#222',border:'#666',size:92},
+    {label:'20p',bg:'#b0b0b0',text:'#222',border:'#777',size:96},
+    {label:'50p',bg:'#d4d4d4',text:'#222',border:'#888',size:100},
+    {label:'£1',bg:'#daa520',text:'white',border:'#b8860b',size:104},
+    {label:'£2',bg:'#d4af37',text:'white',border:'#a07d1a',size:108,inner:true}
+];
+
+function makeCoin(coin,size){
+    const s=size||coin.size;
+    const el=document.createElement('div');
+    el.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:${coin.bg};border:5px solid ${coin.border};display:flex;align-items:center;justify-content:center;font-size:${Math.round(s*0.26)}px;font-weight:700;color:${coin.text};box-shadow:0 4px 16px rgba(0,0,0,0.4),inset 0 -3px 6px rgba(0,0,0,0.2),inset 0 3px 6px rgba(255,255,255,0.2);`;
+    if(coin.inner){
+        const inner=document.createElement('div');
+        inner.style.cssText=`width:${Math.round(s*0.6)}px;height:${Math.round(s*0.6)}px;border-radius:50%;background:#c0c0c0;display:flex;align-items:center;justify-content:center;font-size:${Math.round(s*0.22)}px;font-weight:700;color:#222;`;
+        inner.innerText=coin.label;el.appendChild(inner);
+    }else{el.innerText=coin.label;}
+    return el;
+}
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');nextQ();}
+
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;answered=false;
+    document.getElementById('qnum').innerText=qNum; document.getElementById('feedback').innerText='';
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    const idx=Math.floor(Math.random()*COINS.length);
+    const coin=COINS[idx];
+    const showEl=document.getElementById('coin-show'); showEl.innerHTML='';
+    showEl.style.cssText='display:flex;justify-content:center;align-items:center;';
+    showEl.appendChild(makeCoin(coin,120));
+    const correct=coin.label;
+    const opts=genOpts(idx);
+    const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+    opts.forEach(i=>{
+        const btn=document.createElement('button'); btn.className='choice-btn'; btn.innerText=COINS[i].label;
+        btn.onclick=()=>pick(btn,COINS[i].label,correct); choicesEl.appendChild(btn);
+    });
+}
+function genOpts(correctIdx){
+    const s=new Set([correctIdx]);
+    while(s.size<4){s.add(Math.floor(Math.random()*COINS.length));}
+    return [...s].sort(()=>Math.random()-0.5);
+}
+function pick(btn,val,correct){
+    if(answered)return; answered=true;
+    if(val===correct){btn.classList.add('correct');score+=10;document.getElementById('score').innerText=score;document.getElementById('feedback').innerText='✅ Correct!';confetti({particleCount:30,spread:60,origin:{y:0.5}});}
+    else{btn.classList.add('wrong');document.getElementById('feedback').innerText=`❌ It was ${correct}`;document.querySelectorAll('.choice-btn').forEach(b=>{if(b.innerText===correct)b.classList.add('correct');});}
+    setTimeout(nextQ,1100);
+}
+function endGame(){document.getElementById('game').classList.add('hidden');document.getElementById('end-screen').classList.remove('hidden');document.getElementById('final-score').innerText=score;confetti({particleCount:200,spread:120,origin:{y:0.5}});}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

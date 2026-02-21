@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 94: Shopping Speed Challenge</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#dc2626 0%,#7f1d1d 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:auto;padding-bottom:20px;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(127,29,29,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#ef4444,#dc2626);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(239,68,68,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:14px;width:100%;max-width:540px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.2);border-radius:10px;margin:8px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #time-bar-wrap{width:90%;height:8px;background:rgba(255,255,255,0.1);border-radius:8px;margin-bottom:8px;}
+        #time-bar{height:100%;background:#fbbf24;border-radius:8px;transition:width 0.1s linear;}
+        #target-display{font-size:2.4rem;font-weight:700;background:rgba(0,0,0,0.25);border-radius:14px;padding:8px 24px;color:#fecaca;margin:4px 0;}
+        #total-display{font-size:1.5rem;font-weight:600;background:rgba(255,255,255,0.12);border-radius:12px;padding:6px 18px;margin:4px 0;}
+        #coin-bank{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;background:rgba(255,255,255,0.08);border-radius:14px;padding:12px;width:100%;margin:6px 0;}
+        .bank-coin{cursor:pointer;transition:transform 0.15s;}
+        .bank-coin:hover{transform:scale(1.14);}
+        #tray{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border:2px dashed rgba(255,255,255,0.35);border-radius:14px;min-height:60px;padding:8px;width:100%;}
+        .tray-coin{cursor:pointer;}
+        .tray-coin:hover{opacity:0.6;}
+        #check-btn{background:white;color:#dc2626;border:none;border-radius:60px;padding:8px 32px;font-size:1.4rem;font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;}
+        #check-btn:hover{background:#fef2f2;}
+        #feedback{font-size:1.3rem;margin:6px;min-height:1.5rem;}
+        #score-label{font-size:1.1rem;color:#fecaca;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.6rem;margin-bottom:0.5rem">⚡ Shopping Speed Challenge!</h1>
+    <p style="color:#fecaca;font-size:1.1rem;margin-bottom:1rem">Make the exact amount <strong>as fast as you can</strong>!<br>Work through 10 rounds. Tap tray coins to remove them.</p>
+    <button class="big-btn" onclick="startGame()">Speed Shop! 🛒</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.6rem">🏆 Speed Shopper!</h1>
+    <p style="color:#fecaca;font-size:1.2rem;margin:0.8rem 0" id="end-msg">Brilliant speed round!</p>
+    <div style="font-size:2rem;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="time-bar-wrap"><div id="time-bar"></div></div>
+    <div>Make: <span id="target-display">0p</span></div>
+    <div id="total-display">Tray total: 0p</div>
+    <p style="font-size:0.95rem;color:#fca5a5;margin:2px 0">Click coins to add to tray:</p>
+    <div id="coin-bank"></div>
+    <p style="font-size:0.9rem;color:#fca5a5;margin:3px 0">Tray (tap to remove):</p>
+    <div id="tray"></div>
+    <button id="check-btn" onclick="checkTray()">Check ✓</button>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID=94; const TOTAL_Q=10; const TIME_LIMIT=15000;
+let score=0,qNum=0,targetAmount=0,trayCoins=[],timerAnim=null;
+
+const COIN_DATA=[
+    {label:'1p',val:1,bg:'#b97333',text:'white',border:'#7c4f22'},
+    {label:'2p',val:2,bg:'#8B4513',text:'white',border:'#5c2f0e'},
+    {label:'5p',val:5,bg:'#c0c0c0',text:'#222',border:'#888'},
+    {label:'10p',val:10,bg:'#a8a8a8',text:'#222',border:'#666'},
+    {label:'20p',val:20,bg:'#b0b0b0',text:'#222',border:'#777'},
+    {label:'50p',val:50,bg:'#d4d4d4',text:'#222',border:'#888'}
+];
+
+function makeCoinEl(cd,size,onclick){
+    const el=document.createElement('div');
+    el.style.cssText=`width:${size}px;height:${size}px;border-radius:50%;background:${cd.bg};border:3px solid ${cd.border};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.22)}px;font-weight:700;color:${cd.text};box-shadow:0 2px 8px rgba(0,0,0,0.4);flex-shrink:0;`;
+    el.innerText=cd.label; if(onclick)el.onclick=onclick; return el;
+}
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');buildBank();nextQ();}
+function buildBank(){
+    const bank=document.getElementById('coin-bank'); bank.innerHTML='';
+    COIN_DATA.forEach(cd=>{const coin=makeCoinEl(cd,56,()=>addToTray(cd));coin.className='bank-coin';bank.appendChild(coin);});
+}
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;trayCoins=[];
+    document.getElementById('qnum').innerText=qNum; document.getElementById('feedback').innerText='';
+    document.getElementById('tray').innerHTML='';
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    const targets=[5,10,15,20,25,30,35,40,45,50,6,7,11,12,16];
+    targetAmount=targets[Math.floor(Math.random()*targets.length)];
+    document.getElementById('target-display').innerText=`${targetAmount}p`;
+    updateTotal(); startTimer();
+}
+function startTimer(){
+    clearTimeout(timerAnim);
+    const bar=document.getElementById('time-bar');
+    bar.style.transition='none'; bar.style.width='100%';
+    requestAnimationFrame(()=>{bar.style.transition=`width ${TIME_LIMIT}ms linear`;bar.style.width='0%';});
+    timerAnim=setTimeout(()=>{document.getElementById('feedback').innerText='⏱ Time up! Moving on...';setTimeout(nextQ,900);},TIME_LIMIT);
+}
+function addToTray(cd){trayCoins.push(cd);renderTray();updateTotal();}
+function removeFromTray(idx){trayCoins.splice(idx,1);renderTray();updateTotal();}
+function renderTray(){
+    const tray=document.getElementById('tray'); tray.innerHTML='';
+    trayCoins.forEach((cd,i)=>{const coin=makeCoinEl(cd,44,()=>removeFromTray(i));coin.className='tray-coin';tray.appendChild(coin);});
+}
+function updateTotal(){
+    const t=trayCoins.reduce((s,c)=>s+c.val,0);
+    document.getElementById('total-display').innerText=`Tray total: ${t}p`; return t;
+}
+function checkTray(){
+    const t=trayCoins.reduce((s,c)=>s+c.val,0);
+    document.getElementById('feedback').innerText='';
+    if(t===targetAmount){
+        clearTimeout(timerAnim);
+        score+=10; document.getElementById('score').innerText=score;
+        document.getElementById('feedback').innerText='✅ Exact! Great speed!';
+        confetti({particleCount:40,spread:70,origin:{y:0.5}});
+        setTimeout(nextQ,900);
+    }else if(t<targetAmount){
+        document.getElementById('feedback').innerText=`Need ${targetAmount-t}p more!`;
+    }else{
+        document.getElementById('feedback').innerText=`${t-targetAmount}p too much!`;
+    }
+}
+function endGame(){
+    clearTimeout(timerAnim);
+    document.getElementById('game').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText=score;
+    document.getElementById('end-msg').innerText=score>=80?'Full marks! You\'re a money master!':score>=50?'Great job!':'Keep practising!';
+    confetti({particleCount:200,spread:120,origin:{y:0.5}});
+}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

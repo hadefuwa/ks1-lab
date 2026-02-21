@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 81: Subtraction Balloon Pop</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family:'Fredoka',sans-serif; background: linear-gradient(135deg,#7f1d1d 0%,#b91c1c 100%); min-height:100vh; display:flex; flex-direction:column; align-items:center; color:white; user-select:none; overflow:hidden; }
+        #hud { position:absolute; top:20px; left:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:0 24px; z-index:10; }
+        #question-display { position:absolute; top:56px; left:50%; transform:translateX(-50%); font-size:3rem; font-weight:600; color:#fde68a; text-shadow:0 2px 8px rgba(0,0,0,0.4); z-index:10; white-space:nowrap; }
+        #arena { position:absolute; top:0; left:0; right:0; bottom:0; overflow:hidden; }
+        .balloon { position:absolute; bottom:-120px; display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+        .balloon:hover { transform:scale(1.1); }
+        .balloon-body { width:80px; height:96px; border-radius:50% 50% 50% 50%/60% 60% 40% 40%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700; color:white; text-shadow:0 1px 3px rgba(0,0,0,0.5); box-shadow:-6px -6px 0 rgba(255,255,255,0.2) inset,4px 4px 10px rgba(0,0,0,0.3); }
+        .balloon-knot { width:10px; height:10px; border-radius:50% 50% 0 0; margin-top:-2px; }
+        .balloon-string { width:2px; height:36px; background:rgba(255,255,255,0.5); }
+        @keyframes popAnim { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:0.6} 100%{transform:scale(0);opacity:0} }
+        .balloon.pop { animation:popAnim 0.25s ease forwards; pointer-events:none; }
+        .screen { position:fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(127,29,29,0.97); z-index:50; text-align:center; padding:20px; }
+        .hidden { display:none !important; }
+        .big-btn { background:linear-gradient(135deg,#dc2626,#b91c1c); border:none; padding:14px 52px; font-size:1.8rem; color:white; border-radius:60px; cursor:pointer; box-shadow:0 8px 24px rgba(220,38,38,0.5); font-family:inherit; font-weight:600; transition:transform 0.2s; margin-top:1.2rem; }
+        .big-btn:hover { transform:scale(1.05) translateY(-2px); }
+        #game-container { position:relative; width:100%; height:100vh; display:flex; flex-direction:column; align-items:center; }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🎈 Subtraction Pop!</h1>
+    <p style="color:#fecaca;font-size:1.3rem;margin-bottom:1rem">Pop the balloon showing the right answer!<br>These questions use <strong>take away</strong>.</p>
+    <div style="font-size:3rem">🎈 ➖ 🎈</div>
+    <button class="big-btn" onclick="startGame()">Start! 🚀</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Fantastic!</h1>
+    <p style="color:#fecaca;font-size:1.2rem;margin:0.8rem 0">You completed Subtraction Balloon Pop!</p>
+    <div style="font-size:2rem;color:#fde68a;margin:0.8rem">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game-container" class="hidden">
+    <div id="hud">
+        <div style="font-size:1.2rem;font-weight:600">Score <span id="score">0</span></div>
+        <div style="font-size:1rem;color:#fecaca" id="progress-label">Q 1/10</div>
+    </div>
+    <div id="question-display">? − ? = ?</div>
+    <div id="arena"></div>
+</div>
+
+<script>
+const CONFIG = { lessonId: 81, maxNum: 20, questionCount: 10, speed: 1.6, spawnMs: 1800 };
+const COLORS = ['#dc2626','#b91c1c','#e11d48','#be123c','#c2410c','#9a3412','#b45309','#92400e'];
+const state = { score:0, qNum:0, correct:0, balloons:[], animating:false, rafId:null };
+
+function startGame() {
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-container').classList.remove('hidden');
+    nextQuestion();
+}
+
+function nextQuestion() {
+    if (state.qNum >= CONFIG.questionCount) { endGame(); return; }
+    state.qNum++;
+    clearBalloons();
+    const b = Math.floor(Math.random() * CONFIG.maxNum) + 1;
+    const a = b + Math.floor(Math.random() * CONFIG.maxNum) + 1;
+    state.correct = a - b;
+    document.getElementById('question-display').innerText = `${a} − ${b} = ?`;
+    document.getElementById('progress-label').innerText = `Q ${state.qNum}/${CONFIG.questionCount}`;
+    const answers = genAnswers(state.correct);
+    spawnBalloons(answers);
+}
+
+function genAnswers(correct) {
+    const s = new Set([correct]);
+    while (s.size < 4) { const w = correct + (Math.floor(Math.random()*6)+1) * (Math.random()<0.5?1:-1); if (w>0) s.add(w); }
+    return [...s].sort(()=>Math.random()-0.5);
+}
+
+function spawnBalloons(answers) {
+    const arena = document.getElementById('arena');
+    const W = window.innerWidth;
+    const positions = answers.map((_,i)=>(i+0.5)*(W/answers.length)).sort(()=>Math.random()-0.5);
+    answers.forEach((val,i)=>{
+        const el = document.createElement('div');
+        el.className = 'balloon';
+        const c = COLORS[Math.floor(Math.random()*COLORS.length)];
+        el.innerHTML = `<div class="balloon-body" style="background:${c}">${val}</div><div class="balloon-knot" style="background:${c}"></div><div class="balloon-string"></div>`;
+        el.style.left = `${positions[i]-40}px`;
+        el.style.bottom = '-120px';
+        el.onclick = ()=>tapBalloon(el, val);
+        arena.appendChild(el);
+        state.balloons.push({el, val, y: window.innerHeight+100});
+    });
+    if (state.rafId) cancelAnimationFrame(state.rafId);
+    state.rafId = requestAnimationFrame(loop);
+}
+
+function loop() {
+    state.balloons = state.balloons.filter(b=>b.el.parentNode);
+    state.balloons.forEach(b=>{ b.y -= CONFIG.speed; b.el.style.bottom=`${window.innerHeight-b.y}px`; });
+    if (state.balloons.length === 0) nextQuestion();
+    else state.rafId = requestAnimationFrame(loop);
+}
+
+function tapBalloon(el, val) {
+    if (state.animating) return;
+    if (val === state.correct) {
+        state.animating = true;
+        state.score += 10;
+        document.getElementById('score').innerText = state.score;
+        el.classList.add('pop');
+        confetti({particleCount:40,spread:60,origin:{x:(el.getBoundingClientRect().left+40)/window.innerWidth,y:el.getBoundingClientRect().top/window.innerHeight}});
+        clearBalloons(true);
+        setTimeout(()=>{ state.animating=false; nextQuestion(); }, 600);
+    } else {
+        el.style.filter='brightness(0.35)'; el.style.pointerEvents='none';
+        setTimeout(()=>{ if(el.parentNode){el.style.filter='';el.style.pointerEvents='';} }, 400);
+    }
+}
+
+function clearBalloons(keep) {
+    if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId=null; }
+    if (!keep) { state.balloons.forEach(b=>b.el.remove()); state.balloons=[]; }
+}
+
+function endGame() {
+    clearBalloons();
+    document.getElementById('game-container').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = state.score;
+    confetti({particleCount:200,spread:120,origin:{y:0.5}});
+}
+
+function finishLesson() { window.parent.postMessage({type:'lessonCompleted',lessonId:CONFIG.lessonId},'*'); }
+</script>
+</body>
+</html>

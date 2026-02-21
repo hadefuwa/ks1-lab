@@ -368,5 +368,105 @@
         "title": "Lesson 74: Colour Spelling – Level 7",
         "path": "lessons/lesson74/index.html",
         "id": 74
+    },
+    {
+        "title": "Lesson 75: Take Away to 10",
+        "path": "lessons/lesson75/index.html",
+        "id": 75
+    },
+    {
+        "title": "Lesson 76: Take Away to 20",
+        "path": "lessons/lesson76/index.html",
+        "id": 76
+    },
+    {
+        "title": "Lesson 77: Subtract Tens to 100",
+        "path": "lessons/lesson77/index.html",
+        "id": 77
+    },
+    {
+        "title": "Lesson 78: Column Subtraction",
+        "path": "lessons/lesson78/index.html",
+        "id": 78
+    },
+    {
+        "title": "Lesson 79: Subtraction with Borrowing",
+        "path": "lessons/lesson79/index.html",
+        "id": 79
+    },
+    {
+        "title": "Lesson 80: 3-Digit Subtraction",
+        "path": "lessons/lesson80/index.html",
+        "id": 80
+    },
+    {
+        "title": "Lesson 81: Subtraction Balloon Pop",
+        "path": "lessons/lesson81/index.html",
+        "id": 81
+    },
+    {
+        "title": "Lesson 82: Subtraction Survival",
+        "path": "lessons/lesson82/index.html",
+        "id": 82
+    },
+    {
+        "title": "Lesson 83: O'Clock Times",
+        "path": "lessons/lesson83/index.html",
+        "id": 83
+    },
+    {
+        "title": "Lesson 84: Half Past",
+        "path": "lessons/lesson84/index.html",
+        "id": 84
+    },
+    {
+        "title": "Lesson 85: Quarter Past and Quarter To",
+        "path": "lessons/lesson85/index.html",
+        "id": 85
+    },
+    {
+        "title": "Lesson 86: 5-Minute Intervals",
+        "path": "lessons/lesson86/index.html",
+        "id": 86
+    },
+    {
+        "title": "Lesson 87: Digital to Analogue",
+        "path": "lessons/lesson87/index.html",
+        "id": 87
+    },
+    {
+        "title": "Lesson 88: Clock Speed Challenge",
+        "path": "lessons/lesson88/index.html",
+        "id": 88
+    },
+    {
+        "title": "Lesson 89: Coin Recognition",
+        "path": "lessons/lesson89/index.html",
+        "id": 89
+    },
+    {
+        "title": "Lesson 90: Count the Coins",
+        "path": "lessons/lesson90/index.html",
+        "id": 90
+    },
+    {
+        "title": "Lesson 91: Make the Amount",
+        "path": "lessons/lesson91/index.html",
+        "id": 91
+    },
+    {
+        "title": "Lesson 92: Comparing Prices",
+        "path": "lessons/lesson92/index.html",
+        "id": 92
+    },
+    {
+        "title": "Lesson 93: Calculate Change",
+        "path": "lessons/lesson93/index.html",
+        "id": 93
+    },
+    {
+        "title": "Lesson 94: Shopping Speed Challenge",
+        "path": "lessons/lesson94/index.html",
+        "id": 94
     }
 ]

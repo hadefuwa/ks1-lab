@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 92: Comparing Prices</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#0891b2 0%,#164e63 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:hidden;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(22,78,99,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#0891b2,#0e7490);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(8,145,178,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:20px;width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.25);border-radius:10px;margin:14px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #prices{display:flex;gap:24px;margin:16px 0;justify-content:center;flex-wrap:wrap;}
+        .price-tag{background:white;color:#1e3a5f;border-radius:14px;padding:20px 28px;font-size:2rem;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.3);min-width:120px;text-align:center;position:relative;}
+        .price-tag::after{content:'';width:16px;height:16px;background:white;border-radius:50%;position:absolute;top:50%;right:-8px;transform:translateY(-50%);box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+        #prompt{font-size:1.5rem;font-weight:600;margin:10px 0;text-align:center;color:#a5f3fc;}
+        #choices{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+        .choice-btn{background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);border-radius:14px;padding:14px 28px;font-size:1.4rem;color:white;font-family:inherit;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .choice-btn:hover{background:rgba(255,255,255,0.35);transform:scale(1.06);}
+        .choice-btn.correct{background:#16a34a;border-color:#16a34a;}
+        .choice-btn.wrong{background:#dc2626;border-color:#dc2626;}
+        #feedback{font-size:1.4rem;margin:10px;min-height:1.8rem;}
+        #score-label{font-size:1.1rem;color:#a5f3fc;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🏷️ Comparing Prices</h1>
+    <p style="color:#a5f3fc;font-size:1.2rem;margin-bottom:1rem">Two items are on sale. Can you compare their prices?<br>Which costs <strong>more</strong>? Which costs <strong>less</strong>?</p>
+    <button class="big-btn" onclick="startGame()">Compare! 🛍️</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Smart Shopper!</h1>
+    <p style="color:#a5f3fc;font-size:1.2rem;margin:0.8rem 0">You compared prices brilliantly!</p>
+    <div style="font-size:2rem;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="prices">
+        <div class="price-tag"><span id="item-a-label">🍎</span><br><span id="price-a">10p</span></div>
+        <div class="price-tag"><span id="item-b-label">🍊</span><br><span id="price-b">20p</span></div>
+    </div>
+    <div id="prompt">Which costs more?</div>
+    <div id="choices"></div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID=92; const TOTAL_Q=10;
+let score=0,qNum=0,answered=false;
+const ITEMS=['🍎','🍊','🍌','🍇','🍓','🍒','🥕','🧁','🍭','🍫','✏️','🎀','⚽','🎈','🖍️'];
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');nextQ();}
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;answered=false;
+    document.getElementById('qnum').innerText=qNum; document.getElementById('feedback').innerText='';
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    let pA=Math.floor(Math.random()*19+1)*5; // 5-95p in 5s
+    let pB;do{pB=Math.floor(Math.random()*19+1)*5;}while(pB===pA);
+    const items=ITEMS.sort(()=>Math.random()-0.5).slice(0,2);
+    document.getElementById('item-a-label').innerText=items[0];
+    document.getElementById('item-b-label').innerText=items[1];
+    document.getElementById('price-a').innerText=pA+'p';
+    document.getElementById('price-b').innerText=pB+'p';
+    const type=Math.random()<0.5?'more':'less';
+    document.getElementById('prompt').innerText=`Which costs ${type}?`;
+    let correct;
+    if(type==='more') correct=pA>pB?items[0]:items[1];
+    else correct=pA<pB?items[0]:items[1];
+    const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+    [items[0],items[1]].forEach(label=>{
+        const btn=document.createElement('button'); btn.className='choice-btn'; btn.innerText=label;
+        btn.onclick=()=>pick(btn,label,correct); choicesEl.appendChild(btn);
+    });
+}
+function pick(btn,val,correct){
+    if(answered)return; answered=true;
+    if(val===correct){btn.classList.add('correct');score+=10;document.getElementById('score').innerText=score;document.getElementById('feedback').innerText='✅ Correct!';confetti({particleCount:30,spread:60,origin:{y:0.5}});}
+    else{btn.classList.add('wrong');document.getElementById('feedback').innerText=`❌ It was ${correct}`;document.querySelectorAll('.choice-btn').forEach(b=>{if(b.innerText===correct)b.classList.add('correct');});}
+    setTimeout(nextQ,1100);
+}
+function endGame(){document.getElementById('game').classList.add('hidden');document.getElementById('end-screen').classList.remove('hidden');document.getElementById('final-score').innerText=score;confetti({particleCount:200,spread:120,origin:{y:0.5}});}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

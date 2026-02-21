@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 87: Digital to Analogue</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#db2777 0%,#9d174d 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;color:white;overflow:hidden;}
+        .screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(157,23,77,0.97);z-index:50;text-align:center;padding:20px;}
+        .hidden{display:none!important;}
+        .big-btn{background:linear-gradient(135deg,#db2777,#be185d);border:none;padding:14px 52px;font-size:1.8rem;color:white;border-radius:60px;cursor:pointer;box-shadow:0 8px 24px rgba(219,39,119,0.5);font-family:inherit;font-weight:600;transition:transform 0.2s;margin-top:1.2rem;}
+        .big-btn:hover{transform:scale(1.05) translateY(-2px);}
+        #game{padding:16px;width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;}
+        #prog-bar-wrap{width:90%;height:10px;background:rgba(255,255,255,0.25);border-radius:10px;margin:12px 0;}
+        #prog-bar{height:100%;background:white;border-radius:10px;transition:width 0.4s;}
+        #digital-display{font-size:4rem;font-weight:700;background:#1a1a2e;color:#0ef;border-radius:16px;padding:14px 32px;letter-spacing:4px;margin:10px 0;font-family:monospace;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+        #prompt{font-size:1.4rem;font-weight:600;margin:10px 0 4px;text-align:center;}
+        #choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:480px;margin-top:6px;}
+        .clock-choice{background:rgba(255,255,255,0.15);border:3px solid rgba(255,255,255,0.4);border-radius:16px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;transition:all 0.2s;}
+        .clock-choice:hover{background:rgba(255,255,255,0.3);transform:scale(1.03);}
+        .clock-choice.correct{border-color:#22c55e;background:rgba(34,197,94,0.3);}
+        .clock-choice.wrong{border-color:#ef4444;background:rgba(239,68,68,0.3);}
+        #feedback{font-size:1.3rem;margin:8px;min-height:1.6rem;}
+        #score-label{font-size:1.1rem;color:#fbcfe8;}
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.4rem;margin-bottom:0.5rem">🔢 Digital → Analogue</h1>
+    <p style="color:#fbcfe8;font-size:1.1rem;margin-bottom:1rem">You'll see a digital time.<br>Can you find the matching clock face?</p>
+    <div style="font-size:3.5rem;background:#1a1a2e;color:#0ef;border-radius:12px;padding:8px 20px;font-family:monospace">3:15</div>
+    <button class="big-btn" onclick="startGame()">Match Them! ⏱</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem">🎉 Clock Expert!</h1>
+    <p style="color:#fbcfe8;font-size:1.2rem;margin:0.8rem 0">You matched digital to analogue perfectly!</p>
+    <div style="font-size:2rem;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish ✅</button>
+</div>
+<div id="game" class="hidden">
+    <div id="score-label">Score: <span id="score">0</span> &nbsp;|&nbsp; Q <span id="qnum">1</span>/10</div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="digital-display">0:00</div>
+    <div id="prompt">Which clock shows this time?</div>
+    <div id="choices"></div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+const LESSON_ID=87; const TOTAL_Q=10;
+let score=0,qNum=0,answered=false;
+
+function buildClockSVG(hour,minute,size=110){
+    const ns='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('width',size); svg.setAttribute('height',size);
+    svg.setAttribute('viewBox','0 0 300 300');
+    const cx=150,cy=150;
+    svg.appendChild(e('circle',{cx,cy,r:140,fill:'white',stroke:'#9d174d','stroke-width':'6'}));
+    for(let i=1;i<=12;i++){const a=(i/12)*Math.PI*2-Math.PI/2;const t=e('text',{x:cx+Math.cos(a)*116,y:cy+Math.sin(a)*116,'text-anchor':'middle','dominant-baseline':'central','font-size':'22','font-weight':'700','font-family':'Fredoka',fill:'#9d174d'});t.textContent=i;svg.appendChild(t);}
+    const mA=(minute/60)*360-90; const mR=mA*Math.PI/180;
+    svg.appendChild(e('line',{x1:cx,y1:cy,x2:cx+Math.cos(mR)*112,y2:cy+Math.sin(mR)*112,stroke:'#64748b','stroke-width':'4','stroke-linecap':'round'}));
+    const hA=((hour%12)/12)*360+(minute/60)*30-90; const hR=hA*Math.PI/180;
+    svg.appendChild(e('line',{x1:cx,y1:cy,x2:cx+Math.cos(hR)*78,y2:cy+Math.sin(hR)*78,stroke:'#9d174d','stroke-width':'7','stroke-linecap':'round'}));
+    svg.appendChild(e('circle',{cx,cy,r:5,fill:'#fce7f3'}));
+    return svg;
+}
+function e(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v] of Object.entries(attrs))el.setAttribute(k,v);return el;}
+function fmt(h,m){return `${h}:${m.toString().padStart(2,'0')}`;}
+
+function startGame(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('game').classList.remove('hidden');nextQ();}
+function nextQ(){
+    if(qNum>=TOTAL_Q){endGame();return;}
+    qNum++;answered=false;
+    document.getElementById('qnum').innerText=qNum; document.getElementById('feedback').innerText='';
+    document.getElementById('prog-bar').style.width=`${((qNum-1)/TOTAL_Q)*100}%`;
+    const hour=Math.floor(Math.random()*12)+1;
+    const minOpts=[0,5,10,15,20,25,30,35,40,45,50,55];
+    const minute=minOpts[Math.floor(Math.random()*minOpts.length)];
+    document.getElementById('digital-display').innerText=fmt(hour,minute);
+    const optTimes=genOptTimes(hour,minute);
+    const choicesEl=document.getElementById('choices'); choicesEl.innerHTML='';
+    optTimes.forEach(([h,m])=>{
+        const div=document.createElement('div'); div.className='clock-choice';
+        div.appendChild(buildClockSVG(h,m));
+        div.onclick=()=>pick(div,fmt(h,m),fmt(hour,minute)); choicesEl.appendChild(div);
+    });
+}
+function genOptTimes(ch,cm){
+    const minOpts=[0,5,10,15,20,25,30,35,40,45,50,55];
+    const s=new Set([fmt(ch,cm)]);
+    const pairs=[[ch,cm]];
+    while(pairs.length<4){const h=Math.floor(Math.random()*12)+1;const m=minOpts[Math.floor(Math.random()*minOpts.length)];const k=fmt(h,m);if(!s.has(k)){s.add(k);pairs.push([h,m]);}}
+    return pairs.sort(()=>Math.random()-0.5);
+}
+function pick(div,val,correct){
+    if(answered)return; answered=true;
+    if(val===correct){div.classList.add('correct');score+=10;document.getElementById('score').innerText=score;document.getElementById('feedback').innerText='✅ Correct!';confetti({particleCount:30,spread:60,origin:{y:0.5}});}
+    else{div.classList.add('wrong');document.getElementById('feedback').innerText=`❌ That was ${val}`;}
+    setTimeout(nextQ,1100);
+}
+function endGame(){document.getElementById('game').classList.add('hidden');document.getElementById('end-screen').classList.remove('hidden');document.getElementById('final-score').innerText=score;confetti({particleCount:200,spread:120,origin:{y:0.5}});}
+function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+</script>
+</body>
+</html>

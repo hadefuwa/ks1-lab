@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 76: Take Away to 20</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Fredoka', sans-serif; background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; user-select: none; overflow: hidden; }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 0.3rem; }
+        #subtitle { color: #99f6e4; font-size: 1.1rem; margin-bottom: 1.2rem; }
+        #progress-bar-wrap { width: 320px; height: 10px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-bottom: 1.5rem; overflow: hidden; }
+        #progress-bar { height: 100%; background: #2dd4bf; border-radius: 99px; transition: width 0.5s; width: 0%; }
+        #question-box { font-size: 3rem; font-weight: 600; color: #fde68a; margin-bottom: 1.6rem; text-align: center; min-height: 4rem; }
+        #numberline-wrap { position: relative; width: 94vw; max-width: 680px; margin: 0 auto 1.4rem; }
+        #nl-svg { width: 100%; height: 90px; overflow: visible; }
+        #hint { font-size: 1.1rem; color: #99f6e4; margin-bottom: 1.2rem; min-height: 1.6rem; text-align: center; }
+        #message { font-size: 1.4rem; font-weight: 600; min-height: 2rem; text-align: center; margin-bottom: 0.8rem; }
+        .msg-correct { color: #4ade80; }
+        .msg-wrong { color: #f87171; animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        #score-display { font-size: 1.1rem; color: #99f6e4; }
+        .screen { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(19,78,74,0.97); z-index:50; padding:20px; }
+        .hidden { display: none !important; }
+        .big-btn { background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 14px 52px; font-size: 1.7rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 20px rgba(13,148,136,0.5); font-family: inherit; font-weight: 600; transition: transform 0.2s; margin-top: 1.2rem; }
+        .big-btn:hover { transform: scale(1.05) translateY(-2px); }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1>➖ Take Away to 20</h1>
+    <p style="color:#99f6e4;font-size:1.2rem;text-align:center;margin:0.8rem 0">The number line goes to 20 now!<br>Click where the frog lands after hopping back.</p>
+    <div style="font-size:4rem;margin:1rem 0">🐸</div>
+    <button class="big-btn" onclick="startGame()">Let's Go! 🚀</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1>🎉 Brilliant!</h1>
+    <p style="color:#99f6e4;font-size:1.2rem;margin:0.8rem 0">You finished Take Away to 20!</p>
+    <div style="font-size:1.8rem;color:#fde68a;margin:0.5rem 0">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Complete! ✅</button>
+</div>
+
+<h1>➖ Take Away to 20</h1>
+<div id="subtitle">Click the answer on the number line</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+<div id="question-box">? − ? = ?</div>
+<div id="numberline-wrap">
+    <svg id="nl-svg" viewBox="0 0 680 90"></svg>
+</div>
+<div id="hint">👆 Click the answer!</div>
+<div id="message"></div>
+<div id="score-display">Score: <span id="score">0</span></div>
+
+<script>
+const LESSON_ID = 76;
+const MAX = 20;
+const TOTAL_Q = 10;
+const SVG_W = 680;
+
+let score = 0, qNum = 0, current = null, animating = false;
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function startGame() {
+    document.getElementById('start-screen').classList.add('hidden');
+    nextQuestion();
+}
+
+function nextQuestion() {
+    if (qNum >= TOTAL_Q) { endGame(); return; }
+    qNum++;
+    animating = false;
+    const b = rnd(1, 9);
+    const a = rnd(b + 1, MAX);
+    current = { a, b, answer: a - b };
+    document.getElementById('question-box').innerText = `${a} − ${b} = ?`;
+    document.getElementById('hint').innerText = '👆 Click the answer!';
+    setMessage('', '');
+    updateProgress();
+    drawNumberLine(a, null, []);
+}
+
+function drawNumberLine(startNum, selectedNum, hopPositions) {
+    const svg = document.getElementById('nl-svg');
+    svg.innerHTML = '';
+    const W = SVG_W, H = 90, PAD = 26;
+    const step = (W - 2 * PAD) / MAX;
+
+    const line = makeSVG('line', { x1: PAD, y1: 50, x2: W - PAD, y2: 50, stroke: 'rgba(255,255,255,0.35)', 'stroke-width': 3 });
+    svg.appendChild(line);
+
+    if (hopPositions.length > 1) {
+        for (let i = 0; i < hopPositions.length - 1; i++) {
+            const x1 = PAD + hopPositions[i] * step;
+            const x2 = PAD + hopPositions[i + 1] * step;
+            const mx = (x1 + x2) / 2;
+            const path = makeSVG('path', { d: `M ${x1} 50 Q ${mx} 20 ${x2} 50`, stroke: '#fbbf24', 'stroke-width': 2.5, fill: 'none', 'stroke-dasharray': '5,3' });
+            svg.appendChild(path);
+        }
+    }
+
+    for (let i = 0; i <= MAX; i++) {
+        const x = PAD + i * step;
+        const isStart = i === startNum;
+        const isSelected = i === selectedNum;
+        const isAnswer = selectedNum !== null && i === current.answer;
+        const tick = makeSVG('line', { x1: x, y1: 44, x2: x, y2: 56, stroke: 'rgba(255,255,255,0.5)', 'stroke-width': 2 });
+        svg.appendChild(tick);
+
+        // Only draw circles on even numbers for 0–20 to avoid crowding
+        if (i % 2 === 0 || isStart || isSelected) {
+            const dot = makeSVG('circle', {
+                cx: x, cy: 50, r: isStart ? 14 : 11,
+                fill: isStart ? '#f59e0b' : isSelected ? (isAnswer ? '#4ade80' : '#f87171') : 'rgba(255,255,255,0.1)',
+                stroke: isStart ? '#fde68a' : 'rgba(255,255,255,0.25)', 'stroke-width': isStart ? 3 : 1.5,
+                style: selectedNum === null ? 'cursor:pointer' : 'cursor:default'
+            });
+            if (selectedNum === null) dot.onclick = () => selectAnswer(i);
+            svg.appendChild(dot);
+        } else {
+            // Small transparent hit area for odd numbers too
+            const hitArea = makeSVG('circle', { cx: x, cy: 50, r: 10, fill: 'rgba(255,255,255,0.05)', style: selectedNum === null ? 'cursor:pointer' : 'cursor:default' });
+            if (selectedNum === null) hitArea.onclick = () => selectAnswer(i);
+            svg.appendChild(hitArea);
+        }
+
+        if (i % 2 === 0 || isStart) {
+            const label = makeSVG('text', { x, y: 76, 'text-anchor': 'middle', fill: 'white', 'font-family': 'Fredoka', 'font-size': 13, 'font-weight': 600 });
+            label.textContent = i;
+            svg.appendChild(label);
+        }
+    }
+
+    const frogX = PAD + startNum * step;
+    const frog = makeSVG('text', { x: frogX, y: 28, 'text-anchor': 'middle', 'font-size': 20 });
+    frog.textContent = '🐸';
+    svg.appendChild(frog);
+}
+
+function makeSVG(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+}
+
+function selectAnswer(val) {
+    if (animating) return;
+    animating = true;
+    const hops = [];
+    for (let i = current.a; i >= val; i--) hops.push(i);
+
+    let step = 0;
+    function animateHop() {
+        if (step >= hops.length) {
+            drawNumberLine(current.a, val, hops);
+            if (val === current.answer) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                setMessage('✅ Correct! ' + current.a + ' − ' + current.b + ' = ' + current.answer, 'msg-correct');
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                speak('Correct! Well done!');
+                setTimeout(() => { animating = false; nextQuestion(); }, 1400);
+            } else {
+                setMessage('❌ Try again! Count back ' + current.b + ' hops.', 'msg-wrong');
+                speak('Try again. Count back ' + current.b);
+                setTimeout(() => { animating = false; drawNumberLine(current.a, null, []); setMessage('', ''); }, 900);
+            }
+            return;
+        }
+        drawNumberLine(current.a, null, hops.slice(0, step + 1));
+        step++;
+        setTimeout(animateHop, 100);
+    }
+    animateHop();
+}
+
+function setMessage(text, cls) { const el = document.getElementById('message'); el.innerText = text; el.className = cls; }
+function updateProgress() { document.getElementById('progress-bar').style.width = `${((qNum - 1) / TOTAL_Q) * 100}%`; }
+
+function endGame() {
+    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = score;
+    confetti({ particleCount: 180, spread: 100, origin: { y: 0.5 } });
+    speak('Amazing! You finished take away to twenty!');
+}
+function finishLesson() { window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*'); }
+function speak(text) { if (window.speechSynthesis.speaking) window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+</script>
+</body>
+</html>

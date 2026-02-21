@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 79: Subtraction with Borrowing</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Fredoka', sans-serif; background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; user-select: none; overflow: hidden; }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 0.3rem; }
+        #subtitle { color: #ddd6fe; font-size: 1.1rem; margin-bottom: 1.5rem; }
+        #progress-bar-wrap { width: 320px; height: 10px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-bottom: 1.5rem; overflow: hidden; }
+        #progress-bar { height: 100%; background: #a78bfa; border-radius: 99px; transition: width 0.5s; width: 0%; }
+        .column-box { background: rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 32px; display: inline-block; border: 2px solid rgba(255,255,255,0.15); margin-bottom: 1.5rem; }
+        .col-labels { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 6px; }
+        .col-label { font-size: 0.85rem; color: #c4b5fd; text-align: center; width: 64px; }
+        .number-row { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+        .col-num { font-size: 3rem; font-weight: 700; color: white; width: 64px; text-align: center; line-height: 1.2; }
+        .borrow-hint { font-size: 1rem; color: #fbbf24; text-align: center; width: 64px; min-height: 1.4rem; }
+        .op-sym { font-size: 2.2rem; color: #f87171; font-weight: 700; width: 32px; text-align: right; line-height: 1.2; }
+        .divider { border-top: 3px solid rgba(255,255,255,0.3); margin: 8px 0 10px; }
+        .answer-row { display: flex; justify-content: flex-end; gap: 6px; }
+        .digit-input { width: 64px; height: 66px; font-size: 2.8rem; font-weight: 700; text-align: center; background: rgba(255,255,255,0.12); border: 3px solid rgba(255,255,255,0.25); border-radius: 12px; color: white; font-family: 'Fredoka', sans-serif; outline: none; }
+        .digit-input:focus { border-color: #a78bfa; background: rgba(167,139,250,0.15); }
+        .digit-input.correct { border-color: #4ade80; background: rgba(74,222,128,0.15); }
+        .digit-input.wrong { border-color: #f87171; animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+        #check-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; padding: 14px 52px; font-size: 1.7rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 6px 18px rgba(124,58,237,0.4); font-family: inherit; font-weight: 600; transition: transform 0.2s; }
+        #check-btn:hover { transform: scale(1.05); }
+        #borrow-info { font-size: 1rem; color: #c4b5fd; text-align: center; margin-bottom: 0.8rem; min-height: 1.4rem; }
+        #message { font-size: 1.4rem; font-weight: 600; min-height: 2rem; text-align: center; margin: 1rem 0 0.5rem; }
+        .msg-correct { color: #4ade80; }
+        .msg-wrong { color: #f87171; }
+        #score-display { font-size: 1.1rem; color: #ddd6fe; }
+        .screen { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(76,29,149,0.97); z-index:50; padding:20px; }
+        .hidden { display: none !important; }
+        .big-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; padding: 14px 52px; font-size: 1.7rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 20px rgba(124,58,237,0.5); font-family: inherit; font-weight: 600; transition: transform 0.2s; margin-top: 1.2rem; }
+        .big-btn:hover { transform: scale(1.05) translateY(-2px); }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1>🔄 Borrowing!</h1>
+    <p style="color:#ddd6fe;font-size:1.2rem;text-align:center;margin:0.8rem 0">When the ones are too small, we borrow a ten!<br>The yellow numbers show you what changed.</p>
+    <div style="font-size:3.5rem;margin:1rem 0">📐</div>
+    <button class="big-btn" onclick="startGame()">Let's Go!</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1>🎉 Amazing!</h1>
+    <p style="color:#ddd6fe;font-size:1.2rem;margin:0.8rem 0">You mastered borrowing!</p>
+    <div style="font-size:1.8rem;color:#fde68a;margin:0.5rem 0">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Complete! ✅</button>
+</div>
+
+<h1>🔄 Subtraction with Borrowing</h1>
+<div id="subtitle">The yellow numbers show the borrowed values</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div class="column-box" id="col-box">
+    <div class="col-labels">
+        <div class="col-label">Tens</div>
+        <div class="col-label">Ones</div>
+    </div>
+    <!-- Borrow hints (shown when borrowing needed) -->
+    <div class="number-row" id="borrow-row" style="display:none">
+        <div class="borrow-hint" id="borrow-tens"></div>
+        <div class="borrow-hint" id="borrow-ones"></div>
+    </div>
+    <div class="number-row">
+        <div class="col-num" id="a-tens">0</div>
+        <div class="col-num" id="a-ones">0</div>
+    </div>
+    <div class="number-row" style="margin-top:2px">
+        <div class="op-sym">−</div>
+        <div class="col-num" id="b-tens">0</div>
+        <div class="col-num" id="b-ones">0</div>
+    </div>
+    <div class="divider"></div>
+    <div class="answer-row">
+        <input class="digit-input" id="ans-tens" type="number" min="0" max="9" placeholder="?" onkeydown="handleKey(event,'ans-tens')" oninput="limitOne(this)">
+        <input class="digit-input" id="ans-ones" type="number" min="0" max="9" placeholder="?" onkeydown="handleKey(event,'ans-ones')" oninput="limitOne(this)">
+    </div>
+</div>
+
+<div id="borrow-info"></div>
+<button id="check-btn" onclick="checkAnswer()">Check ✓</button>
+<div id="message"></div>
+<div id="score-display">Score: <span id="score">0</span></div>
+
+<script>
+const LESSON_ID = 79;
+const TOTAL_Q = 10;
+let score = 0, qNum = 0, current = null;
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function startGame() { document.getElementById('start-screen').classList.add('hidden'); nextQuestion(); }
+
+function nextQuestion() {
+    if (qNum >= TOTAL_Q) { endGame(); return; }
+    qNum++;
+    // Force borrowing: ones of b > ones of a (so we always borrow)
+    let aT, aO, bT, bO;
+    do {
+        aT = rnd(2, 9); aO = rnd(0, 8);
+        bT = rnd(0, aT - 1); bO = rnd(aO + 1, 9);
+    } while (aT <= bT);
+    const a = aT * 10 + aO;
+    const b = bT * 10 + bO;
+    const answer = a - b;
+    // After borrowing: a ones become aO+10, a tens become aT-1
+    current = { a, b, answer, aT, aO, bT, bO, borrowedOnes: aO + 10, borrowedTens: aT - 1 };
+
+    document.getElementById('a-tens').innerText = aT;
+    document.getElementById('a-ones').innerText = aO;
+    document.getElementById('b-tens').innerText = bT;
+    document.getElementById('b-ones').innerText = bO;
+    document.getElementById('borrow-row').style.display = 'none';
+    document.getElementById('borrow-info').innerText = '💡 You need to borrow! Click "Borrow" to see the steps.';
+    // Show borrow hint automatically after 1s
+    setTimeout(showBorrow, 800);
+
+    ['ans-tens','ans-ones'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = ''; el.className = 'digit-input'; el.disabled = false;
+    });
+    setMessage('', '');
+    updateProgress();
+    speak(`${a} minus ${b}`);
+}
+
+function showBorrow() {
+    const row = document.getElementById('borrow-row');
+    row.style.display = 'flex';
+    document.getElementById('borrow-tens').innerText = current.borrowedTens;
+    document.getElementById('borrow-ones').innerText = current.borrowedOnes;
+    document.getElementById('a-tens').style.textDecoration = 'line-through';
+    document.getElementById('a-tens').style.opacity = '0.4';
+    document.getElementById('a-ones').style.textDecoration = 'line-through';
+    document.getElementById('a-ones').style.opacity = '0.4';
+    document.getElementById('borrow-info').innerText = '🔄 Borrowed 10! Now subtract using the yellow numbers.';
+    document.getElementById('ans-tens').focus();
+}
+
+function limitOne(el) { if (el.value.length > 1) el.value = el.value.slice(-1); }
+function handleKey(e, id) { if (e.key === 'Enter') { if (id === 'ans-tens') document.getElementById('ans-ones').focus(); else checkAnswer(); } }
+
+function checkAnswer() {
+    const tVal = parseInt(document.getElementById('ans-tens').value);
+    const oVal = parseInt(document.getElementById('ans-ones').value);
+    if (isNaN(tVal) || isNaN(oVal)) return;
+    const cT = Math.floor(current.answer / 10);
+    const cO = current.answer % 10;
+    const tOk = tVal === cT, oOk = oVal === cO;
+    document.getElementById('ans-tens').className = 'digit-input ' + (tOk ? 'correct' : 'wrong');
+    document.getElementById('ans-ones').className = 'digit-input ' + (oOk ? 'correct' : 'wrong');
+    if (tOk && oOk) {
+        score += 10; document.getElementById('score').innerText = score;
+        setMessage('✅ Correct! ' + current.a + ' − ' + current.b + ' = ' + current.answer, 'msg-correct');
+        document.getElementById('a-tens').style.textDecoration = '';
+        document.getElementById('a-tens').style.opacity = '';
+        document.getElementById('a-ones').style.textDecoration = '';
+        document.getElementById('a-ones').style.opacity = '';
+        ['ans-tens','ans-ones'].forEach(id => document.getElementById(id).disabled = true);
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        speak('Correct! Amazing!');
+        setTimeout(() => nextQuestion(), 1400);
+    } else {
+        setMessage('❌ Not quite — check the yellow numbers!', 'msg-wrong');
+        speak('Not quite. Use the yellow borrowed numbers.');
+        setTimeout(() => {
+            ['ans-tens','ans-ones'].forEach(id => { const el = document.getElementById(id); el.value = ''; el.className = 'digit-input'; });
+            setMessage('', '');
+            document.getElementById('ans-tens').focus();
+        }, 900);
+    }
+}
+
+function setMessage(text, cls) { const el = document.getElementById('message'); el.innerText = text; el.className = cls; }
+function updateProgress() { document.getElementById('progress-bar').style.width = `${((qNum-1)/TOTAL_Q)*100}%`; }
+
+function endGame() {
+    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('end-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = score;
+    confetti({ particleCount: 180, spread: 100, origin: { y: 0.5 } });
+    speak('Amazing! You mastered borrowing!');
+}
+function finishLesson() { window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*'); }
+function speak(text) { if (window.speechSynthesis.speaking) window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+</script>
+</body>
+</html>
