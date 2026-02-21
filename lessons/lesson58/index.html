@@ -193,7 +193,7 @@
         function nextProblem() {
             // Generate: 3-digit, ones sum >= 10, tens+carry >= 10 (double carry)
             const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // sum >= 10
+            const o2 = Math.floor(Math.random() * (9 - (10 - o1) + 1)) + (10 - o1); // sum >= 10, both single digits
             const t1 = Math.floor(Math.random() * 4) + 5; // 5-8
             const t2 = Math.floor(Math.random() * (17 - t1)) + Math.max(1, 10 - t1); // t1+t2+1 >= 10
             const h1 = Math.floor(Math.random() * 3) + 1; // 1-3

@@ -192,7 +192,7 @@
         function nextProblem() {
             // Generate: 3-digit, ones sum >= 10, tens sum < 10 (no tens carry)
             const o1 = Math.floor(Math.random() * 5) + 5; // 5-9
-            const o2 = Math.floor(Math.random() * (18 - o1)) + (10 - o1); // sum >= 10
+            const o2 = Math.floor(Math.random() * (9 - (10 - o1) + 1)) + (10 - o1); // sum >= 10, both single digits
             const t1 = Math.floor(Math.random() * 4) + 1; // 1-4
             const t2 = Math.floor(Math.random() * (8 - t1)) + 1; // t1+t2+1 < 10
             const h1 = Math.floor(Math.random() * 3) + 1; // 1-3
