@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 69: Colour Spelling – Cyan, Teal & More</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #0f4c5c 0%, #0e7490 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; user-select: none; overflow: hidden;
+        }
+        h1 { font-size: 2.2rem; margin-bottom: 0.3rem; letter-spacing: 1px; text-align: center; }
+        #subtitle { font-size: 1.1rem; color: #a5f3fc; margin-bottom: 1.5rem; }
+        #progress-bar-wrap { width: 340px; height: 12px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-bottom: 1.8rem; overflow: hidden; }
+        #progress-bar { height: 100%; background: #22d3ee; border-radius: 99px; transition: width 0.5s; width: 0%; }
+        #colour-swatch { width: 160px; height: 160px; border-radius: 24px; border: 5px solid rgba(255,255,255,0.3); box-shadow: 0 0 40px rgba(0,0,0,0.4); margin-bottom: 1.4rem; transition: background 0.4s; animation: swatchPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes swatchPop { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
+        #word-display { font-size: 3rem; font-weight: 600; letter-spacing: 0.25rem; margin-bottom: 1.6rem; min-height: 3.5rem; color: #fde68a; text-align: center; }
+        #letter-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 1.6rem; max-width: 380px; }
+        .tile { width: 58px; height: 58px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 14px; font-size: 1.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background 0.15s, opacity 0.15s; animation: tileIn 0.3s ease both; }
+        .tile:hover { transform: scale(1.12); background: rgba(255,255,255,0.22); }
+        .tile.used { opacity: 0.2; pointer-events: none; }
+        @keyframes tileIn { 0%{transform:scale(0) rotate(-10deg);opacity:0} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+        #answer-slots { display: flex; gap: 8px; margin-bottom: 1.8rem; min-height: 62px; flex-wrap: wrap; justify-content: center; max-width: 380px; }
+        .slot { width: 52px; height: 52px; border-bottom: 4px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.15s; }
+        .slot:hover { border-bottom-color: #f59e0b; color: #fde68a; }
+        .slot.correct-flash { animation: correctFlash 0.4s ease; }
+        @keyframes correctFlash { 0%,100%{background:transparent} 50%{background:rgba(34,197,94,0.4);border-radius:10px} }
+        #message { font-size: 1.5rem; min-height: 2rem; margin-bottom: 1rem; text-align: center; font-weight: 600; }
+        .msg-correct { color: #4ade80; }
+        .msg-wrong { color: #f87171; animation: shake 0.4s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        #score-display { font-size: 1.1rem; color: #a5f3fc; }
+        .screen { position: fixed; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(15,76,92,0.97); z-index:50; }
+        .hidden { display: none !important; }
+        .big-btn { background: linear-gradient(135deg, #0891b2, #0e7490); border: none; padding: 16px 56px; font-size: 1.8rem; color: white; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 24px rgba(8,145,178,0.5); font-family: inherit; font-weight: 600; transition: transform 0.2s; margin-top: 1.5rem; }
+        .big-btn:hover { transform: scale(1.05) translateY(-2px); }
+        .end-swatch-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 1.2rem 0; }
+        .end-swatch { width: 48px; height: 48px; border-radius: 10px; border: 3px solid rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1>🎨 Colour Spelling!</h1>
+    <p style="color:#a5f3fc;font-size:1.3rem;margin:0.8rem 0 0.4rem;text-align:center">Level 2 – Cyan, Teal & more!<br>4-letter colours this time.</p>
+    <div style="display:flex;gap:14px;margin:1.2rem 0;flex-wrap:wrap;justify-content:center">
+        <div style="width:48px;height:48px;border-radius:10px;background:#06b6d4;border:3px solid rgba(255,255,255,0.3)"></div>
+        <div style="width:48px;height:48px;border-radius:10px;background:#0d9488;border:3px solid rgba(255,255,255,0.3)"></div>
+        <div style="width:48px;height:48px;border-radius:10px;background:#84cc16;border:3px solid rgba(255,255,255,0.3)"></div>
+        <div style="width:48px;height:48px;border-radius:10px;background:#f59e0b;border:3px solid rgba(255,255,255,0.3)"></div>
+    </div>
+    <button class="big-btn" onclick="startGame()">Let's Spell! 🖊️</button>
+</div>
+<div id="end-screen" class="screen hidden">
+    <h1>🌈 Brilliant!</h1>
+    <p style="color:#a5f3fc;font-size:1.3rem;margin:0.8rem 0;text-align:center">You spelled all the colours!</p>
+    <div class="end-swatch-row" id="end-swatches"></div>
+    <div style="font-size:1.5rem;font-weight:600;color:#fde68a;margin-top:0.5rem">Score: <span id="final-score">0</span></div>
+    <button class="big-btn" onclick="finishLesson()">Complete! 🎉</button>
+</div>
+<h1>🎨 Colour Spelling</h1>
+<div id="subtitle">Level 2 – Cyan, Teal & More</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+<div id="colour-swatch"></div>
+<div id="word-display"></div>
+<div id="answer-slots"></div>
+<div id="letter-tiles"></div>
+<div id="message"></div>
+<div id="score-display">Score: <span id="score">0</span></div>
+<script>
+    const LESSON_ID = 69;
+    const COLOURS = [
+        { word: 'cyan', hex: '#06b6d4' },
+        { word: 'teal', hex: '#0d9488' },
+        { word: 'lime', hex: '#84cc16' },
+        { word: 'gold', hex: '#f59e0b' },
+        { word: 'rose', hex: '#f43f5e' },
+        { word: 'jade', hex: '#00a86b' },
+    ];
+    let queue=[], current=null, typed=[], score=0;
+    function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+    function startGame(){document.getElementById('start-screen').classList.add('hidden');queue=shuffle([...COLOURS]);score=0;nextWord();}
+    function nextWord(){if(queue.length===0){endGame();return;}current=queue.shift();typed=[];updateProgress();renderSwatch();renderSlots();renderTiles();setMessage('','');speak(`Spell the colour ${current.word}`);}
+    function renderSwatch(){const s=document.getElementById('colour-swatch');s.style.background=current.hex;s.style.animation='none';void s.offsetWidth;s.style.animation='swatchPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275)';document.getElementById('word-display').innerText=current.word.toUpperCase().split('').map(()=>'_').join('  ');}
+    function renderSlots(){const el=document.getElementById('answer-slots');el.innerHTML='';for(let i=0;i<current.word.length;i++){const slot=document.createElement('div');slot.className='slot';slot.dataset.idx=i;slot.onclick=()=>removeLetterAt(i);el.appendChild(slot);}}
+    function renderTiles(){const letters=shuffle([...current.word.split(''),...getDistractors(current.word)]);const el=document.getElementById('letter-tiles');el.innerHTML='';letters.forEach((ch,i)=>{const tile=document.createElement('div');tile.className='tile';tile.innerText=ch.toUpperCase();tile.dataset.letter=ch;tile.style.animationDelay=`${i*0.05}s`;tile.onclick=()=>tapLetter(tile,ch);el.appendChild(tile);});}
+    function getDistractors(word){const pool='abcdefghijklmnopqrstuvwxyz'.split('').filter(c=>!word.includes(c));shuffle(pool);return pool.slice(0,Math.min(3,word.length));}
+    function tapLetter(tile,ch){if(typed.length>=current.word.length)return;typed.push({ch,tile});tile.classList.add('used');const idx=typed.length-1;const slot=document.querySelector(`.slot[data-idx="${idx}"]`);if(slot)slot.innerText=ch.toUpperCase();if(typed.length===current.word.length)checkAnswer();}
+    function removeLetterAt(idx){if(idx>=typed.length||typed.length===0)return;const removed=typed.splice(idx);removed.forEach(r=>r.tile.classList.remove('used'));for(let i=idx;i<current.word.length;i++){const slot=document.querySelector(`.slot[data-idx="${i}"]`);if(slot)slot.innerText=typed[i]?typed[i].ch.toUpperCase():'';}}
+    function checkAnswer(){const attempt=typed.map(t=>t.ch).join('');if(attempt===current.word){score+=10;document.getElementById('score').innerText=score;setMessage('✅ Correct! '+current.word.toUpperCase(),'msg-correct');document.querySelectorAll('.slot').forEach(s=>s.classList.add('correct-flash'));confetti({particleCount:50,spread:60,origin:{y:0.6}});speak('Well done!');setTimeout(nextWord,1400);}else{setMessage('❌ Try again!','msg-wrong');speak('Try again');setTimeout(()=>{typed=[];document.querySelectorAll('.tile').forEach(t=>t.classList.remove('used'));renderSlots();setMessage('','');},900);}}
+    function setMessage(text,cls){const el=document.getElementById('message');el.innerText=text;el.className=cls;}
+    function updateProgress(){const total=COLOURS.length;const done=total-queue.length-1;document.getElementById('progress-bar').style.width=`${Math.max(0,done/total*100)}%`;}
+    function endGame(){document.getElementById('progress-bar').style.width='100%';document.getElementById('end-screen').classList.remove('hidden');document.getElementById('final-score').innerText=score;const row=document.getElementById('end-swatches');row.innerHTML='';COLOURS.forEach(c=>{const d=document.createElement('div');d.className='end-swatch';d.style.background=c.hex;row.appendChild(d);});confetti({particleCount:200,spread:100,origin:{y:0.5}});speak('Amazing! You spelled all the colours!');}
+    function finishLesson(){window.parent.postMessage({type:'lessonCompleted',lessonId:LESSON_ID},'*');}
+    function speak(text){if(window.speechSynthesis.speaking)window.speechSynthesis.cancel();window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));}
+</script>
+</body>
+</html>

@@ -295,23 +295,78 @@
         "id": 59
     },
     {
-        "title": "Lesson 60: Challenge Mode (Addition)",
+        "title": "Lesson 60: Challenge Mode (Multiplication)",
         "path": "lessons/lesson60/index.html",
         "id": 60
     },
     {
-        "title": "Lesson 61: Challenge Mode (Addition Hard)",
+        "title": "Lesson 61: Balloon Numbers – Easy",
         "path": "lessons/lesson61/index.html",
         "id": 61
     },
     {
-        "title": "Lesson 62: Challenge Mode (Mixed +/-)",
+        "title": "Lesson 62: Balloon Pop – Add to 10",
         "path": "lessons/lesson62/index.html",
         "id": 62
     },
     {
-        "title": "Lesson 63: Challenge Mode (Survival +/-)",
+        "title": "Lesson 63: Balloon Pop – Add to 20",
         "path": "lessons/lesson63/index.html",
         "id": 63
+    },
+    {
+        "title": "Lesson 64: Balloon Pop – Speed Round",
+        "path": "lessons/lesson64/index.html",
+        "id": 64
+    },
+    {
+        "title": "Lesson 65: Challenge Mode (Hard Addition)",
+        "path": "lessons/lesson65/index.html",
+        "id": 65
+    },
+    {
+        "title": "Lesson 66: Challenge Mode (Mixed)",
+        "path": "lessons/lesson66/index.html",
+        "id": 66
+    },
+    {
+        "title": "Lesson 67: Challenge Mode (Survival)",
+        "path": "lessons/lesson67/index.html",
+        "id": 67
+    },
+    {
+        "title": "Lesson 68: Colour Spelling – Level 1",
+        "path": "lessons/lesson68/index.html",
+        "id": 68
+    },
+    {
+        "title": "Lesson 69: Colour Spelling – Level 2",
+        "path": "lessons/lesson69/index.html",
+        "id": 69
+    },
+    {
+        "title": "Lesson 70: Colour Spelling – Level 3",
+        "path": "lessons/lesson70/index.html",
+        "id": 70
+    },
+    {
+        "title": "Lesson 71: Colour Spelling – Level 4",
+        "path": "lessons/lesson71/index.html",
+        "id": 71
+    },
+    {
+        "title": "Lesson 72: Colour Spelling – Level 5",
+        "path": "lessons/lesson72/index.html",
+        "id": 72
+    },
+    {
+        "title": "Lesson 73: Colour Spelling – Level 6",
+        "path": "lessons/lesson73/index.html",
+        "id": 73
+    },
+    {
+        "title": "Lesson 74: Colour Spelling – Level 7",
+        "path": "lessons/lesson74/index.html",
+        "id": 74
     }
 ]

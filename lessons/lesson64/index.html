@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 64: Balloon Numbers – Speed Round</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d97706;
+            --secondary: #92400e;
+            --accent: #fbbf24;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #78350f 0%, #b45309 100%);
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 10;
+        }
+
+        #question-display {
+            position: absolute;
+            top: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3.2rem;
+            font-weight: 600;
+            color: #fde68a;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        #arena {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+        }
+
+        .balloon {
+            position: absolute;
+            bottom: -120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .balloon:hover { transform: scale(1.1); }
+
+        .balloon-body {
+            width: 80px;
+            height: 96px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: -6px -6px 0 rgba(255,255,255,0.2) inset, 4px 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .balloon-string {
+            width: 2px;
+            height: 36px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .balloon-knot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50% 50% 0 0;
+            margin-top: -2px;
+        }
+
+        @keyframes popAnim {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 0.6; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .balloon.pop { animation: popAnim 0.25s ease forwards; pointer-events: none; }
+
+        .score-label { font-size: 1.1rem; color: #fde68a; font-weight: 600; }
+        .score-val { font-size: 1.3rem; font-weight: 700; color: white; }
+        .q-label { font-size: 1rem; color: #fed7aa; }
+
+        .screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(120,53,15,0.97); z-index: 50; text-align: center; padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        .big-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; padding: 16px 56px; font-size: 1.8rem; color: white;
+            border-radius: 60px; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(217,119,6,0.5);
+            font-family: inherit; font-weight: 600; transition: transform 0.2s; margin-top: 1.5rem;
+        }
+
+        .big-btn:hover { transform: scale(1.05) translateY(-2px); }
+
+        .preview-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+
+        .preview-balloon {
+            width: 60px; height: 72px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 700; color: white;
+            box-shadow: -4px -4px 0 rgba(255,255,255,0.2) inset;
+        }
+
+        @keyframes floatUp { 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
+        .preview-balloon { animation: floatUp 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+<div id="start-screen" class="screen">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🎈 Speed Round!</h1>
+    <p style="color:#fed7aa;font-size:1.3rem;margin-bottom:1rem">Pop the balloon with the right answer!<br>Numbers up to 30 – a bit faster now!</p>
+    <div class="preview-row">
+        <div class="preview-balloon" style="background:#d97706">8</div>
+        <div class="preview-balloon" style="background:#b45309;animation-delay:0.3s">15</div>
+        <div class="preview-balloon" style="background:#f59e0b;animation-delay:0.6s">22</div>
+        <div class="preview-balloon" style="background:#92400e;animation-delay:0.9s">30</div>
+    </div>
+    <button class="big-btn" onclick="startGame()">Start! 🚀</button>
+</div>
+
+<div id="end-screen" class="screen hidden">
+    <h1 style="font-size:2.8rem;margin-bottom:0.5rem">🎉 Amazing!</h1>
+    <p style="color:#fed7aa;font-size:1.3rem;margin-bottom:0.5rem">You completed the Speed Round!</p>
+    <div style="font-size:2rem;margin:1rem 0;color:#fde68a">Score: <strong id="final-score">0</strong></div>
+    <button class="big-btn" onclick="finishLesson()">Finish Lesson ✅</button>
+</div>
+
+<div id="game-container" class="hidden">
+    <div id="hud">
+        <div><span class="score-label">Score </span><span class="score-val" id="score">0</span></div>
+        <div><span class="q-label" id="progress-label">Q 1 / 10</span></div>
+    </div>
+    <div id="question-display">? + ? = ?</div>
+    <div id="arena"></div>
+</div>
+
+<script>
+    const CONFIG = { lessonId: 64, maxNum: 15, questionCount: 10, speed: 1.9, spawnMs: 1600 };
+
+    const BALLOON_COLORS = ['#d97706','#b45309','#f59e0b','#92400e','#fbbf24','#a16207','#c2410c','#ea580c'];
+
+    const state = {
+        score: 0, questionNum: 0, correctAnswer: 0,
+        balloons: [], animating: false, spawnTimer: null, rafId: null
+    };
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        if (state.questionNum >= CONFIG.questionCount) { endGame(); return; }
+        state.questionNum++;
+        clearBalloons();
+
+        const a = Math.floor(Math.random() * CONFIG.maxNum) + 1;
+        const b = Math.floor(Math.random() * CONFIG.maxNum) + 1;
+        state.correctAnswer = a + b;
+
+        document.getElementById('question-display').innerText = `${a} + ${b} = ?`;
+        document.getElementById('progress-label').innerText = `Q ${state.questionNum} / ${CONFIG.questionCount}`;
+
+        const answers = generateAnswerOptions(state.correctAnswer);
+        spawnBalloons(answers);
+        scheduleSpawn(answers);
+    }
+
+    function generateAnswerOptions(correct) {
+        const options = new Set([correct]);
+        while (options.size < 4) {
+            const offset = (Math.floor(Math.random() * 8) + 1) * (Math.random() < 0.5 ? 1 : -1);
+            const w = correct + offset;
+            if (w > 0) options.add(w);
+        }
+        return [...options];
+    }
+
+    function spawnBalloons(answers) {
+        const arena = document.getElementById('arena');
+        const positions = shufflePositions(answers.length);
+        answers.forEach((val, i) => {
+            const balloon = createBalloon(val, positions[i]);
+            arena.appendChild(balloon);
+            state.balloons.push({ el: balloon, val, y: window.innerHeight + 100 });
+        });
+        if (state.rafId) cancelAnimationFrame(state.rafId);
+        state.rafId = requestAnimationFrame(gameLoop);
+    }
+
+    function shufflePositions(n) {
+        const w = window.innerWidth;
+        const positions = Array.from({ length: n }, (_, i) => (i + 0.5) * (w / n));
+        return positions.sort(() => Math.random() - 0.5);
+    }
+
+    function createBalloon(val, x) {
+        const el = document.createElement('div');
+        el.className = 'balloon';
+        const color = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
+        el.innerHTML = `
+            <div class="balloon-body" style="background:${color};">${val}</div>
+            <div class="balloon-knot" style="background:${color};"></div>
+            <div class="balloon-string"></div>`;
+        el.style.left = `${x - 40}px`;
+        el.style.bottom = '-120px';
+        el.onclick = () => tapBalloon(el, val);
+        return el;
+    }
+
+    function gameLoop() {
+        state.balloons = state.balloons.filter(b => b.el.parentNode);
+        state.balloons.forEach(b => {
+            b.y -= CONFIG.speed;
+            b.el.style.bottom = `${window.innerHeight - b.y}px`;
+            if (window.innerHeight - b.y > window.innerHeight + 60) b.el.remove();
+        });
+        state.rafId = requestAnimationFrame(gameLoop);
+    }
+
+    function tapBalloon(el, val) {
+        if (state.animating) return;
+        if (val === state.correctAnswer) {
+            state.animating = true;
+            state.score += 10;
+            document.getElementById('score').innerText = state.score;
+            el.classList.add('pop');
+            confetti({ particleCount: 40, spread: 60, origin: getBalloonOrigin(el) });
+            clearBalloons(true);
+            setTimeout(() => { state.animating = false; nextQuestion(); }, 600);
+        } else {
+            el.style.filter = 'brightness(0.4)';
+            el.style.pointerEvents = 'none';
+            setTimeout(() => { if (el.parentNode) { el.style.filter = ''; el.style.pointerEvents = ''; } }, 400);
+        }
+    }
+
+    function getBalloonOrigin(el) {
+        const r = el.getBoundingClientRect();
+        return { x: (r.left + r.width / 2) / window.innerWidth, y: (r.top + r.height / 2) / window.innerHeight };
+    }
+
+    function clearBalloons(keep) {
+        if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; }
+        if (state.spawnTimer) { clearTimeout(state.spawnTimer); state.spawnTimer = null; }
+        if (!keep) {
+            state.balloons.forEach(b => b.el.remove());
+            state.balloons = [];
+        }
+    }
+
+    function scheduleSpawn(answers) {
+        state.spawnTimer = setTimeout(() => {
+            if (state.balloons.every(b => !b.el.parentNode)) nextQuestion();
+        }, CONFIG.spawnMs * 10);
+    }
+
+    function endGame() {
+        clearBalloons();
+        document.getElementById('game-container').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = state.score;
+        confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 } });
+    }
+
+    function finishLesson() {
+        window.parent.postMessage({ type: 'lessonCompleted', lessonId: CONFIG.lessonId }, '*');
+    }
+</script>
+</body>
+</html>
