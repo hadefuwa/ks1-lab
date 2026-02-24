@@ -371,7 +371,12 @@
                 addend1,
                 addend2,
                 total: sum,
-                missing
+                missing,
+                hints: {
+                    total: `How many ${item} do ${name1} and ${name2} have in total?`,
+                    addend1: `How many ${item} did ${name1} have?`,
+                    addend2: `How many ${item} did ${name2} have?`
+                }
             };
         }
 
@@ -408,6 +413,10 @@
                                 const next = inputs[inputs.indexOf(input) + 1];
                                 if (next) next.focus();
                             }
+                        });
+                        // Speak hint on focus
+                        input.addEventListener('focus', () => {
+                            speak(p.hints[part.id]);
                         });
                         area.appendChild(input);
                     } else {
@@ -489,12 +498,18 @@
                     nextQuestion();
                 }, 1500);
             } else {
-                speak("Try again!");
                 inputs.forEach(input => {
                     if (input.classList.contains('wrong')) input.value = '';
                 });
                 const firstWrong = document.querySelector('.equation-input.wrong');
-                if (firstWrong) firstWrong.focus();
+                if (firstWrong) {
+                    const partId = firstWrong.dataset.id;
+                    const hintMsg = state.currentProblem.hints[partId];
+                    speak("Try again! " + hintMsg);
+                    setTimeout(() => firstWrong.focus(), 100);
+                } else {
+                    speak("Try again!");
+                }
             }
             updateHUD();
         }
