@@ -468,5 +468,35 @@
         "title": "Lesson 94: Shopping Speed Challenge",
         "path": "lessons/lesson94/index.html",
         "id": 94
+    },
+    {
+        "title": "Lesson 95: Word Problems 1 (Sums to 10)",
+        "path": "lessons/lesson95/index.html",
+        "id": 95
+    },
+    {
+        "title": "Lesson 96: Word Problems 2 (Sums to 20)",
+        "path": "lessons/lesson96/index.html",
+        "id": 96
+    },
+    {
+        "title": "Lesson 97: Word Problems 3 (Missing Addend)",
+        "path": "lessons/lesson97/index.html",
+        "id": 97
+    },
+    {
+        "title": "Lesson 98: Word Problems 4 (Sums to 50)",
+        "path": "lessons/lesson98/index.html",
+        "id": 98
+    },
+    {
+        "title": "Lesson 99: Word Problems 5 (Sums to 100)",
+        "path": "lessons/lesson99/index.html",
+        "id": 99
+    },
+    {
+        "title": "Lesson 100: Word Problems 6 (Harder Missing Addend)",
+        "path": "lessons/lesson100/index.html",
+        "id": 100
     }
 ]
