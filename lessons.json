@@ -498,5 +498,30 @@
         "title": "Lesson 100: Word Problems 6 (Harder Missing Addend)",
         "path": "lessons/lesson100/index.html",
         "id": 100
+    },
+    {
+        "title": "Lesson 101: Skip-counting by 1s",
+        "path": "lessons/lesson101/index.html",
+        "id": 101
+    },
+    {
+        "title": "Lesson 102: Skip-counting by 5s",
+        "path": "lessons/lesson102/index.html",
+        "id": 102
+    },
+    {
+        "title": "Lesson 103: Skip-counting by 10s",
+        "path": "lessons/lesson103/index.html",
+        "id": 103
+    },
+    {
+        "title": "Lesson 104: Skip-counting by 100s",
+        "path": "lessons/lesson104/index.html",
+        "id": 104
+    },
+    {
+        "title": "Lesson 105: Skip-counting by 1000s",
+        "path": "lessons/lesson105/index.html",
+        "id": 105
     }
 ]

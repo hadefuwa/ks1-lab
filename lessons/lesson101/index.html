@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 101: Skip-counting by 1s</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --background: #0f172a;
+            --surface: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .prompt-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .option-letter {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .option-value {
+            font-family: serif;
+        }
+
+        .correct {
+            border-color: #22c55e !important;
+            background: rgba(34, 197, 94, 0.2) !important;
+        }
+
+        .incorrect {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.2) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glass-panel">
+        <h1 id="lesson-title">Skip-counting by 1s</h1>
+        <div class="question-text" id="question"></div>
+        <div class="prompt-text" id="prompt"></div>
+        <div class="options-grid" id="options"></div>
+    </div>
+
+    <script>
+        const LESSON_ID = 101;
+        const STEP = 1;
+        const names = ["Aubrey", "Liam", "Emma", "Noah", "Olivia", "William", "Ava", "James", "Isabella", "Oliver"];
+
+        let correctCount = 0;
+        const totalToWin = 8;
+        let isProcessing = false;
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function generateProblem() {
+            isProcessing = false;
+            const name = names[Math.floor(Math.random() * names.length)];
+
+            let start = Math.floor(Math.random() * 900) + 10;
+
+            const next1 = start + STEP;
+            const next2 = next1 + STEP;
+
+            const stepName = 'ones';
+
+            const qText = `${name} starts counting at ${start}. ${name === 'Liam' || name === 'Noah' || name === 'William' || name === 'James' || name === 'Oliver' ? 'He' : 'She'} counts by ${stepName}.`;
+            const pText = `What two numbers does ${name} count next?`;
+
+            document.getElementById('question').innerText = qText;
+            document.getElementById('prompt').innerText = pText;
+
+            speak(qText + " " + pText);
+
+            // Generate options
+            const correctAnswer = `${next1} and ${next2}`;
+            const options = new Set([correctAnswer]);
+
+            while (options.size < 4) {
+                let w1, w2;
+                let r = Math.random();
+                if (r < 0.25) {
+                    w1 = next1 + Math.floor(Math.random() * 5 + 1);
+                    w2 = w1 + STEP;
+                } else if (r < 0.5) {
+                    w1 = next1 - Math.floor(Math.random() * 5 + 1);
+                    w2 = w1 + STEP;
+                } else if (r < 0.75) {
+                    w1 = next2;
+                    w2 = next2 + STEP;
+                } else {
+                    w1 = start;
+                    w2 = next1;
+                }
+
+                if (w1 > 0 && w2 > 0) {
+                    const wrongAnswer = `${w1} and ${w2}`;
+                    options.add(wrongAnswer);
+                }
+            }
+
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `
+                    <div class="option-letter">${letters[index]}</div>
+                    <div class="option-value">${opt}</div>
+                `;
+                btn.onclick = () => checkAnswer(opt === correctAnswer, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect, btn) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                correctCount++;
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+                speak("Correct!");
+
+                if (correctCount >= totalToWin) {
+                    setTimeout(() => {
+                        window.parent.postMessage({ type: 'lessonCompleted', lessonId: LESSON_ID }, '*');
+                    }, 2000);
+                } else {
+                    setTimeout(generateProblem, 2000);
+                }
+            } else {
+                btn.classList.add('incorrect');
+                speak("Not quite, try again!");
+                setTimeout(() => {
+                    btn.classList.remove('incorrect');
+                    isProcessing = false;
+                }, 1000);
+            }
+        }
+
+        // Initialize first problem
+        generateProblem();
+    </script>
+</body>
+
+</html>
