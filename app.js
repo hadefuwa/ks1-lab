@@ -8,6 +8,14 @@ try {
   const stored = localStorage.getItem('completedLessons');
   if (stored) {
     completedLessons = JSON.parse(stored);
+    
+    // Automatically reset 101-105 as requested
+    const resetTargets = [101, 102, 103, 104, 105];
+    const prevLength = completedLessons.length;
+    completedLessons = completedLessons.filter(id => !resetTargets.includes(id));
+    if (completedLessons.length !== prevLength) {
+        localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    }
   }
 } catch (error) {
   console.warn('localStorage not available:', error.message);
@@ -41,12 +49,13 @@ async function loadLessons() {
 function renderSidebar() {
   sidebar.innerHTML = `
     <h2>Lesson Progress</h2>
-    <ul>
+    <ul style="list-style: none; padding: 0;">
       ${lessons.map(lesson => `
-        <li>
-          <button onclick="loadLesson('${lesson.path}')">
+        <li style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <button onclick="loadLesson('${lesson.path}')" style="flex-grow: 1; text-align: left;">
             ${lesson.title} ${completedLessons.includes(lesson.id) ? '✅' : '❌'}
           </button>
+          ${completedLessons.includes(lesson.id) ? `<button onclick="resetLesson(${lesson.id})" style="background: #ff4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Reset</button>` : ''}
         </li>
       `).join('')}
     </ul>
@@ -58,6 +67,18 @@ function loadLesson(url) {
 }
 
 window.loadLesson = loadLesson;
+
+function resetLesson(lessonId) {
+  completedLessons = completedLessons.filter(id => id !== lessonId);
+  try {
+    localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+  } catch (error) {
+    console.warn('Could not save to localStorage:', error.message);
+  }
+  renderSidebar();
+}
+
+window.resetLesson = resetLesson;
 
 function markCompleted(lessonId) {
   if (!completedLessons.includes(lessonId)) {
